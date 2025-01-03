@@ -40,6 +40,7 @@
   "author": "evisdrenova",
   "license": "MIT",
   "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.4",
     "electron-squirrel-startup": "^1.0.1",
     "lucide-react": "^0.469.0",
     "react": "^19.0.0",
