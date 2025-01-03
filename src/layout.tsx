@@ -1,8 +1,22 @@
 import React, { ReactNode, useState } from "react";
-import { ChevronLeft, ChevronRight, Menu } from "lucide-react";
+import { ChevronLeft, ChevronRight, Menu, Home, Server } from "lucide-react";
 
-const Layout = ({ children }: { children: ReactNode }) => {
+import { Link, useLocation } from "react-router-dom";
+
+interface Props {
+  children: ReactNode;
+}
+
+export default function Layout(props: Props) {
+  const { children } = props;
   const [isOpen, setIsOpen] = useState(true);
+
+  const navItems = [
+    { path: "/", icon: <Home size={20} />, label: "Home" },
+    { path: "/servers", icon: <Server size={20} />, label: "Servers" },
+  ];
+
+  const location = useLocation();
 
   return (
     <div className="flex h-screen">
@@ -21,24 +35,23 @@ const Layout = ({ children }: { children: ReactNode }) => {
           </button>
         </div>
         <nav className="mt-4">
-          {/* Add your menu items here */}
-          <div
-            className={`p-4 hover:bg-gray-700 cursor-pointer ${
-              !isOpen && "justify-center"
-            } flex items-center`}
-          >
-            <Menu size={20} />
-            {isOpen && <span className="ml-2">Menu Item</span>}
-          </div>
+          {navItems.map(({ path, icon, label }) => (
+            <Link
+              key={path}
+              to={path}
+              className={`p-4 hover:bg-gray-700 cursor-pointer flex items-center ${
+                location.pathname === path ? "bg-gray-700" : ""
+              }`}
+            >
+              {icon}
+              {isOpen && <span className="ml-2">{label}</span>}
+            </Link>
+          ))}
         </nav>
       </div>
-
-      {/* Main content */}
       <div className="flex-1 overflow-auto bg-gray-100">
         <main className="p-6">{children}</main>
       </div>
     </div>
   );
-};
-
-export default Layout;
+}

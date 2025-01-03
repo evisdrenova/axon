@@ -1,11 +1,19 @@
 import { createRoot } from "react-dom/client";
 import "./styles/index.css";
 import Layout from "./layout";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Servers from "./pages/Servers";
+import Home from "./pages/Home";
 
 const App = () => (
-  <Layout>
-    <h2 className="text-4xl bg-red-300">Welcome to Axon</h2>
-  </Layout>
+  <BrowserRouter>
+    <Layout>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/servers" element={<Servers />} />
+      </Routes>
+    </Layout>
+  </BrowserRouter>
 );
 
 const container = document.getElementById("root");

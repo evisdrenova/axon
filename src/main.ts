@@ -1,6 +1,9 @@
-import { app, BrowserWindow } from "electron";
+import { app, BrowserWindow, ipcMain } from "electron";
 import path from "path";
 import started from "electron-squirrel-startup";
+import fs from "fs/promises";
+import os from "os";
+import yaml from "yaml";
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (started) {
@@ -13,6 +16,8 @@ const createWindow = () => {
     width: 800,
     height: 600,
     webPreferences: {
+      nodeIntegration: false,
+      contextIsolation: true,
       preload: path.join(__dirname, "preload.js"),
     },
   });
@@ -29,6 +34,20 @@ const createWindow = () => {
   // Open the DevTools.
   mainWindow.webContents.openDevTools();
 };
+// Loads the mcp config
+ipcMain.handle("load-config", async () => {
+  try {
+    // load config file from the home directory
+    const data = await fs.readFile(
+      path.join(os.homedir(), ".axon.yaml"),
+      "utf8"
+    );
+    return yaml.parse(data);
+  } catch (error) {
+    console.error("Failed to load config:", error);
+    return null;
+  }
+});
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
