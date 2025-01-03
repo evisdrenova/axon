@@ -4,6 +4,7 @@ import Layout from "./layout";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Servers from "./pages/Servers";
 import Home from "./pages/Home";
+import Providers from "./pages/Providers";
 
 const App = () => (
   <BrowserRouter>
@@ -11,6 +12,7 @@ const App = () => (
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/servers" element={<Servers />} />
+        <Route path="/providers" element={<Providers />} />
       </Routes>
     </Layout>
   </BrowserRouter>

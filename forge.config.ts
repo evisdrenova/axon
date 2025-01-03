@@ -11,7 +11,7 @@ const config: ForgeConfig = {
   packagerConfig: {
     asar: true,
   },
-  rebuildConfig: {},
+  rebuildConfig: { extraModules: ["better-sqlite3"] },
   makers: [
     new MakerSquirrel({}),
     new MakerZIP({}, ["darwin"]),

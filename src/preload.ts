@@ -1,8 +1,18 @@
-// See the Electron documentation for details on how to use preload scripts:
-// https://www.electronjs.org/docs/latest/tutorial/process-model#preload-scripts
-
 import { contextBridge, ipcRenderer } from "electron";
 
 contextBridge.exposeInMainWorld("electron", {
-  loadConfig: () => ipcRenderer.invoke("load-config"),
+  // settings methods
+  getSetting: (key: string) => ipcRenderer.invoke("db-get-setting", key),
+  setSetting: (key: string, value: string) =>
+    ipcRenderer.invoke("db-set-setting", key, value),
+
+  // provider methods
+  getProviders: (key: string) => ipcRenderer.invoke("get-providers", key),
+  addProvider: (key: string, value: string) =>
+    ipcRenderer.invoke("add-provider", key, value),
+
+  //mcp server methods
+  getMcpServers: (key: string) => ipcRenderer.invoke("get-mcp-server", key),
+  setMcpServer: (key: string, value: string) =>
+    ipcRenderer.invoke("set-mcp-server", key, value),
 });

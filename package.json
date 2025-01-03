@@ -21,6 +21,7 @@
     "@electron-forge/plugin-fuses": "^7.6.0",
     "@electron-forge/plugin-vite": "^7.6.0",
     "@electron/fuses": "^1.8.0",
+    "@types/better-sqlite3": "^7.6.12",
     "@types/electron-squirrel-startup": "^1",
     "@types/react": "^19.0.2",
     "@types/react-dom": "^19.0.2",
@@ -41,6 +42,7 @@
   "license": "MIT",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.0.4",
+    "better-sqlite3": "^11.7.0",
     "electron-squirrel-startup": "^1.0.1",
     "lucide-react": "^0.469.0",
     "react": "^19.0.0",

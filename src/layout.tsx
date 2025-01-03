@@ -1,6 +1,5 @@
 import React, { ReactNode, useState } from "react";
-import { ChevronLeft, ChevronRight, Menu, Home, Server } from "lucide-react";
-
+import { Brain, ChevronLeft, ChevronRight, Home, Server } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 
 interface Props {
@@ -14,6 +13,7 @@ export default function Layout(props: Props) {
   const navItems = [
     { path: "/", icon: <Home size={20} />, label: "Home" },
     { path: "/servers", icon: <Server size={20} />, label: "Servers" },
+    { path: "/providers", icon: <Brain size={20} />, label: "Providers" },
   ];
 
   const location = useLocation();
