@@ -1,8 +1,12 @@
 export interface IElectronAPI {
+  // settings methods
   getSetting: (key: string) => Promise<string>;
   setSetting: (key: string, value: string) => Promise<void>;
+  // provider methods
   getProviders: () => Promise<Provider[]>;
   addProvider: (provider: Provider) => Promise<void>;
+  deleteProvider: (name: string) => Promise<void>;
+  // mcp methods
   getMcpServers: () => Promise<McpConfig[]>;
   addMcpServer: (server: McpConfig) => Promise<void>;
 }

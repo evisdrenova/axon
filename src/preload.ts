@@ -11,6 +11,9 @@ contextBridge.exposeInMainWorld("electron", {
   getProviders: () => ipcRenderer.invoke("get-providers"),
   addProvider: (provider: Provider) =>
     ipcRenderer.invoke("add-provider", provider),
+  deleteProvider: (name: string) => {
+    ipcRenderer.invoke("delete-provider", name);
+  },
 
   //mcp server methods
   getMcpServers: () => ipcRenderer.invoke("get-mcp-servers"),

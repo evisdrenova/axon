@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import { Provider } from "../types";
+import { Trash } from "lucide-react";
+import { Button } from "../../components/ui/button";
 
 export default function Providers() {
   const [providers, setProviders] = useState<Provider[]>([]);
@@ -51,10 +53,18 @@ export default function Providers() {
 
       <div className="grid gap-4">
         {providers.map((provider) => (
-          <div key={provider.id} className="bg-white p-4 rounded shadow">
-            <h3 className="font-bold">{provider.name}</h3>
+          <div
+            key={provider.id}
+            className="bg-white p-4 rounded shadow flex justify-between items-center "
+          >
+            <div>
+              <h3 className="font-bold">{provider.name}</h3>
+              <p className="text-sm text-gray-500">{provider.base_url}</p>
+            </div>
 
-            <p className="text-sm text-gray-500">{provider.base_url}</p>
+            <Button variant="outline" size="icon">
+              <Trash />
+            </Button>
           </div>
         ))}
       </div>

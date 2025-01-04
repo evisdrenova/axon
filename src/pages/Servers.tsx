@@ -34,8 +34,6 @@ export default function Servers() {
     );
   }
 
-  console.log("server", servers);
-
   return (
     <div className="p-4">
       <div className="flex justify-between items-center mb-6">

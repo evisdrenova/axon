@@ -98,6 +98,16 @@ ipcMain.handle("add-provider", (_, provider: Provider) => {
   return stmt.run(provider.name, provider.base_url, provider.api_key);
 });
 
+ipcMain.handle("delete-provider", (_, name: string) => {
+  try {
+    const stmt = db.prepare("DELETE from providers WHERE name = ?");
+    return stmt.run(name);
+  } catch (error) {
+    console.error("Error deleting provider:", error);
+    throw error; // Propagate the error to the renderer
+  }
+});
+
 ipcMain.handle("get-mcp-servers", () => {
   try {
     const stmt = db.prepare("SELECT id, name, command, args FROM servers");
@@ -132,6 +142,12 @@ ipcMain.handle("add-mcp-server", (_, config: McpConfig) => {
 
   return true;
 });
+
+// ipcMain.handle("delete-server", (_, name:string) => {
+//   const stmt = db.prepare("DELETE from servers where name = ?")
+
+//  stmt.run(string)
+// })
 
 // called when Electron has initialized and is ready to create browser windows.
 app.on("ready", createWindow);
