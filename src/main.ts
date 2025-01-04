@@ -2,7 +2,7 @@ import { app, BrowserWindow, ipcMain } from "electron";
 import path from "path";
 import started from "electron-squirrel-startup";
 import Database from "better-sqlite3";
-import { McpConfig, Provider } from "./types";
+import { ServerConfig, Provider } from "./types";
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (started) {
@@ -112,10 +112,11 @@ ipcMain.handle("delete-provider", (_, id: number) => {
   }
 });
 
-ipcMain.handle("get-mcp-servers", () => {
+ipcMain.handle("get-servers", () => {
   try {
     const stmt = db.prepare("SELECT id, name, command, args FROM servers");
     const rows = stmt.all() as {
+      id: number;
       name: string;
       command: string;
       args: string;
@@ -123,6 +124,7 @@ ipcMain.handle("get-mcp-servers", () => {
 
     return rows.map((row) => {
       return {
+        id: row.id,
         name: row.name,
         command: row.command,
         args: JSON.parse(row.args) as string[],
@@ -134,7 +136,7 @@ ipcMain.handle("get-mcp-servers", () => {
   }
 });
 
-ipcMain.handle("add-mcp-server", (_, config: McpConfig) => {
+ipcMain.handle("add-server", (_, config: ServerConfig) => {
   const stmt = db.prepare(
     "INSERT INTO servers (name, command, args) VALUES(?,?,?)"
   );
@@ -145,6 +147,20 @@ ipcMain.handle("add-mcp-server", (_, config: McpConfig) => {
   );
 
   return true;
+});
+
+ipcMain.handle("delete-server", (_, id: number) => {
+  try {
+    const stmt = db.prepare("DELETE FROM servers WHERE id = ?");
+    const result = stmt.run(id);
+    if (result.changes === 0) {
+      throw new Error(`No server found with id ${id}`);
+    }
+    return result;
+  } catch (error) {
+    console.error("Error deleting server:", error);
+    throw error;
+  }
 });
 
 // ipcMain.handle("delete-server", (_, name:string) => {

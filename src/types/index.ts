@@ -7,11 +7,13 @@ export interface IElectronAPI {
   addProvider: (provider: Provider) => Promise<void>;
   deleteProvider: (id: number) => Promise<void>;
   // mcp methods
-  getMcpServers: () => Promise<McpConfig[]>;
-  addMcpServer: (server: McpConfig) => Promise<void>;
+  getServers: () => Promise<ServerConfig[]>;
+  addServer: (server: ServerConfig) => Promise<void>;
+  deleteServer: (id: number) => Promise<void>;
 }
 
-export interface McpConfig {
+export interface ServerConfig {
+  id?: number;
   name: string;
   command: string;
   args: string[];

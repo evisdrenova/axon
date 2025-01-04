@@ -1,12 +1,16 @@
 import { useState, useEffect } from "react";
-import { McpConfig } from "../types";
+import { ServerConfig } from "../types";
+import { Button } from "../../components/ui/button";
+import Spinner from "../../components/ui/Spinner";
+import { Trash } from "lucide-react";
 
 export default function Servers() {
-  const [servers, setServers] = useState<McpConfig[] | null>(null);
+  const [servers, setServers] = useState<ServerConfig[] | null>(null);
   const [showForm, setShowForm] = useState(false);
+  const [isDeleting, setIsDeleting] = useState<boolean>(false);
 
   const loadServers = async () => {
-    const servers = await window.electron.getMcpServers();
+    const servers = await window.electron.getServers();
     setServers(servers);
   };
 
@@ -34,6 +38,19 @@ export default function Servers() {
     );
   }
 
+  const handleDelete = async (e: React.MouseEvent, pId: number) => {
+    e.preventDefault();
+    setIsDeleting(true);
+    try {
+      await window.electron.deleteServer(pId);
+      setServers(servers.filter((servers) => servers.id !== pId));
+    } catch (error) {
+      console.error("Error deleting provider:", error);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   return (
     <div className="p-4">
       <div className="flex justify-between items-center mb-6">
@@ -53,7 +70,17 @@ export default function Servers() {
       <div className="grid gap-4">
         {servers.map((s) => (
           <div key={s.name} className="bg-white p-4 rounded shadow mb-4">
-            <h2 className="text-xl font-bold mb-2">{s.name}</h2>
+            <div className="flex flex-row items-center justify-between">
+              <h2 className="text-xl font-bold mb-2">{s.name}</h2>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={(e) => handleDelete(e, s.id)}
+              >
+                {isDeleting ? <Spinner /> : <Trash />}
+              </Button>
+            </div>
+
             <div className="space-y-2">
               <div>
                 <span className="font-semibold">Command:</span>
@@ -109,7 +136,7 @@ function ServerForm(props: ServerProps) {
       command: formData.command,
       args: formData.args,
     };
-    await window.electron.addMcpServer(config);
+    await window.electron.addServer(config);
     onSave();
     onCancel();
   };

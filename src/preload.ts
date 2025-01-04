@@ -1,5 +1,5 @@
 import { contextBridge, ipcRenderer } from "electron";
-import { McpConfig, Provider } from "./types";
+import { ServerConfig, Provider } from "./types";
 
 contextBridge.exposeInMainWorld("electron", {
   // settings methods
@@ -23,10 +23,13 @@ contextBridge.exposeInMainWorld("electron", {
   },
 
   //mcp server methods
-  getMcpServers: () => {
-    return ipcRenderer.invoke("get-mcp-servers");
+  getServers: () => {
+    return ipcRenderer.invoke("get-servers");
   },
-  addMcpServer: (server: McpConfig) => {
-    return ipcRenderer.invoke("add-mcp-server", server);
+  addServer: (server: ServerConfig) => {
+    return ipcRenderer.invoke("add-server", server);
+  },
+  deleteServer: (id: number) => {
+    return ipcRenderer.invoke("delete-server", id);
   },
 });
