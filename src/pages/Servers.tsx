@@ -14,11 +14,15 @@ export default function Servers() {
     loadServers();
   }, []);
 
+  if (servers === null) {
+    return <div className="p-4">Loading...</div>;
+  }
+
   if (servers.length === 0 && !showForm) {
     return (
       <div className="p-4">
         <div className="text-center py-8">
-          <p className="text-gray-600 mb-4">No providers created yet</p>
+          <p className="text-gray-600 mb-4">No servers created yet</p>
           <button
             onClick={() => setShowForm(true)}
             className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
@@ -29,6 +33,8 @@ export default function Servers() {
       </div>
     );
   }
+
+  console.log("server", servers);
 
   return (
     <div className="p-4">
@@ -47,22 +53,22 @@ export default function Servers() {
       )}
 
       <div className="grid gap-4">
-        {Object.entries(servers).map(([name, server]) => (
-          <div key={name} className="bg-white p-4 rounded shadow mb-4">
-            <h2 className="text-xl font-bold mb-2">{name}</h2>
+        {servers.map((s) => (
+          <div key={s.name} className="bg-white p-4 rounded shadow mb-4">
+            <h2 className="text-xl font-bold mb-2">{s.name}</h2>
             <div className="space-y-2">
               <div>
                 <span className="font-semibold">Command:</span>
                 <code className="ml-2 bg-gray-100 p-1 rounded">
-                  {server.command.command}
+                  {s.command}
                 </code>
               </div>
               <div>
                 <span className="font-semibold">Arguments:</span>
-                <ul className="ml-2 list-disc list-inside">
-                  {server.args.args.map((arg, index) => (
+                <ul className="ml-2 list-disc list-inside flex flex-col space-y-2">
+                  {s.args.map((arg) => (
                     <li
-                      key={index}
+                      key={arg}
                       className="bg-gray-100 p-1 rounded inline-block mr-2 mb-1"
                     >
                       {arg}
@@ -100,11 +106,10 @@ function ServerForm(props: ServerProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const config: McpConfig = {
-      [formData.name]: {
-        command: formData.command,
-        args: formData.args,
-      },
+    const config = {
+      name: formData.name,
+      command: formData.command,
+      args: formData.args,
     };
     await window.electron.addMcpServer(config);
     onSave();
@@ -144,15 +149,17 @@ function ServerForm(props: ServerProps) {
           <input
             type="text"
             value={formData.args ? formData.args.join(",") : ""}
-            onChange={(e) =>
+            onChange={(e) => {
+              const newArgs =
+                e.target.value === ""
+                  ? []
+                  : e.target.value.split(",").map((arg) => arg.trim());
+
               setFormData({
                 ...formData,
-                args: e.target.value
-                  .split(",")
-                  .map((arg) => arg.trim())
-                  .filter((arg) => arg !== ""),
-              })
-            }
+                args: newArgs,
+              });
+            }}
             className="w-full p-2 border rounded"
             placeholder="Enter arguments separated by commas"
           />

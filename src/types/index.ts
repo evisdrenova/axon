@@ -7,9 +7,8 @@ export interface IElectronAPI {
   addMcpServer: (server: McpConfig) => Promise<void>;
 }
 
-export type McpConfig = Record<string, ServerConfig>;
-
-export interface ServerConfig {
+export interface McpConfig {
+  name: string;
   command: string;
   args: string[];
 }

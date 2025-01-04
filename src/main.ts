@@ -8,6 +8,7 @@ import { McpConfig, Provider } from "./types";
 if (started) {
   app.quit();
 }
+process.stdout.write = console.log.bind(console);
 
 let db = new Database();
 
@@ -33,7 +34,7 @@ const initializeDatabase = () => {
       );
     `);
   db.exec(`
-      CREATE TABLE IF NOT EXISTS mcp_servers (
+      CREATE TABLE IF NOT EXISTS servers (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT,
         command TEXT,
@@ -52,7 +53,7 @@ const createWindow = () => {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
     width: 800,
-    height: 600,
+    height: 900,
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
@@ -98,21 +99,36 @@ ipcMain.handle("add-provider", (_, provider: Provider) => {
 });
 
 ipcMain.handle("get-mcp-servers", () => {
-  const stmt = db.prepare("SELECT id, name, command, args FROM mcp-servers");
-  return stmt.all;
+  try {
+    const stmt = db.prepare("SELECT id, name, command, args FROM servers");
+    const rows = stmt.all() as {
+      name: string;
+      command: string;
+      args: string;
+    }[];
+
+    return rows.map((row) => {
+      return {
+        name: row.name,
+        command: row.command,
+        args: JSON.parse(row.args) as string[],
+      };
+    });
+  } catch (error) {
+    console.log("database error", error);
+    throw error;
+  }
 });
 
 ipcMain.handle("add-mcp-server", (_, config: McpConfig) => {
   const stmt = db.prepare(
-    "INSERT INTO mcp_servers (name, command, args) VALUES(?,?,?)"
+    "INSERT INTO servers (name, command, args) VALUES(?,?,?)"
   );
-  for (const [name, server] of Object.entries(config.mcp_servers)) {
-    stmt.run(
-      name,
-      server.command,
-      JSON.stringify(server.args) // store as json string
-    );
-  }
+  stmt.run(
+    config.name,
+    config.command,
+    JSON.stringify(config.args) // store as json string
+  );
 
   return true;
 });

@@ -1,4 +1,5 @@
 import { contextBridge, ipcRenderer } from "electron";
+import { McpConfig, Provider } from "./types";
 
 contextBridge.exposeInMainWorld("electron", {
   // settings methods
@@ -7,12 +8,12 @@ contextBridge.exposeInMainWorld("electron", {
     ipcRenderer.invoke("db-set-setting", key, value),
 
   // provider methods
-  getProviders: (key: string) => ipcRenderer.invoke("get-providers", key),
-  addProvider: (key: string, value: string) =>
-    ipcRenderer.invoke("add-provider", key, value),
+  getProviders: () => ipcRenderer.invoke("get-providers"),
+  addProvider: (provider: Provider) =>
+    ipcRenderer.invoke("add-provider", provider),
 
   //mcp server methods
-  getMcpServers: (key: string) => ipcRenderer.invoke("get-mcp-server", key),
-  setMcpServer: (key: string, value: string) =>
-    ipcRenderer.invoke("set-mcp-server", key, value),
+  getMcpServers: () => ipcRenderer.invoke("get-mcp-servers"),
+  addMcpServer: (server: McpConfig) =>
+    ipcRenderer.invoke("add-mcp-server", server),
 });
