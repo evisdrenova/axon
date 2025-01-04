@@ -3,12 +3,13 @@ import path from "path";
 import started from "electron-squirrel-startup";
 import Database from "better-sqlite3";
 import { ServerConfig, Provider } from "./types";
+import Anthropic from "@anthropic-ai/sdk";
+import OpenAI from "openai";
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (started) {
   app.quit();
 }
-process.stdout.write = console.log.bind(console);
 
 let db = new Database();
 
@@ -200,6 +201,70 @@ ipcMain.handle("delete-server", (_, id: number) => {
     throw error;
   }
 });
+
+ipcMain.handle("chat", async (_, data) => {
+  const { provider, messages } = data;
+  let instance = providerInstances.get(provider.id);
+
+  if (!instance) {
+    instance = initializeProvider(provider);
+    providerInstances.set(provider.id, instance);
+  }
+
+  try {
+    switch (provider.type) {
+      case "openai": {
+        const completion = await instance.chat.completions.create({
+          model: provider.model,
+          messages: messages.map((m: any) => ({
+            role: m.role,
+            content: m.content,
+          })),
+          stream: false,
+        });
+        return completion.choices[0].message.content;
+      }
+
+      case "anthropic": {
+        const response = await instance.messages.create({
+          model: provider.model,
+          messages: messages.map((m: any) => ({
+            role: m.role === "user" ? "user" : "assistant",
+            content: m.content,
+          })),
+          max_tokens: 1024,
+        });
+        return response.content;
+      }
+
+      default:
+        throw new Error(`Unsupported provider type: ${provider.type}`);
+    }
+  } catch (error: any) {
+    console.error("Chat error:", error);
+    throw new Error(error.message || "Failed to get response from provider");
+  }
+});
+
+const providerInstances: Map<string, any> = new Map();
+// initialize the provider client
+function initializeProvider(provider: Provider) {
+  switch (provider.type) {
+    case "openai":
+      return new OpenAI({
+        apiKey: provider.apiKey,
+        baseURL: `${provider.baseUrl}${provider.apiPath}`,
+      });
+    case "anthropic":
+      return new Anthropic({
+        apiKey: provider.apiKey,
+        baseURL: provider.baseUrl,
+      });
+    // we can other cases here for custom or ollama
+    default:
+      throw new Error(`Unsupported provider type: ${provider.type}`);
+  }
+}
 
 // called when Electron has initialized and is ready to create browser windows.
 app.on("ready", createWindow);
