@@ -98,13 +98,17 @@ ipcMain.handle("add-provider", (_, provider: Provider) => {
   return stmt.run(provider.name, provider.base_url, provider.api_key);
 });
 
-ipcMain.handle("delete-provider", (_, name: string) => {
+ipcMain.handle("delete-provider", (_, id: number) => {
   try {
-    const stmt = db.prepare("DELETE from providers WHERE name = ?");
-    return stmt.run(name);
+    const stmt = db.prepare("DELETE FROM providers WHERE id = ?");
+    const result = stmt.run(id);
+    if (result.changes === 0) {
+      throw new Error(`No provider found with id ${id}`);
+    }
+    return result;
   } catch (error) {
     console.error("Error deleting provider:", error);
-    throw error; // Propagate the error to the renderer
+    throw error;
   }
 });
 

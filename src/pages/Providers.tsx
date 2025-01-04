@@ -2,10 +2,12 @@ import { useState, useEffect } from "react";
 import { Provider } from "../types";
 import { Trash } from "lucide-react";
 import { Button } from "../../components/ui/button";
+import Spinner from "../../components/ui/Spinner";
 
 export default function Providers() {
   const [providers, setProviders] = useState<Provider[]>([]);
   const [showForm, setShowForm] = useState(false);
+  const [isDeleting, setIsDeleting] = useState<boolean>(false);
 
   const loadProviders = async () => {
     const providers = await window.electron.getProviders();
@@ -31,6 +33,19 @@ export default function Providers() {
       </div>
     );
   }
+
+  const handleDelete = async (e: React.MouseEvent, pId: number) => {
+    e.preventDefault();
+    setIsDeleting(true);
+    try {
+      await window.electron.deleteProvider(pId);
+      setProviders(providers.filter((provider) => provider.id !== pId));
+    } catch (error) {
+      console.error("Error deleting provider:", error);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
 
   return (
     <div className="p-4">
@@ -61,9 +76,12 @@ export default function Providers() {
               <h3 className="font-bold">{provider.name}</h3>
               <p className="text-sm text-gray-500">{provider.base_url}</p>
             </div>
-
-            <Button variant="outline" size="icon">
-              <Trash />
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={(e) => handleDelete(e, provider.id)}
+            >
+              {isDeleting ? <Spinner /> : <Trash />}
             </Button>
           </div>
         ))}
