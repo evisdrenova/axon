@@ -25,13 +25,17 @@ const initializeDatabase = () => {
     );
   `);
   db.exec(`
-      CREATE TABLE IF NOT EXISTS providers (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT UNIQUE,
-        base_url TEXT NOT NULL,
-        api_key TEXT NOT NULL,
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-      );
+   CREATE TABLE IF NOT EXISTS providers (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL,
+      providerType TEXT NOT NULL,    -- "openai" | "anthropic" | "ollama" | "custom"
+      baseUrl TEXT NOT NULL,         -- e.g. "https://api.openai.com/v1"
+      apiPath TEXT NOT NULL,         -- e.g. "/chat/completions", or a custom path for local
+      apiKey TEXT NOT NULL,
+      modelName TEXT,                -- e.g. "gpt-4", "claude-instant-v1", "llama2-7b"
+      config TEXT,                   -- optional JSON for special fields
+      createdAt DATETIME DEFAULT CURRENT_TIMESTAMP
+);
     `);
   db.exec(`
       CREATE TABLE IF NOT EXISTS servers (
@@ -42,6 +46,25 @@ const initializeDatabase = () => {
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP
       );
     `);
+
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS conversations (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      providerId INTEGER,
+      title TEXT,
+      createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (providerId) REFERENCES providers(id)
+);`);
+
+  db.exec(`
+  CREATE TABLE IF NOT EXISTS messages (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    conversationId INTEGER,
+    role TEXT,       -- "user" | "assistant" | "system"
+    content TEXT,
+    createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (conversationId) REFERENCES conversations(id)
+);`);
 
   return db;
 };
@@ -87,15 +110,25 @@ ipcMain.handle("db-set-setting", async (_, key, value) => {
 });
 
 ipcMain.handle("get-providers", () => {
-  const stmt = db.prepare("SELECT id, name, base_url FROM providers");
+  const stmt = db.prepare(
+    "SELECT id, name, type, baseUrl, apiPath, apiKey, model, config FROM providers"
+  );
   return stmt.all();
 });
 
 ipcMain.handle("add-provider", (_, provider: Provider) => {
   const stmt = db.prepare(
-    "INSERT INTO providers (name, base_url, api_key) VALUES (?, ?, ?)"
+    "INSERT INTO providers (name, type, baseUrl, apiPath, apiKey, model, config) VALUES (?, ?, ?, ?, ?, ?, ?)"
   );
-  return stmt.run(provider.name, provider.base_url, provider.api_key);
+  return stmt.run(
+    provider.name,
+    provider.type,
+    provider.baseUrl,
+    provider.apiPath,
+    provider.apiKey,
+    provider.model,
+    provider.config
+  );
 });
 
 ipcMain.handle("delete-provider", (_, id: number) => {
@@ -162,12 +195,6 @@ ipcMain.handle("delete-server", (_, id: number) => {
     throw error;
   }
 });
-
-// ipcMain.handle("delete-server", (_, name:string) => {
-//   const stmt = db.prepare("DELETE from servers where name = ?")
-
-//  stmt.run(string)
-// })
 
 // called when Electron has initialized and is ready to create browser windows.
 app.on("ready", createWindow);

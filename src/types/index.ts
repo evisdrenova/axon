@@ -22,8 +22,12 @@ export interface ServerConfig {
 export interface Provider {
   id?: number;
   name: string;
-  base_url: string;
-  api_key: string;
+  type: string;
+  baseUrl: string;
+  apiPath: string;
+  apiKey: string;
+  model: string;
+  config: string;
 }
 
 declare global {
