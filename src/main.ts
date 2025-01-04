@@ -28,11 +28,11 @@ const initializeDatabase = () => {
    CREATE TABLE IF NOT EXISTS providers (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       name TEXT NOT NULL,
-      providerType TEXT NOT NULL,    -- "openai" | "anthropic" | "ollama" | "custom"
+      type TEXT NOT NULL,    -- "openai" | "anthropic" | "ollama" | "custom"
       baseUrl TEXT NOT NULL,         -- e.g. "https://api.openai.com/v1"
       apiPath TEXT NOT NULL,         -- e.g. "/chat/completions", or a custom path for local
       apiKey TEXT NOT NULL,
-      modelName TEXT,                -- e.g. "gpt-4", "claude-instant-v1", "llama2-7b"
+      model TEXT,                -- e.g. "gpt-4", "claude-instant-v1", "llama2-7b"
       config TEXT,                   -- optional JSON for special fields
       createdAt DATETIME DEFAULT CURRENT_TIMESTAMP
 );
@@ -117,18 +117,23 @@ ipcMain.handle("get-providers", () => {
 });
 
 ipcMain.handle("add-provider", (_, provider: Provider) => {
-  const stmt = db.prepare(
-    "INSERT INTO providers (name, type, baseUrl, apiPath, apiKey, model, config) VALUES (?, ?, ?, ?, ?, ?, ?)"
-  );
-  return stmt.run(
-    provider.name,
-    provider.type,
-    provider.baseUrl,
-    provider.apiPath,
-    provider.apiKey,
-    provider.model,
-    provider.config
-  );
+  try {
+    const stmt = db.prepare(
+      "INSERT INTO providers (name, type, baseUrl, apiPath, apiKey, model, config) VALUES (?, ?, ?, ?, ?, ?, ?)"
+    );
+    return stmt.run(
+      provider.name,
+      provider.type,
+      provider.baseUrl,
+      provider.apiPath,
+      provider.apiKey,
+      provider.model,
+      provider.config
+    );
+  } catch (error) {
+    console.log("unable to create new provider", error);
+    throw new error("unable to create new provider");
+  }
 });
 
 ipcMain.handle("delete-provider", (_, id: number) => {

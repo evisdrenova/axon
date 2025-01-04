@@ -15,8 +15,7 @@ contextBridge.exposeInMainWorld("electron", {
     return ipcRenderer.invoke("get-providers");
   },
   addProvider: (provider: Provider) => {
-    return;
-    ipcRenderer.invoke("add-provider", provider);
+    return ipcRenderer.invoke("add-provider", provider);
   },
   deleteProvider: (id: number) => {
     return ipcRenderer.invoke("delete-provider", id);
