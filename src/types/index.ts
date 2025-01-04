@@ -10,6 +10,12 @@ export interface IElectronAPI {
   getServers: () => Promise<ServerConfig[]>;
   addServer: (server: ServerConfig) => Promise<void>;
   deleteServer: (id: number) => Promise<void>;
+  // chat methods
+  chat: (data: {
+    provider: Provider;
+    messages: any[];
+    message: string;
+  }) => Promise<string>;
 }
 
 export interface ServerConfig {
