@@ -18,7 +18,16 @@ import {
   SelectValue,
 } from "../../components/ui/select";
 import { Separator } from "../../components/ui/separator";
-import ReactMarkdown from "react-markdown";
+
+/*
+https://modelcontextprotocol.io/quickstart/client
+1. send prompt to backend
+2. structure message to the provider based on the request type as an array of messages
+3. send initial message to LLM with the prompt, tools, and message history
+4. process the response and handle the tools based on what the LLM responds. It essentially outlines a plan of what tools to call and then the server actually calls the tools
+5. call the tools
+6. append the response back to the user
+*/
 
 export default function Home() {
   const [providers, setProviders] = useState<Provider[]>([]);

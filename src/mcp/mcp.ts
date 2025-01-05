@@ -10,6 +10,7 @@ export default class MCP {
   private clients: Record<string, InstanceType<MCPClient>> = {};
   private client: MCPClient;
   private transport: MCPTransport;
+  private serverTools: Record<string, Tool[]> = {}; // list of server<>tools
 
   constructor(private readonly db: Database) {}
 
