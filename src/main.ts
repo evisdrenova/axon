@@ -5,6 +5,7 @@ import Database from "better-sqlite3";
 import { ServerConfig, Provider } from "./types";
 import Anthropic from "@anthropic-ai/sdk";
 import OpenAI from "openai";
+import log from "electron-log/main";
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (started) {
@@ -12,6 +13,7 @@ if (started) {
 }
 
 let db = new Database();
+log.initialize();
 
 const initializeDatabase = () => {
   const dbPath = path.join(app.getPath("userData"), "database.sqlite");
@@ -203,6 +205,7 @@ ipcMain.handle("delete-server", (_, id: number) => {
 });
 
 ipcMain.handle("chat", async (_, data) => {
+  log.info("data", data);
   const { provider, messages } = data;
   let instance = providerInstances.get(provider.id);
 
@@ -210,6 +213,8 @@ ipcMain.handle("chat", async (_, data) => {
     instance = initializeProvider(provider);
     providerInstances.set(provider.id, instance);
   }
+
+  log.info("provider", provider);
 
   try {
     switch (provider.type) {
@@ -246,9 +251,16 @@ ipcMain.handle("chat", async (_, data) => {
   }
 });
 
+//TODO: when we make a post call it goes to this url:
+//POST http://localhost:5173/api/chat 404 (Not Found)
+// even though we have a different one configured
+// for some reason it's attending the local url
+
 const providerInstances: Map<string, any> = new Map();
+
 // initialize the provider client
 function initializeProvider(provider: Provider) {
+  console.log("initializing");
   switch (provider.type) {
     case "openai":
       return new OpenAI({

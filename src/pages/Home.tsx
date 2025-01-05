@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useChat } from "ai/react";
+import { useChat } from "@ai-sdk/react";
 import { Provider } from "../types";
 import {
   Card,
@@ -20,39 +20,21 @@ import {
 import { Separator } from "../../components/ui/separator";
 import ReactMarkdown from "react-markdown";
 
+interface ChatMessage {
+  id: string;
+  role: "user" | "assistant";
+  content: string;
+  timestamp: number;
+}
+
 export default function Home() {
   const [providers, setProviders] = useState<Provider[]>([]);
   const [selectedProvider, setSelectedProvider] = useState<string>("");
   const [currentProvider, setCurrentProvider] = useState<Provider | null>(null);
   const [error, setError] = useState<string | null>(null);
-
-  console.log("selected privider", selectedProvider);
-  console.log(" privider", providers);
-
-  const customSubmit = async (messages: any[]) => {
-    const latestMessage = messages[messages.length - 1];
-
-    try {
-      if (!currentProvider) throw new Error("No provider selected");
-
-      const response = await window.electron.chat({
-        provider: currentProvider,
-        messages: messages,
-        message: latestMessage.content,
-      });
-
-      return response;
-    } catch (err: any) {
-      setError(err.message);
-      throw err;
-    }
-  };
-
-  // Initialize useChat with custom submit
-  const { messages, input, handleInputChange, handleSubmit, isLoading } =
-    useChat({
-      api: customSubmit,
-    });
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [inputValue, setInputValue] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const loadProviders = async () => {
     try {
@@ -74,13 +56,66 @@ export default function Home() {
     setError(null);
   };
 
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!inputValue.trim() || !currentProvider || isLoading) {
+      return;
+    }
+
+    // Create user message
+    const userMessage: ChatMessage = {
+      id: Date.now().toString(),
+      role: "user",
+      content: inputValue.trim(),
+      timestamp: Date.now(),
+    };
+
+    // Update messages with user input
+    setMessages((prev) => [...prev, userMessage]);
+    setInputValue("");
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const response = await window.electron.chat({
+        provider: currentProvider,
+        messages: [...messages, userMessage],
+        message: userMessage.content,
+      });
+
+      // Add assistant's response
+      const assistantMessage: ChatMessage = {
+        id: (Date.now() + 1).toString(),
+        role: "assistant",
+        content: response,
+        timestamp: Date.now(),
+      };
+
+      setMessages((prev) => [...prev, assistantMessage]);
+    } catch (err: any) {
+      setError(err.message || "Failed to get response");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const renderMessageContent = (
+    content: string | { type: string; text: string }
+  ) => {
+    if (typeof content === "string") {
+      return content;
+    }
+    return content.text || JSON.stringify(content);
+  };
+
   return (
     <div className="container max-w-4xl mx-auto p-4">
-      <Card>
+      <Card className="min-h-[80vh] flex flex-col">
         <CardHeader>
           <CardTitle className="text-2xl font-bold">Chat Interface</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="flex-1 flex flex-col">
           <div className="mb-4">
             <Select
               onValueChange={handleProviderSelect}
@@ -105,9 +140,9 @@ export default function Home() {
 
           <Separator className="my-4" />
 
-          <ScrollArea className="h-[300px] pr-4">
+          <ScrollArea className="flex-1 pr-4">
             <div className="space-y-4">
-              {messages.map((message: any) => (
+              {messages.map((message) => (
                 <div
                   key={message.id}
                   className={`flex ${
@@ -121,24 +156,7 @@ export default function Home() {
                         : "bg-muted"
                     }`}
                   >
-                    <ReactMarkdown
-                      className="prose dark:prose-invert max-w-none"
-                      components={{
-                        pre: ({ node, ...props }) => (
-                          <div className="bg-secondary p-2 rounded my-2">
-                            <pre {...props} />
-                          </div>
-                        ),
-                        code: ({ node, ...props }) => (
-                          <code
-                            className="bg-secondary px-1 rounded"
-                            {...props}
-                          />
-                        ),
-                      }}
-                    >
-                      {message.content}
-                    </ReactMarkdown>
+                    <div>{renderMessageContent(message.content)}</div>
                   </div>
                 </div>
               ))}
@@ -156,13 +174,16 @@ export default function Home() {
 
           <form onSubmit={handleSubmit} className="flex gap-2">
             <Input
-              value={input}
-              onChange={handleInputChange}
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
               placeholder="Type a message..."
               disabled={!currentProvider || isLoading}
               className="flex-1"
             />
-            <Button type="submit" disabled={!currentProvider || isLoading}>
+            <Button
+              type="submit"
+              disabled={!currentProvider || isLoading || !inputValue.trim()}
+            >
               Send
             </Button>
           </form>
