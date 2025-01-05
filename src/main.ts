@@ -4,8 +4,8 @@ import started from "electron-squirrel-startup";
 import Database from "better-sqlite3";
 import { ServerConfig, Provider } from "./types";
 import log from "electron-log/main";
-import { Chat } from "./providers/providers";
 import MCP from "./mcp/mcp";
+import Providers from "./providers/providers";
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (started) {
@@ -14,6 +14,7 @@ if (started) {
 
 let db = new Database();
 let mcp: MCP;
+let providers: Providers;
 log.initialize();
 
 const initializeDatabase = () => {
@@ -74,9 +75,9 @@ const initializeDatabase = () => {
 };
 
 const createWindow = async () => {
-  // intiilaize the db
   initializeDatabase();
   mcp = new MCP(db);
+  providers = new Providers(db);
   await mcp.createClients();
   // Create the browser window.
   const mainWindow = new BrowserWindow({
@@ -220,7 +221,7 @@ ipcMain.handle("update-server", (_, config: ServerConfig) => {
 });
 
 ipcMain.handle("chat", async (_, data) => {
-  return Chat(data);
+  return providers.chat();
 });
 
 // called when Electron has initialized and is ready to create browser windows.
