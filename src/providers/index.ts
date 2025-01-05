@@ -14,7 +14,7 @@ export function initializeProvider(provider: Provider): ProviderClient {
         type: "openai",
         client: new OpenAI({
           apiKey: provider.apiKey,
-          baseURL: `${provider.baseUrl}${provider.apiPath}`,
+          baseURL: `${provider.baseUrl}/v1`,
         }),
       };
     case "anthropic":
@@ -30,6 +30,7 @@ export function initializeProvider(provider: Provider): ProviderClient {
   }
 }
 
+// create a map in case there are multple providers and we want to switch back and forth which, the map helps us avoid re-initializing clients again
 const providerInstances: Map<string, ProviderClient> = new Map();
 
 export async function Chat(data: ChatRequest) {
@@ -42,6 +43,8 @@ export async function Chat(data: ChatRequest) {
     llm = initializeProvider(provider);
     providerInstances.set(providerId, llm);
   }
+
+  console.log("provider", provider);
 
   try {
     if (provider.type === "openai" && llm.type === "openai") {
