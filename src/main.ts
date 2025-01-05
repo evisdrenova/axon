@@ -5,7 +5,7 @@ import Database from "better-sqlite3";
 import { ServerConfig, Provider } from "./types";
 import log from "electron-log/main";
 import { Chat } from "./providers/providers";
-import { getServers, initializeServers } from "./servers/servers";
+import MCP from "./mcp/mcp";
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (started) {
@@ -13,6 +13,7 @@ if (started) {
 }
 
 let db = new Database();
+let mcp: MCP;
 log.initialize();
 
 const initializeDatabase = () => {
@@ -75,9 +76,8 @@ const initializeDatabase = () => {
 const createWindow = async () => {
   // intiilaize the db
   initializeDatabase();
-  if ((await getServers.length) > 0) {
-    await initializeServers(db);
-  }
+  mcp = new MCP(db);
+  await mcp.createClients();
   // Create the browser window.
   const mainWindow = new BrowserWindow({
     width: 800,
@@ -177,7 +177,7 @@ ipcMain.handle("update-provider", (_, provider: Provider) => {
 });
 
 ipcMain.handle("get-servers", () => {
-  return getServers(db);
+  return mcp.getServers();
 });
 
 ipcMain.handle("add-server", (_, config: ServerConfig) => {
@@ -231,12 +231,14 @@ app.on("ready", createWindow);
 // explicitly with Cmd + Q.
 app.on("window-all-closed", () => {
   if (process.platform !== "darwin") {
+    mcp.closeClients();
     app.quit();
   }
 });
 
 app.on("will-quit", () => {
   if (db) {
+    mcp.closeClients();
     db.close();
   }
 });

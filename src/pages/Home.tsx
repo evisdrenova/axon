@@ -19,7 +19,6 @@ import {
 } from "../../components/ui/select";
 import { Separator } from "../../components/ui/separator";
 import ReactMarkdown from "react-markdown";
-import { initializeServers } from "src/servers/servers";
 
 export default function Home() {
   const [providers, setProviders] = useState<Provider[]>([]);
