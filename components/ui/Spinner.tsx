@@ -1,6 +1,6 @@
 "use client";
 import { UpdateIcon } from "@radix-ui/react-icons";
-import { cn } from "../../lib/utils";
+import { cn } from "../../src/lib/utils";
 
 import { ReactElement } from "react";
 

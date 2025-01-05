@@ -1,9 +1,4 @@
-import {
-  ChatMessage,
-  ChatRequest,
-  Provider,
-  ProviderClient,
-} from "../../src/types";
+import { ChatMessage, ChatRequest, Provider, ProviderClient } from "../types";
 import Anthropic from "@anthropic-ai/sdk";
 import OpenAI from "openai";
 

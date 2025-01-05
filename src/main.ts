@@ -3,10 +3,9 @@ import path from "path";
 import started from "electron-squirrel-startup";
 import Database from "better-sqlite3";
 import { ServerConfig, Provider } from "./types";
-import Anthropic from "@anthropic-ai/sdk";
-import OpenAI from "openai";
 import log from "electron-log/main";
-import { Chat, initializeProvider } from "./providers";
+import { Chat } from "./providers/providers";
+import { getServers, initializeServers } from "./servers/servers";
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (started) {
@@ -73,10 +72,12 @@ const initializeDatabase = () => {
   return db;
 };
 
-const createWindow = () => {
+const createWindow = async () => {
   // intiilaize the db
   initializeDatabase();
-
+  if ((await getServers.length) > 0) {
+    await initializeServers(db);
+  }
   // Create the browser window.
   const mainWindow = new BrowserWindow({
     width: 800,
@@ -176,27 +177,7 @@ ipcMain.handle("update-provider", (_, provider: Provider) => {
 });
 
 ipcMain.handle("get-servers", () => {
-  try {
-    const stmt = db.prepare("SELECT id, name, command, args FROM servers");
-    const rows = stmt.all() as {
-      id: number;
-      name: string;
-      command: string;
-      args: string;
-    }[];
-
-    return rows.map((row) => {
-      return {
-        id: row.id,
-        name: row.name,
-        command: row.command,
-        args: JSON.parse(row.args) as string[],
-      };
-    });
-  } catch (error) {
-    console.log("database error", error);
-    throw error;
-  }
+  return getServers(db);
 });
 
 ipcMain.handle("add-server", (_, config: ServerConfig) => {

@@ -12,11 +12,23 @@
     "plugin:import/electron",
     "plugin:import/typescript"
   ],
+  "plugins": [
+    "eslint-plugin-import",
+    "@typescript-eslint",
+    "react",
+    "react-hooks",
+    "react-native",
+    "jsx-a11y"
+  ],
   "parser": "@typescript-eslint/parser",
   "settings": {
     "import/resolver": {
       "node": {
         "extensions": [".js", ".jsx", ".ts", ".tsx"]
+      },
+      "alias": {
+        "map": [["@", "."]],
+        "extensions": [".ts", ".tsx", ".js", ".jsx", ".json"]
       }
     }
   }

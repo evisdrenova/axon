@@ -19,6 +19,7 @@ import {
 } from "../../components/ui/select";
 import { Separator } from "../../components/ui/separator";
 import ReactMarkdown from "react-markdown";
+import { initializeServers } from "src/servers/servers";
 
 export default function Home() {
   const [providers, setProviders] = useState<Provider[]>([]);
@@ -101,7 +102,6 @@ export default function Home() {
     }
     return content.text || JSON.stringify(content);
   };
-
   return (
     <div className="container max-w-4xl mx-auto p-4">
       <Card className="min-h-[80vh] flex flex-col">
