@@ -50,6 +50,18 @@ export interface ChatMessage {
   timestamp: number;
 }
 
+export interface Tool {
+  name: string;
+  description?: string;
+  inputSchema?: InputSchema;
+}
+
+export interface InputSchema {
+  type: string;
+  properties: Record<string, any>;
+  requried: string[];
+}
+
 export type ProviderClient =
   | {
       type: "openai";

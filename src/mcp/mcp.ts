@@ -1,4 +1,4 @@
-import { ServerConfig } from "src/types";
+import { ServerConfig, Tool } from "src/types";
 import { Database } from "better-sqlite3";
 import { Client } from "@modelcontextprotocol/sdk/client/index";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio";
@@ -98,5 +98,55 @@ export default class MCP {
       console.error("Failed to close clients:", error);
       throw new Error("Unable to close clients");
     }
+  }
+
+  public async listTools(client?: string) {
+    let toolList: Tool[];
+
+    if (client) {
+      if (!this.clients[client]) {
+        throw new Error(`MCP Client ${client} not found`);
+      }
+
+      const { tools } = await this.clients[client].listTools();
+      toolList = tools.map((tool) => {
+        return {
+          name: `${client}-${tool.name}`,
+        };
+      });
+    } else {
+      for (const key in this.clients) {
+        const { tools } = await this.clients[key].listTools();
+        toolList = toolList.concat(
+          (toolList = tools.map((tool) => {
+            return {
+              name: `${client}-${tool.name}`,
+            };
+          }))
+        );
+      }
+    }
+
+    return toolList;
+  }
+
+  public async callTool({
+    client,
+    name,
+    args,
+  }: {
+    client: string;
+    name: string;
+    args: any;
+  }) {
+    if (!this.clients[client]) {
+      throw new Error(`MCP Client ${client} not found`);
+    }
+    console.log("Calling tool:", client, name, args);
+    const result = await this.clients[client].callTool({
+      name,
+      arguments: args,
+    });
+    return result;
   }
 }
