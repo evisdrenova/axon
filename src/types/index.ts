@@ -13,6 +13,7 @@ export interface IElectronAPI {
   getServers: () => Promise<ServerConfig[]>;
   addServer: (server: ServerConfig) => Promise<void>;
   deleteServer: (id: number) => Promise<void>;
+  updateServer: (data: ServerConfig) => Promise<void>;
   // chat methods
   chat: (data: ChatRequest) => Promise<string>;
 }

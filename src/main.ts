@@ -205,6 +205,18 @@ ipcMain.handle("delete-server", (_, id: number) => {
   }
 });
 
+ipcMain.handle("update-server", (_, config: ServerConfig) => {
+  const stmt = db.prepare(
+    "UPDATE servers SET name = ?, command = ?, args = ? WHERE id = ?"
+  );
+  return stmt.run(
+    config.name,
+    config.command,
+    JSON.stringify(config.args),
+    config.id
+  );
+});
+
 ipcMain.handle("chat", async (_, data) => {
   return Chat(data);
 });

@@ -31,6 +31,10 @@ contextBridge.exposeInMainWorld("electron", {
   deleteServer: (id: number) => {
     return ipcRenderer.invoke("delete-server", id);
   },
+  updateServer: (data: ServerConfig) => {
+    return ipcRenderer.invoke("update-server", data);
+  },
+
   //chat methods
   chat: (data: ChatRequest) => {
     return ipcRenderer.invoke("chat", data);
