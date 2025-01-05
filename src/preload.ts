@@ -1,5 +1,5 @@
 import { contextBridge, ipcRenderer } from "electron";
-import { ServerConfig, Provider } from "./types";
+import { ServerConfig, Provider, ChatRequest } from "./types";
 
 contextBridge.exposeInMainWorld("electron", {
   // settings methods
@@ -32,7 +32,7 @@ contextBridge.exposeInMainWorld("electron", {
     return ipcRenderer.invoke("delete-server", id);
   },
   //chat methods
-  chat: (data: any) => {
+  chat: (data: ChatRequest) => {
     return ipcRenderer.invoke("chat", data);
   },
 });

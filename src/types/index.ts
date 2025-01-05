@@ -1,3 +1,6 @@
+import OpenAI from "openai";
+import Anthropic from "@anthropic-ai/sdk";
+
 export interface IElectronAPI {
   // settings methods
   getSetting: (key: string) => Promise<string>;
@@ -11,11 +14,7 @@ export interface IElectronAPI {
   addServer: (server: ServerConfig) => Promise<void>;
   deleteServer: (id: number) => Promise<void>;
   // chat methods
-  chat: (data: {
-    provider: Provider;
-    messages: any[];
-    message: string;
-  }) => Promise<string>;
+  chat: (data: ChatRequest) => Promise<string>;
 }
 
 export interface ServerConfig {
@@ -35,6 +34,29 @@ export interface Provider {
   model: string;
   config: string;
 }
+
+export interface ChatRequest {
+  provider: Provider;
+  messages: ChatMessage[];
+  message: string;
+}
+
+export interface ChatMessage {
+  id: string;
+  role: "user" | "assistant";
+  content: string;
+  timestamp: number;
+}
+
+export type ProviderClient =
+  | {
+      type: "openai";
+      client: OpenAI;
+    }
+  | {
+      type: "anthropic";
+      client: Anthropic;
+    };
 
 declare global {
   interface Window {

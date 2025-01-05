@@ -6,6 +6,7 @@ import { ServerConfig, Provider } from "./types";
 import Anthropic from "@anthropic-ai/sdk";
 import OpenAI from "openai";
 import log from "electron-log/main";
+import { Chat, initializeProvider } from "./providers";
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (started) {
@@ -205,78 +206,8 @@ ipcMain.handle("delete-server", (_, id: number) => {
 });
 
 ipcMain.handle("chat", async (_, data) => {
-  log.info("data", data);
-  const { provider, messages } = data;
-  let instance = providerInstances.get(provider.id);
-
-  if (!instance) {
-    instance = initializeProvider(provider);
-    providerInstances.set(provider.id, instance);
-  }
-
-  log.info("provider", provider);
-
-  try {
-    switch (provider.type) {
-      case "openai": {
-        const completion = await instance.chat.completions.create({
-          model: provider.model,
-          messages: messages.map((m: any) => ({
-            role: m.role,
-            content: m.content,
-          })),
-          stream: false,
-        });
-        return completion.choices[0].message.content;
-      }
-
-      case "anthropic": {
-        const response = await instance.messages.create({
-          model: provider.model,
-          messages: messages.map((m: any) => ({
-            role: m.role === "user" ? "user" : "assistant",
-            content: m.content,
-          })),
-          max_tokens: 1024,
-        });
-        return response.content;
-      }
-
-      default:
-        throw new Error(`Unsupported provider type: ${provider.type}`);
-    }
-  } catch (error: any) {
-    console.error("Chat error:", error);
-    throw new Error(error.message || "Failed to get response from provider");
-  }
+  return Chat(data);
 });
-
-//TODO: when we make a post call it goes to this url:
-//POST http://localhost:5173/api/chat 404 (Not Found)
-// even though we have a different one configured
-// for some reason it's attending the local url
-
-const providerInstances: Map<string, any> = new Map();
-
-// initialize the provider client
-function initializeProvider(provider: Provider) {
-  console.log("initializing");
-  switch (provider.type) {
-    case "openai":
-      return new OpenAI({
-        apiKey: provider.apiKey,
-        baseURL: `${provider.baseUrl}${provider.apiPath}`,
-      });
-    case "anthropic":
-      return new Anthropic({
-        apiKey: provider.apiKey,
-        baseURL: provider.baseUrl,
-      });
-    // we can other cases here for custom or ollama
-    default:
-      throw new Error(`Unsupported provider type: ${provider.type}`);
-  }
-}
 
 // called when Electron has initialized and is ready to create browser windows.
 app.on("ready", createWindow);

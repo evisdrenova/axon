@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useChat } from "@ai-sdk/react";
-import { Provider } from "../types";
+import { ChatMessage, Provider } from "../types";
 import {
   Card,
   CardContent,
@@ -19,13 +19,6 @@ import {
 } from "../../components/ui/select";
 import { Separator } from "../../components/ui/separator";
 import ReactMarkdown from "react-markdown";
-
-interface ChatMessage {
-  id: string;
-  role: "user" | "assistant";
-  content: string;
-  timestamp: number;
-}
 
 export default function Home() {
   const [providers, setProviders] = useState<Provider[]>([]);
