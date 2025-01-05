@@ -154,6 +154,27 @@ ipcMain.handle("delete-provider", (_, id: number) => {
   }
 });
 
+ipcMain.handle("update-provider", (_, provider: Provider) => {
+  try {
+    const stmt = db.prepare(
+      "UPDATE providers SET name = ?, type = ?, baseUrl = ?, apiPath = ?, apiKey = ?, model = ?, config = ? WHERE id = ?"
+    );
+    return stmt.run(
+      provider.name,
+      provider.type,
+      provider.baseUrl,
+      provider.apiPath,
+      provider.apiKey,
+      provider.model,
+      provider.config,
+      provider.id
+    );
+  } catch (error) {
+    console.log("unable to update provider", error);
+    throw new Error("unable to update provider");
+  }
+});
+
 ipcMain.handle("get-servers", () => {
   try {
     const stmt = db.prepare("SELECT id, name, command, args FROM servers");

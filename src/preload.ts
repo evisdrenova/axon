@@ -20,6 +20,9 @@ contextBridge.exposeInMainWorld("electron", {
   deleteProvider: (id: number) => {
     return ipcRenderer.invoke("delete-provider", id);
   },
+  updateProvider: (data: Provider) => {
+    return ipcRenderer.invoke("update-provider", data);
+  },
 
   //mcp server methods
   getServers: () => {

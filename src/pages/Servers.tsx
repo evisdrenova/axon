@@ -3,6 +3,7 @@ import { ServerConfig } from "../types";
 import { Button } from "../../components/ui/button";
 import Spinner from "../../components/ui/Spinner";
 import { Pencil, Trash } from "lucide-react";
+import { Card, CardContent } from "../../components/ui/card";
 
 export default function Servers() {
   const [servers, setServers] = useState<ServerConfig[] | null>(null);
@@ -26,10 +27,12 @@ export default function Servers() {
   if (servers.length === 0 && !showForm) {
     return (
       <div className="p-4">
-        <div className="text-center py-8">
-          <p className="text-gray-600 mb-4">No servers created yet</p>
-          <Button onClick={() => setShowForm(true)}>Create New Server</Button>
-        </div>
+        <Card className="text-center py-8">
+          <CardContent>
+            <p className="text-muted-foreground mb-4">No servers created yet</p>
+            <Button onClick={() => setShowForm(true)}>Create New Server</Button>
+          </CardContent>
+        </Card>
       </div>
     );
   }
@@ -61,71 +64,75 @@ export default function Servers() {
     <div className="p-4">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Servers</h1>
-        <Button
-          onClick={() => {
-            setEditingServer(null);
-            setShowForm(true);
-          }}
-        >
-          New Server
-        </Button>
+        {!showForm && (
+          <Button
+            onClick={() => {
+              setEditingServer(null);
+              setShowForm(true);
+            }}
+          >
+            New Server
+          </Button>
+        )}
       </div>
 
-      {showForm && (
+      {showForm ? (
         <ServerForm
           onSave={loadServers}
           onCancel={handleCloseForm}
           initialData={editingServer}
         />
-      )}
-
-      <div className="grid gap-4">
-        {servers.map((s) => (
-          <div key={s.name} className="bg-white p-4 rounded shadow mb-4">
-            <div className="flex flex-row items-center justify-between">
-              <h2 className="text-xl font-bold mb-2">{s.name}</h2>
-              <div className="gap-2 flex flex-row">
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={(e) => handleDelete(e, s.id)}
-                >
-                  {isDeleting ? <Spinner /> : <Trash />}
-                </Button>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() => handleEdit(s)}
-                >
-                  <Pencil />
-                </Button>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <div>
-                <span className="font-semibold">Command:</span>
-                <code className="ml-2 bg-gray-100 p-1 rounded">
-                  {s.command}
-                </code>
-              </div>
-              <div>
-                <span className="font-semibold">Arguments:</span>
-                <ul className="ml-2 list-disc list-inside flex flex-col space-y-2">
-                  {s.args.map((arg) => (
-                    <li
-                      key={arg}
-                      className="bg-gray-100 p-1 rounded inline-block mr-2 mb-1"
+      ) : (
+        <div className="grid gap-4">
+          {servers.map((s) => (
+            <Card key={s.name}>
+              <CardContent className="pt-6">
+                <div className="flex flex-row items-center justify-between mb-4">
+                  <h2 className="text-xl font-bold">{s.name}</h2>
+                  <div className="gap-2 flex flex-row">
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => handleEdit(s)}
                     >
-                      {arg}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={(e) => handleDelete(e, s.id)}
+                    >
+                      {isDeleting ? <Spinner /> : <Trash className="h-4 w-4" />}
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <div>
+                    <span className="font-semibold">Command:</span>
+                    <code className="ml-2 bg-muted p-1 rounded">
+                      {s.command}
+                    </code>
+                  </div>
+                  <div>
+                    <span className="font-semibold">Arguments:</span>
+                    <ul className="ml-2 list-disc list-inside flex flex-col space-y-2">
+                      {s.args.map((arg) => (
+                        <li
+                          key={arg}
+                          className="bg-muted p-1 rounded inline-block mr-2 mb-1"
+                        >
+                          {arg}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -136,10 +143,17 @@ interface ServerProps {
   initialData?: ServerConfig | null;
 }
 
+interface FormData {
+  name: string;
+  command: string;
+  args: string[];
+  id?: number;
+}
+
 function ServerForm(props: ServerProps) {
   const { onSave, onCancel, initialData } = props;
 
-  const [formData, setFormData] = useState<ServerConfig>(() => {
+  const [formData, setFormData] = useState<FormData>(() => {
     if (initialData) {
       return {
         id: initialData.id,
@@ -157,8 +171,7 @@ function ServerForm(props: ServerProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    const config: ServerConfig = {
+    const config = {
       id: formData.id,
       name: formData.name,
       command: formData.command,
@@ -170,69 +183,72 @@ function ServerForm(props: ServerProps) {
     } else {
       await window.electron.addServer(config);
     }
-
     onSave();
     onCancel();
   };
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white p-4 rounded shadow mb-4">
-      <div className="grid gap-4">
-        <div>
-          <label className="block text-sm font-medium mb-1">Name</label>
-          <input
-            type="text"
-            value={formData.name}
-            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-            className="w-full p-2 border rounded"
-            required
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium mb-1">Command</label>
-          <input
-            type="text"
-            value={formData.command}
-            onChange={(e) =>
-              setFormData({ ...formData, command: e.target.value })
-            }
-            className="w-full p-2 border rounded"
-            required
-          />
-        </div>
+    <Card>
+      <CardContent className="pt-6">
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium mb-1">Name</label>
+            <input
+              type="text"
+              value={formData.name}
+              onChange={(e) =>
+                setFormData({ ...formData, name: e.target.value })
+              }
+              className="w-full p-2 border rounded"
+              required
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1">Command</label>
+            <input
+              type="text"
+              value={formData.command}
+              onChange={(e) =>
+                setFormData({ ...formData, command: e.target.value })
+              }
+              className="w-full p-2 border rounded"
+              required
+            />
+          </div>
 
-        <div>
-          <label className="block text-sm font-medium mb-1">
-            Arguments (comma-separated)
-          </label>
-          <input
-            type="text"
-            value={formData.args ? formData.args.join(",") : ""}
-            onChange={(e) => {
-              const newArgs =
-                e.target.value === ""
-                  ? []
-                  : e.target.value.split(",").map((arg) => arg.trim());
+          <div>
+            <label className="block text-sm font-medium mb-1">
+              Arguments (comma-separated)
+            </label>
+            <input
+              type="text"
+              value={formData.args ? formData.args.join(",") : ""}
+              onChange={(e) => {
+                const newArgs =
+                  e.target.value === ""
+                    ? []
+                    : e.target.value.split(",").map((arg) => arg.trim());
 
-              setFormData({
-                ...formData,
-                args: newArgs,
-              });
-            }}
-            className="w-full p-2 border rounded"
-            placeholder="Enter arguments separated by commas"
-          />
-        </div>
+                setFormData({
+                  ...formData,
+                  args: newArgs,
+                });
+              }}
+              className="w-full p-2 border rounded"
+              placeholder="Enter arguments separated by commas"
+            />
+          </div>
 
-        <div className="flex justify-end gap-2">
-          <Button type="button" variant="outline" onClick={onCancel}>
-            Cancel
-          </Button>
-          <Button type="submit">
-            {initialData ? "Update Server" : "Save Server Config"}
-          </Button>
-        </div>
-      </div>
-    </form>
+          <div className="flex justify-end gap-2">
+            <Button type="button" variant="outline" onClick={onCancel}>
+              Cancel
+            </Button>
+            <Button type="submit">
+              {initialData ? "Update Server" : "Save Server Config"}
+            </Button>
+          </div>
+        </form>
+      </CardContent>
+    </Card>
   );
 }

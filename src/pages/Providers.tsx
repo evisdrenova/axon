@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Provider } from "../types";
-import { Trash } from "lucide-react";
+import { Pencil, Trash } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -24,6 +24,7 @@ export default function Providers() {
   const [showForm, setShowForm] = useState(false);
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [editingProvider, setEditingProvider] = useState<Provider | null>(null);
 
   const loadProviders = async () => {
     try {
@@ -68,6 +69,17 @@ export default function Providers() {
     }
   };
 
+  const handleEdit = (provider: Provider) => {
+    setEditingProvider(provider);
+    setShowForm(true);
+  };
+
+  const handleCloseForm = () => {
+    setShowForm(false);
+    setEditingProvider(null);
+    setError(null);
+  };
+
   return (
     <div className="p-4">
       {error && (
@@ -78,56 +90,75 @@ export default function Providers() {
 
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Providers</h1>
-        <Button onClick={() => setShowForm(true)}>New Provider</Button>
+        {!showForm && (
+          <Button
+            onClick={() => {
+              setEditingProvider(null);
+              setShowForm(true);
+            }}
+          >
+            New Provider
+          </Button>
+        )}
       </div>
 
-      {showForm && (
+      {showForm ? (
         <ProviderForm
           onSave={loadProviders}
-          onCancel={() => setShowForm(false)}
+          onCancel={handleCloseForm}
+          initialData={editingProvider}
         />
+      ) : (
+        <div className="grid gap-4">
+          {providers.map((provider) => (
+            <Card key={provider.id}>
+              <CardContent className="flex justify-between items-center pt-6">
+                <div>
+                  <h3 className="font-bold">{provider.name}</h3>
+                  <p className="text-sm text-muted-foreground">
+                    {provider.baseUrl}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    Model: {provider.model}
+                  </p>
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => handleEdit(provider)}
+                  >
+                    <Pencil className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={(e) => handleDelete(e, provider.id)}
+                    disabled={isDeleting}
+                  >
+                    <Trash className="h-4 w-4" />
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
       )}
-
-      <div className="grid gap-4">
-        {providers.map((provider) => (
-          <Card key={provider.id}>
-            <CardContent className="flex justify-between items-center pt-6">
-              <div>
-                <h3 className="font-bold">{provider.name}</h3>
-                <p className="text-sm text-muted-foreground">
-                  {provider.baseUrl}
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  Model: {provider.model}
-                </p>
-              </div>
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={(e) => handleDelete(e, provider.id)}
-                disabled={isDeleting}
-              >
-                <Trash className="h-4 w-4" />
-              </Button>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
     </div>
   );
 }
-
 interface ProviderProps {
   onSave: () => void;
   onCancel: () => void;
+  initialData?: Provider | null;
 }
 
 const PROVIDER_TYPES = [
   {
     value: "openai",
     label: "OpenAI",
-    baseUrl: "https://api.openai.com",
-    apiPath: "/v1/chat/completions",
+    baseUrl: "https://api.openai.com/v1",
+    apiPath: "/chat/completions",
     defaultModel: "gpt-3.5-turbo",
   },
   {
@@ -147,17 +178,22 @@ const PROVIDER_TYPES = [
 ];
 
 function ProviderForm(props: ProviderProps) {
-  const { onSave, onCancel } = props;
+  const { onSave, onCancel, initialData } = props;
   const [error, setError] = useState<string | null>(null);
 
-  const [formData, setFormData] = useState<Provider>({
-    name: "",
-    type: "",
-    baseUrl: "",
-    apiPath: "",
-    apiKey: "",
-    model: "",
-    config: "",
+  const [formData, setFormData] = useState<Provider>(() => {
+    if (initialData) {
+      return { ...initialData };
+    }
+    return {
+      name: "",
+      type: "",
+      baseUrl: "",
+      apiPath: "",
+      apiKey: "",
+      model: "",
+      config: "",
+    };
   });
 
   const handleProviderTypeChange = (type: string) => {
@@ -177,18 +213,24 @@ function ProviderForm(props: ProviderProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await window.electron.addProvider(formData);
+      if (initialData) {
+        await window.electron.updateProvider(formData);
+      } else {
+        await window.electron.addProvider(formData);
+      }
       onSave();
       onCancel();
     } catch (err) {
-      setError("Failed to create provider");
+      setError(
+        initialData ? "Failed to update provider" : "Failed to create provider"
+      );
     }
   };
 
   return (
     <Card className="mb-4">
       <CardHeader>
-        <CardTitle>New Provider</CardTitle>
+        <CardTitle>{initialData ? "Edit Provider" : "New Provider"}</CardTitle>
       </CardHeader>
       <CardContent>
         {error && (
@@ -215,6 +257,7 @@ function ProviderForm(props: ProviderProps) {
             <Select
               value={formData.type}
               onValueChange={handleProviderTypeChange}
+              disabled={!!initialData}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select provider type" />
@@ -295,7 +338,9 @@ function ProviderForm(props: ProviderProps) {
             <Button variant="outline" onClick={onCancel}>
               Cancel
             </Button>
-            <Button type="submit">Save Provider</Button>
+            <Button type="submit">
+              {initialData ? "Update Provider" : "Save Provider"}
+            </Button>
           </div>
         </form>
       </CardContent>
