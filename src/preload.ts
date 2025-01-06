@@ -23,6 +23,9 @@ contextBridge.exposeInMainWorld("electron", {
   updateProvider: (data: Provider) => {
     return ipcRenderer.invoke("update-provider", data);
   },
+  selectProvider: (provider: Provider) => {
+    return ipcRenderer.invoke("select-provider", provider);
+  },
 
   //mcp server methods
   getServers: () => {

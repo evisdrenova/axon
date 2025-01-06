@@ -29,6 +29,15 @@ https://modelcontextprotocol.io/quickstart/client
 6. append the response back to the user
 */
 
+/*
+TODO:
+
+1. We have a basic back and forth working besides the actual tool-ca;;
+2.  finish implementing the tool call, right now the LLM just returns the plan and what they would do
+3. make a decision on the chat message structuring and what types do we want to use. I think we want our own types in the front end and then in the process-query, we check the provider type and then have a switch that creates the provider specific chat interface. 
+4. the input into the processquery should just be the ChatRequest with just he messages. In the front end we should just append to that array. 
+*/
+
 export default function Home() {
   const [providers, setProviders] = useState<Provider[]>([]);
   const [selectedProvider, setSelectedProvider] = useState<string>("");
@@ -54,8 +63,13 @@ export default function Home() {
   const handleProviderSelect = (providerId: string) => {
     setSelectedProvider(providerId);
     const provider = providers.find((p) => p.id?.toString() === providerId);
-    setCurrentProvider(provider || null);
-    setError(null);
+    try {
+      window.electron.selectProvider(provider);
+      setCurrentProvider(provider || null);
+    } catch (e) {
+      console.log("there was an error setting the provider", e);
+      setError(null);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -81,9 +95,8 @@ export default function Home() {
 
     try {
       const response = await window.electron.chat({
-        provider: currentProvider,
-        messages: [...messages, userMessage],
-        message: userMessage.content,
+        messages: [...messages, userMessage], // the updated message dialogue
+        message: userMessage.content, // the most recent user message
       });
 
       // Add assistant's response

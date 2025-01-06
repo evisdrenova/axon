@@ -1,7 +1,8 @@
-import { ServerConfig, Tool } from "src/types";
+import { ServerConfig } from "src/types";
 import { Database } from "better-sqlite3";
 import { Client } from "@modelcontextprotocol/sdk/client/index";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio";
+import Anthropic from "@anthropic-ai/sdk";
 
 type MCPClient = typeof Client;
 type MCPTransport = typeof StdioClientTransport;
@@ -100,34 +101,36 @@ export default class MCP {
     }
   }
 
-  public async listTools(client?: string) {
-    let toolList: Tool[];
-
+  public async listTools(client?: string): Promise<Anthropic.Tool[]> {
     if (client) {
       if (!this.clients[client]) {
         throw new Error(`MCP Client ${client} not found`);
       }
-
       const { tools } = await this.clients[client].listTools();
-      toolList = tools.map((tool) => {
-        return {
-          name: `${client}-${tool.name}`,
-        };
-      });
-    } else {
-      for (const key in this.clients) {
-        const { tools } = await this.clients[key].listTools();
-        toolList = toolList.concat(
-          (toolList = tools.map((tool) => {
-            return {
-              name: `${client}-${tool.name}`,
-            };
-          }))
-        );
-      }
+      return tools.map((tool) => ({
+        name: `${client}-${tool.name}`,
+        description: tool.description,
+        input_schema: {
+          type: tool.inputSchema.type,
+          properties: tool.inputSchema.properties,
+        },
+      }));
     }
+    const allTools = await Promise.all(
+      Object.entries(this.clients).map(async ([clientName, client]) => {
+        const { tools } = await client.listTools();
+        return tools.map((tool) => ({
+          name: `${clientName}-${tool.name}`,
+          description: tool.description,
+          input_schema: {
+            type: tool.inputSchema.type,
+            properties: tool.inputSchema.properties,
+          },
+        }));
+      })
+    );
 
-    return toolList;
+    return allTools.flat();
   }
 
   public async callTool({

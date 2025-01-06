@@ -10,6 +10,7 @@ export interface IElectronAPI {
   addProvider: (provider: Provider) => Promise<void>;
   deleteProvider: (id: number) => Promise<void>;
   updateProvider: (data: Provider) => Promise<void>;
+  selectProvider: (provider: Provider) => Promise<void>;
   // mcp methods
   getServers: () => Promise<ServerConfig[]>;
   addServer: (server: ServerConfig) => Promise<void>;
@@ -38,28 +39,15 @@ export interface Provider {
 }
 
 export interface ChatRequest {
-  provider: Provider;
   messages: ChatMessage[];
   message: string;
 }
 
 export interface ChatMessage {
-  id: string;
+  id?: string;
   role: "user" | "assistant";
   content: string;
-  timestamp: number;
-}
-
-export interface Tool {
-  name: string;
-  description?: string;
-  inputSchema?: InputSchema;
-}
-
-export interface InputSchema {
-  type: string;
-  properties: Record<string, any>;
-  requried: string[];
+  timestamp?: number;
 }
 
 export type ProviderClient =

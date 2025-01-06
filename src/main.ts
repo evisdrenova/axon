@@ -2,7 +2,7 @@ import { app, BrowserWindow, ipcMain } from "electron";
 import path from "path";
 import started from "electron-squirrel-startup";
 import Database from "better-sqlite3";
-import { ServerConfig, Provider } from "./types";
+import { ServerConfig, Provider, ChatRequest } from "./types";
 import log from "electron-log/main";
 import MCP from "./mcp/mcp";
 import Providers from "./providers/providers";
@@ -77,7 +77,8 @@ const initializeDatabase = () => {
 const createWindow = async () => {
   initializeDatabase();
   mcp = new MCP(db);
-  providers = new Providers(db);
+  await mcp.init();
+  providers = new Providers(mcp);
   await mcp.createClients();
   // Create the browser window.
   const mainWindow = new BrowserWindow({
@@ -177,6 +178,11 @@ ipcMain.handle("update-provider", (_, provider: Provider) => {
   }
 });
 
+ipcMain.handle("select-provider", (_, provider: Provider) => {
+  providers.setProvider(provider);
+  return true;
+});
+
 ipcMain.handle("get-servers", () => {
   return mcp.getServers();
 });
@@ -220,8 +226,11 @@ ipcMain.handle("update-server", (_, config: ServerConfig) => {
   );
 });
 
-ipcMain.handle("chat", async (_, data) => {
-  return providers.chat();
+ipcMain.handle("chat", async (_, data: ChatRequest) => {
+  if (!providers.getCurrentProvider()) {
+    throw new Error("No provider selected");
+  }
+  return providers.processQuery(data);
 });
 
 // called when Electron has initialized and is ready to create browser windows.
