@@ -17,7 +17,7 @@ export interface IElectronAPI {
   deleteServer: (id: number) => Promise<void>;
   updateServer: (data: ServerConfig) => Promise<void>;
   // chat methods
-  chat: (data: ChatRequest) => Promise<string>;
+  chat: (data: Message[]) => Promise<string>;
 }
 
 export interface ServerConfig {
@@ -38,16 +38,9 @@ export interface Provider {
   config: string;
 }
 
-export interface ChatRequest {
-  messages: ChatMessage[];
-  message: string;
-}
-
-export interface ChatMessage {
-  id?: string;
+export interface Message {
   role: "user" | "assistant";
   content: string;
-  timestamp?: number;
 }
 
 export type ProviderClient =

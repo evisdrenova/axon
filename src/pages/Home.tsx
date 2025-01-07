@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
-import { useChat } from "@ai-sdk/react";
-import { ChatMessage, Provider } from "../types";
+import { Message, Provider } from "../types";
 import {
   Card,
   CardContent,
@@ -19,31 +18,12 @@ import {
 } from "../../components/ui/select";
 import { Separator } from "../../components/ui/separator";
 
-/*
-https://modelcontextprotocol.io/quickstart/client
-1. send prompt to backend
-2. structure message to the provider based on the request type as an array of messages
-3. send initial message to LLM with the prompt, tools, and message history
-4. process the response and handle the tools based on what the LLM responds. It essentially outlines a plan of what tools to call and then the server actually calls the tools
-5. call the tools
-6. append the response back to the user
-*/
-
-/*
-TODO:
-
-1. We have a basic back and forth working besides the actual tool-ca;;
-2.  finish implementing the tool call, right now the LLM just returns the plan and what they would do
-3. make a decision on the chat message structuring and what types do we want to use. I think we want our own types in the front end and then in the process-query, we check the provider type and then have a switch that creates the provider specific chat interface. 
-4. the input into the processquery should just be the ChatRequest with just he messages. In the front end we should just append to that array. 
-*/
-
 export default function Home() {
   const [providers, setProviders] = useState<Provider[]>([]);
   const [selectedProvider, setSelectedProvider] = useState<string>("");
   const [currentProvider, setCurrentProvider] = useState<Provider | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
@@ -80,11 +60,9 @@ export default function Home() {
     }
 
     // Create user message
-    const userMessage: ChatMessage = {
-      id: Date.now().toString(),
+    const userMessage: Message = {
       role: "user",
       content: inputValue.trim(),
-      timestamp: Date.now(),
     };
 
     // Update messages with user input
@@ -94,19 +72,14 @@ export default function Home() {
     setError(null);
 
     try {
-      const response = await window.electron.chat({
-        messages: [...messages, userMessage], // the updated message dialogue
-        message: userMessage.content, // the most recent user message
-      });
+      const response = await window.electron.chat([...messages, userMessage]);
 
       // Add assistant's response
-      const assistantMessage: ChatMessage = {
-        id: (Date.now() + 1).toString(),
+      const assistantMessage: Message = {
         role: "assistant",
         content: response,
-        timestamp: Date.now(),
       };
-
+      // append assistant response to chat log
       setMessages((prev) => [...prev, assistantMessage]);
     } catch (err: any) {
       setError(err.message || "Failed to get response");
@@ -123,6 +96,7 @@ export default function Home() {
     }
     return content.text || JSON.stringify(content);
   };
+
   return (
     <div className="container max-w-4xl mx-auto p-4">
       <Card className="min-h-[80vh] flex flex-col">
@@ -158,7 +132,7 @@ export default function Home() {
             <div className="space-y-4">
               {messages.map((message) => (
                 <div
-                  key={message.id}
+                  key={message.content}
                   className={`flex ${
                     message.role === "user" ? "justify-end" : "justify-start"
                   }`}
@@ -177,7 +151,7 @@ export default function Home() {
               {isLoading && (
                 <div className="flex justify-start">
                   <div className="bg-muted rounded-lg px-4 py-2">
-                    <div className="animate-pulse">Thinking...</div>
+                    <div className="animate-pulse">Analyzing...</div>
                   </div>
                 </div>
               )}

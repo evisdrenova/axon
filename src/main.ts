@@ -2,7 +2,7 @@ import { app, BrowserWindow, ipcMain } from "electron";
 import path from "path";
 import started from "electron-squirrel-startup";
 import Database from "better-sqlite3";
-import { ServerConfig, Provider, ChatRequest } from "./types";
+import { ServerConfig, Provider, Message } from "./types";
 import log from "electron-log/main";
 import MCP from "./mcp/mcp";
 import Providers from "./providers/providers";
@@ -226,7 +226,7 @@ ipcMain.handle("update-server", (_, config: ServerConfig) => {
   );
 });
 
-ipcMain.handle("chat", async (_, data: ChatRequest) => {
+ipcMain.handle("chat", async (_, data: Message[]) => {
   if (!providers.getCurrentProvider()) {
     throw new Error("No provider selected");
   }
