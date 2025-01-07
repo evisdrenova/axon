@@ -27,15 +27,16 @@ export default class AnthropicHandler {
         availableTools
       );
 
-      console.log("the initial response", response);
+      console.log("available tools", availableTools);
 
       // there are only two content types: "text" and "tool use"
       for (const content of response.content) {
         if (content.type === "text") {
           // llm didn't respond with tool_use just return the text
-          console.log("");
+          console.log("just text");
           finalText.push(content.text);
         } else if (content.type === "tool_use" && this.mcp) {
+          console.log("tool use");
           // const res = await this.anthropicToolHandler(
           //   content,
           //   finalText,
@@ -51,20 +52,23 @@ export default class AnthropicHandler {
           console.log("tool args", toolArgs);
           //we append the client name to the beginning of the tool name with an hyphen, so let's get that
           const client = toolName.split("-")[0];
-          console.log("client name", toolName);
-          console.log("tool name split", toolName.split("-")[1]);
+          // console.log("client name", toolName);
+          // console.log("tool name split", toolName.split("-")[1]);
           const result = await this.mcp.callTool({
             client,
-            name: toolName.split("-")[1],
+            name: toolName,
             args: toolArgs,
           });
 
-          const tr = {
+          const toolResult = {
             call: toolName,
             result: result,
           };
 
-          toolResults.push(tr);
+          console.log("toolresult", result);
+          console.log("tool result contnet", result.content);
+
+          toolResults.push(toolResult);
           finalText.push(`[Calling tool ${toolName} with args ${toolArgs}]`);
 
           if ("text" in content && content.text) {
@@ -108,12 +112,23 @@ export default class AnthropicHandler {
   ) {
     try {
       if (provider.type === "anthropic") {
+        const systemMessage: Anthropic.MessageParam = {
+          role: "assistant",
+          content: [
+            {
+              type: "text",
+              text: "You have access to tools that you should use directly when appropriate. Instead of describing how you would use the tools, you should actually use them to help the user. When a user asks about files or directories, use the filesystem tools to help them.",
+            },
+          ],
+        };
         const convertedMessages = this.createAnthropicMessage(messages);
         return await provider.client.messages.create({
           model: currentProvider.model,
           max_tokens: 1024,
           tools: tools,
-          messages: convertedMessages,
+          messages: [systemMessage, ...convertedMessages],
+          system:
+            "Use available tools directly instead of describing how you would use them.",
         });
       }
     } catch (e) {

@@ -66,7 +66,7 @@ export default class MCP {
           servers.map(async (server) => {
             console.log(`Initializing server: ${server.name}`);
 
-            const clientName = `${server.name}-client`;
+            const clientName = `${server.name}`;
             const client = new this.client(
               { name: clientName, version: "0.0.1" },
               { capabilities: {} }
