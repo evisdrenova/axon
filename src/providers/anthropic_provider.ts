@@ -15,7 +15,7 @@ export default class AnthropicHandler {
     currentProvider: Provider
   ) {
     const finalText: string[] = [];
-    let toolResults: ToolResults[];
+    const toolResults: ToolResults[] = [];
 
     const availableTools = await this.mcp.listTools();
 
@@ -26,8 +26,6 @@ export default class AnthropicHandler {
         currentProvider,
         availableTools
       );
-
-      console.log("available tools", availableTools);
 
       // there are only two content types: "text" and "tool use"
       for (const content of response.content) {
@@ -51,12 +49,14 @@ export default class AnthropicHandler {
           console.log("tool name", toolName);
           console.log("tool args", toolArgs);
           //we append the client name to the beginning of the tool name with an hyphen, so let's get that
-          const client = toolName.split("-")[0];
+          // const client = toolName.split("-")[0];
           // console.log("client name", toolName);
           // console.log("tool name split", toolName.split("-")[1]);
+          const [client, ...toolNameParts] = toolName.split("-");
+          const actualToolName = toolNameParts.join("-");
           const result = await this.mcp.callTool({
             client,
-            name: toolName,
+            name: actualToolName,
             args: toolArgs,
           });
 
@@ -70,6 +70,8 @@ export default class AnthropicHandler {
 
           toolResults.push(toolResult);
           finalText.push(`[Calling tool ${toolName} with args ${toolArgs}]`);
+
+          console.log("messages", messages);
 
           if ("text" in content && content.text) {
             messages.push({
