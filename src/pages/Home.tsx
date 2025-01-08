@@ -18,6 +18,7 @@ import {
 } from "../../components/ui/select";
 import { Separator } from "../../components/ui/separator";
 import Anthropic from "@anthropic-ai/sdk";
+import ReactMarkdown from "react-markdown";
 
 export default function Home() {
   const [providers, setProviders] = useState<Provider[]>([]);
@@ -89,12 +90,70 @@ export default function Home() {
     }
   };
 
+  // const renderMessageContent = (content: string | Anthropic.ContentBlock[]) => {
+  //   if (typeof content === "string") {
+  //     return content;
+  //   } else {
+  //     return JSON.stringify(content);
+  //   }
+  // };
+
   const renderMessageContent = (content: string | Anthropic.ContentBlock[]) => {
     if (typeof content === "string") {
-      return content;
-    } else {
-      return JSON.stringify(content);
+      return renderMarkdown(content);
+    } else if (Array.isArray(content)) {
+      return content.map((block, index) => {
+        if (block.type === "text") {
+          return renderMarkdown(block.text || "");
+        }
+        // Handle other block types...
+        return null;
+      });
     }
+    return null;
+  };
+
+  const convertToMarkdown = (text: string) => {
+    // Split the text into parts - headers, lists, and regular text
+    const parts = text.split("\n");
+
+    // Process each line
+    const markdownLines = parts.map((line) => {
+      // Check if it's a numbered list item
+      const listItemMatch = line.match(/^(\d+)\.\s(.+?)(\(image:\s(.+?)\))$/);
+      if (listItemMatch) {
+        // Format as markdown list with bold image name
+        return `${listItemMatch[1]}. ${listItemMatch[2]}(**${listItemMatch[4]}**)`;
+      }
+
+      // Return regular lines as-is
+      return line;
+    });
+
+    return markdownLines.join("\n");
+  };
+
+  const renderMarkdown = (content: string) => {
+    const markdown = convertToMarkdown(content);
+    return (
+      <ReactMarkdown
+        className="prose max-w-none"
+        components={{
+          // Customize rendering of specific elements
+          p: ({ children }: { children: any }) => (
+            <p className="my-2">{children}</p>
+          ),
+          li: ({ children }: { children: any }) => (
+            <li className="my-1">{children}</li>
+          ),
+          strong: ({ children }) => (
+            <span className="text-gray-600 font-mono">{children}</span>
+          ),
+        }}
+      >
+        {markdown}
+      </ReactMarkdown>
+    );
   };
 
   return (

@@ -126,8 +126,6 @@ export default class AnthropicHandler {
     //   }
     // }
 
-    console.log("currentProvider", currentProvider);
-
     try {
       const response = await this.callAnthropic(
         providerClient,
@@ -192,7 +190,10 @@ export default class AnthropicHandler {
           }
           console.log("message 3 ", messages);
           // if there is another tool use response
-          messages.push({ role: "user", content: result.content });
+          messages.push({
+            role: "user",
+            content: result.content as Anthropic.ContentBlock[],
+          });
           console.log("message 4 ", messages);
           // finalText.push(toolResult);
           // console.log("toolresult", toolResult);
