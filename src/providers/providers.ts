@@ -71,7 +71,6 @@ export default class Providers {
 
     switch (this.currentProvider.type) {
       case "anthropic":
-        // return this.anthropicHandler(provider, messages, availableTools);
         return this.anthropicHandler.handleQuery(
           providerClient,
           messages,

@@ -121,6 +121,7 @@ export default class MCP {
       Object.entries(this.clients).map(async ([clientName, client]) => {
         const { tools } = await client.listTools();
         return tools.map((tool) => ({
+          // the __ allows us to split the client out from the name later to use it
           name: `${clientName}__${tool.name}`,
           description: tool.description,
           input_schema: {
@@ -146,7 +147,6 @@ export default class MCP {
     if (!this.clients[client]) {
       throw new Error(`MCP Client ${client} not found`);
     }
-    console.log("Calling tool:", client, name, args);
     const result = await this.clients[client].callTool({
       name,
       arguments: args,
