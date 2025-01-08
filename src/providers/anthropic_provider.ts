@@ -5,10 +5,6 @@ import MCP from "src/mcp/mcp";
 interface ToolResult {
   call: string;
   result: any;
-  // result: {
-  //   toolResult?: any;
-  //   content?: string;
-  // };
 }
 
 export default class AnthropicHandler {
@@ -166,7 +162,7 @@ export default class AnthropicHandler {
   }
 
   private async anthropicToolHandler(toolName: string, toolArgs: any) {
-    //we append the client name to the beginning of the tool name with an __, so let's get that
+    //we append the client name to the beginning of the tool name with an __, so we need to split the string to get the client name
     const [client, ...toolNameParts] = toolName.split("__");
     const actualToolName = toolNameParts.join("-");
 
