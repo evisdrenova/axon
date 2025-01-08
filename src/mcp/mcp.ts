@@ -108,7 +108,8 @@ export default class MCP {
       }
       const { tools } = await this.clients[client].listTools();
       return tools.map((tool) => ({
-        name: `${client}-${tool.name}`,
+        // the __ allows us to split the client out from the name later to use it
+        name: `${client}__${tool.name}`,
         description: tool.description,
         input_schema: {
           type: tool.inputSchema.type,
@@ -120,7 +121,7 @@ export default class MCP {
       Object.entries(this.clients).map(async ([clientName, client]) => {
         const { tools } = await client.listTools();
         return tools.map((tool) => ({
-          name: `${clientName}-${tool.name}`,
+          name: `${clientName}__${tool.name}`,
           description: tool.description,
           input_schema: {
             type: tool.inputSchema.type,

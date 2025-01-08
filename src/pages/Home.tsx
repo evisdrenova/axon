@@ -17,6 +17,7 @@ import {
   SelectValue,
 } from "../../components/ui/select";
 import { Separator } from "../../components/ui/separator";
+import Anthropic from "@anthropic-ai/sdk";
 
 export default function Home() {
   const [providers, setProviders] = useState<Provider[]>([]);
@@ -88,13 +89,12 @@ export default function Home() {
     }
   };
 
-  const renderMessageContent = (
-    content: string | { type: string; text: string }
-  ) => {
+  const renderMessageContent = (content: string | Anthropic.ContentBlock[]) => {
     if (typeof content === "string") {
       return content;
+    } else {
+      return JSON.stringify(content);
     }
-    return content.text || JSON.stringify(content);
   };
 
   return (
@@ -130,9 +130,9 @@ export default function Home() {
 
           <ScrollArea className="flex-1 pr-4">
             <div className="space-y-4">
-              {messages.map((message) => (
+              {messages.map((message, index) => (
                 <div
-                  key={message.content}
+                  key={index}
                   className={`flex ${
                     message.role === "user" ? "justify-end" : "justify-start"
                   }`}

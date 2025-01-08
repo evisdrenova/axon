@@ -40,7 +40,7 @@ export interface Provider {
 
 export interface Message {
   role: "user" | "assistant";
-  content: string;
+  content: string | Anthropic.ContentBlock[];
 }
 
 export type ProviderClient =

@@ -67,8 +67,6 @@ export default class Providers {
       throw new Error("No provider selected");
     }
 
-    console.log("the input query", messages);
-
     const providerClient = await this.getProviderInstance(this.currentProvider);
 
     switch (this.currentProvider.type) {
