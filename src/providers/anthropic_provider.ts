@@ -21,7 +21,7 @@ export default class AnthropicHandler {
         availableTools
       );
 
-      // the llm may respond with 2 message, for example a text message that explains what it wants to do and then a tool_use message that tells you what tools to call, so this iterates over both of those
+      // the llm may respond with 2+ message, for example a text message that explains what it wants to do and then a tool_use message that tells you what tools to call, so this iterates over both of those
       for (const content of response.content) {
         if (content.type === "text") {
           finalText.push(content.text);
