@@ -1,12 +1,6 @@
 import { Message, Provider, ProviderClient } from "../types";
 import Anthropic from "@anthropic-ai/sdk";
 import MCP from "src/mcp/mcp";
-
-interface ToolResult {
-  call: string;
-  result: any;
-}
-
 export default class AnthropicHandler {
   constructor(private readonly mcp: MCP) {}
 
@@ -16,7 +10,6 @@ export default class AnthropicHandler {
     currentProvider: Provider
   ) {
     const finalText: string[] = [];
-    const toolResults: ToolResult[] = [];
 
     const availableTools = await this.mcp.listTools();
 
@@ -37,13 +30,6 @@ export default class AnthropicHandler {
           const toolArgs = content.input;
 
           const result = await this.anthropicToolHandler(toolName, toolArgs);
-
-          const toolResult = {
-            call: toolName,
-            result: result,
-          };
-
-          toolResults.push(toolResult);
 
           if ("text" in content && content.text) {
             messages.push({
