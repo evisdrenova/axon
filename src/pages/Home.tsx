@@ -177,7 +177,7 @@ There are a total of 11 containers currently running, using images for various s
                         : "bg-muted"
                     }`}
                   >
-                    {RenderMessageContent(message.content, message.role)}
+                    {RenderMessageContent(message)}
                   </div>
                 </div>
               ))}

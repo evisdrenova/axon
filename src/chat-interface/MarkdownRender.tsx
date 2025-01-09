@@ -3,10 +3,13 @@ import ReactMarkdown from "react-markdown";
 import { FilterThinkingContent } from "./utils";
 import { cn } from "../../src/lib/utils";
 
-export default function RenderMessageContent(
-  content: string | Anthropic.ContentBlock[],
-  role: string
-) {
+export default function RenderMessageContent(message: {
+  content: string | Anthropic.ContentBlock[];
+  role: string;
+}) {
+  const content = message.content;
+  const role = message.role;
+
   if (typeof content === "string") {
     return renderMarkdown(content, role);
   } else if (Array.isArray(content)) {
