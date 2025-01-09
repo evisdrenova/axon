@@ -2,8 +2,89 @@ import Anthropic from "@anthropic-ai/sdk";
 import ReactMarkdown from "react-markdown";
 import { FilterThinkingContent } from "./utils";
 import { cn } from "../../src/lib/utils";
+import { ScrollArea } from "../../components/ui/scroll-area";
+import { Message } from "../../src/types";
 
-export default function RenderMessageContent(message: {
+interface Props {
+  messages: Message[];
+  isLoading: boolean;
+}
+
+const mes = [
+  {
+    content: "what docker containers do i have running locally?",
+    role: "user",
+  },
+  {
+    content: `"<thinking>
+To answer the question of what containers are running locally, the most relevant tool is:
+
+mcp-server-docker__list_containers
+
+This tool lists all Docker containers. It has two optional parameters:
+- all (boolean): Show all containers (default shows just running). This defaults to false, so by default it will only show running containers which matches the user's request.
+- filters (ListContainersFilters or null): Filter containers. This is optional and the user did not provide any filters, so we can omit this.
+
+No other tools are needed to answer this request. All required parameters are either provided or have suitable defaults, so we can proceed with calling the list_containers tool.
+</thinking>
+Here is a summary of the containers running locally:
+
+| Container Name | Image |
+| --- | --- |
+| neosync-worker | neosync-worker:latest |
+| temporal-ui | temporalio/ui:2.22.3 |
+| temporal | temporalio/auto-setup:1.22.6 |  
+| neosync-api | neosync-api:latest |
+| neosync-db | postgres:15 |
+| temporal-postgresql | postgres:13 |
+| neosync-redis | redis:7.2.4 |
+| test-prod-db | postgres:15 |
+| test-stage-db | postgres:15 |
+| temporal-elasticsearch | elasticsearch:7.16.2 |
+| neosync-app | neosync-app:latest |
+
+There are a total of 11 containers currently running, using images for various services like Postgres databases, Redis, Elasticsearch, and custom application images."`,
+    role: "assistant",
+  },
+];
+
+export default function ChatInterface(props: Props) {
+  const { messages, isLoading } = props;
+  return (
+    <ScrollArea className="flex-1 pr-4">
+      <div className="space-y-4">
+        {/* {messages.map((message, index) => ( */}
+        {mes.map((message, index) => (
+          <div
+            key={index}
+            className={`flex ${
+              message.role === "user" ? "justify-end" : "justify-start"
+            }`}
+          >
+            <div
+              className={`rounded-lg px-4 py-2 max-w-[80%] ${
+                message.role === "user"
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-muted"
+              }`}
+            >
+              {renderMessageContent(message)}
+            </div>
+          </div>
+        ))}
+        {isLoading && (
+          <div className="flex justify-start">
+            <div className="bg-muted rounded-lg px-4 py-2">
+              <div className="animate-pulse">Analyzing...</div>
+            </div>
+          </div>
+        )}
+      </div>
+    </ScrollArea>
+  );
+}
+
+export function renderMessageContent(message: {
   content: string | Anthropic.ContentBlock[];
   role: string;
 }) {
