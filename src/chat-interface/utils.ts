@@ -1,5 +1,3 @@
-import Anthropic from "@anthropic-ai/sdk";
-
 // parses out everything in ebtween the <thinking> tags in claude's response
 export function FilterThinkingContent(text: string): string {
   // More explicit regex pattern

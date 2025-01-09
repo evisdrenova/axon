@@ -5,5 +5,5 @@ A desktop app that allows you to talk to different models, register MCP servers 
 ## TODO:
 
 1. support hot reload of new servers and providers
-2. update text rendering to be better and nicer
+2. handle rendering tables better
 3. conversation branching

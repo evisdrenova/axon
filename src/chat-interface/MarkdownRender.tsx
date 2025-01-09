@@ -54,7 +54,7 @@ export default function ChatInterface(props: Props) {
     <ScrollArea className="flex-1 pr-4">
       <div className="space-y-4">
         {/* {messages.map((message, index) => ( */}
-        {mes.map((message, index) => (
+        {messages.map((message, index) => (
           <div
             key={index}
             className={`flex ${
