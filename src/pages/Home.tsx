@@ -17,8 +17,7 @@ import {
   SelectValue,
 } from "../../components/ui/select";
 import { Separator } from "../../components/ui/separator";
-import Anthropic from "@anthropic-ai/sdk";
-import ReactMarkdown from "react-markdown";
+import RenderMessageContent from "../../src/chat-interface/MarkdownRender";
 
 export default function Home() {
   const [providers, setProviders] = useState<Provider[]>([]);
@@ -90,71 +89,45 @@ export default function Home() {
     }
   };
 
-  // const renderMessageContent = (content: string | Anthropic.ContentBlock[]) => {
-  //   if (typeof content === "string") {
-  //     return content;
-  //   } else {
-  //     return JSON.stringify(content);
-  //   }
-  // };
+  console.log("messages", messages);
 
-  const renderMessageContent = (content: string | Anthropic.ContentBlock[]) => {
-    if (typeof content === "string") {
-      return renderMarkdown(content);
-    } else if (Array.isArray(content)) {
-      return content.map((block, index) => {
-        if (block.type === "text") {
-          return renderMarkdown(block.text || "");
-        }
-        // Handle other block types...
-        return null;
-      });
-    }
-    return null;
-  };
+  const mes = [
+    {
+      content: "what docker containers do i have running locally?",
+      role: "user",
+    },
+    {
+      content: `"<thinking>
+To answer the question of what containers are running locally, the most relevant tool is:
 
-  const convertToMarkdown = (text: string) => {
-    // Split the text into parts - headers, lists, and regular text
-    const parts = text.split("\n");
+mcp-server-docker__list_containers
 
-    // Process each line
-    const markdownLines = parts.map((line) => {
-      // Check if it's a numbered list item
-      const listItemMatch = line.match(/^(\d+)\.\s(.+?)(\(image:\s(.+?)\))$/);
-      if (listItemMatch) {
-        // Format as markdown list with bold image name
-        return `${listItemMatch[1]}. ${listItemMatch[2]}(**${listItemMatch[4]}**)`;
-      }
+This tool lists all Docker containers. It has two optional parameters:
+- all (boolean): Show all containers (default shows just running). This defaults to false, so by default it will only show running containers which matches the user's request.
+- filters (ListContainersFilters or null): Filter containers. This is optional and the user did not provide any filters, so we can omit this.
 
-      // Return regular lines as-is
-      return line;
-    });
+No other tools are needed to answer this request. All required parameters are either provided or have suitable defaults, so we can proceed with calling the list_containers tool.
+</thinking>
+Here is a summary of the containers running locally:
 
-    return markdownLines.join("\n");
-  };
+| Container Name | Image |
+| --- | --- |
+| neosync-worker | neosync-worker:latest |
+| temporal-ui | temporalio/ui:2.22.3 |
+| temporal | temporalio/auto-setup:1.22.6 |  
+| neosync-api | neosync-api:latest |
+| neosync-db | postgres:15 |
+| temporal-postgresql | postgres:13 |
+| neosync-redis | redis:7.2.4 |
+| test-prod-db | postgres:15 |
+| test-stage-db | postgres:15 |
+| temporal-elasticsearch | elasticsearch:7.16.2 |
+| neosync-app | neosync-app:latest |
 
-  const renderMarkdown = (content: string) => {
-    const markdown = convertToMarkdown(content);
-    return (
-      <ReactMarkdown
-        className="prose max-w-none"
-        components={{
-          // Customize rendering of specific elements
-          p: ({ children }: { children: any }) => (
-            <p className="my-2">{children}</p>
-          ),
-          li: ({ children }: { children: any }) => (
-            <li className="my-1">{children}</li>
-          ),
-          strong: ({ children }) => (
-            <span className="text-gray-600 font-mono">{children}</span>
-          ),
-        }}
-      >
-        {markdown}
-      </ReactMarkdown>
-    );
-  };
+There are a total of 11 containers currently running, using images for various services like Postgres databases, Redis, Elasticsearch, and custom application images."`,
+      role: "assistant",
+    },
+  ];
 
   return (
     <div className="container max-w-4xl mx-auto p-4">
@@ -189,7 +162,8 @@ export default function Home() {
 
           <ScrollArea className="flex-1 pr-4">
             <div className="space-y-4">
-              {messages.map((message, index) => (
+              {/* {messages.map((message, index) => ( */}
+              {mes.map((message, index) => (
                 <div
                   key={index}
                   className={`flex ${
@@ -203,7 +177,7 @@ export default function Home() {
                         : "bg-muted"
                     }`}
                   >
-                    <div>{renderMessageContent(message.content)}</div>
+                    {RenderMessageContent(message.content, message.role)}
                   </div>
                 </div>
               ))}

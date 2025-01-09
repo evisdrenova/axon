@@ -13,6 +13,7 @@ export default class AnthropicHandler {
 
     const availableTools = await this.mcp.listTools();
 
+    // get initial tool plan from claude
     try {
       const response = await this.callAnthropic(
         providerClient,
@@ -20,6 +21,8 @@ export default class AnthropicHandler {
         currentProvider,
         availableTools
       );
+
+      console.log("response", response);
 
       // the llm may respond with 2+ message, for example a text message that explains what it wants to do and then a tool_use message that tells you what tools to call, so this iterates over both of those
       for (const content of response.content) {
@@ -48,11 +51,13 @@ export default class AnthropicHandler {
             currentProvider
           );
 
+          console.log("messages", messages);
           if (followUpResponse.content[0].type == "text") {
             finalText.push(followUpResponse.content[0].text);
           }
         }
       }
+
       return finalText.join("\n");
     } catch (error) {
       console.error("Error in handling user query and/or llm response:", error);
@@ -72,23 +77,30 @@ export default class AnthropicHandler {
       );
     }
     try {
-      const systemMessage: Anthropic.MessageParam = {
-        role: "assistant",
-        content: [
-          {
-            type: "text",
-            text: "You have access to tools that you should use directly when appropriate. Instead of describing how you would use the tools, you should actually use them to help the user. When a user asks about files or directories, use the filesystem tools to help them.",
-          },
-        ],
-      };
+      // const systemMessage: Anthropic.MessageParam = {
+      //   role: "assistant",
+      //   content: [
+      //     {
+      //       type: "text",
+      //       text: "You have access to tools that you should use directly when appropriate. Instead of describing how you would use the tools, you should actually use them to help the user. When a user asks about files or directories, use the filesystem tools to help them.",
+      //     },
+      //     {
+      //       type: "text",
+      //       text: "Always return your response in properly formatted markdown.",
+      //     },
+      //   ],
+      // };
       const convertedMessages = this.createAnthropicMessage(messages);
       return await provider.client.messages.create({
         model: currentProvider.model,
         max_tokens: 1024,
         tools: tools,
-        messages: [systemMessage, ...convertedMessages],
-        system:
-          "Use available tools directly instead of describing how you would use them.",
+        messages: [...convertedMessages],
+        system: `You are an intelligent computer assistant that has access to tools that you should use directly when appropriate. Please always follow these rules:
+          
+          1. Instead of describing how you would use the tools, you should actually use them to help the user. 
+          2. Always return properly formatted markdown.
+          3. Don't return your thought process or what is in between two <thinking> tags, just return the final answer that the user is asking for. `,
       });
     } catch (e) {
       throw new Error(`Error calling the anthropic API, got: ${e}`);
