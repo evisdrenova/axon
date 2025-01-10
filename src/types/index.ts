@@ -53,6 +53,18 @@ export type ProviderClient =
       client: Anthropic;
     };
 
+export interface PromptTemplate {
+  name: string;
+  description?: string;
+  arguments?: PromptTemplateArguments;
+}
+
+export interface PromptTemplateArguments {
+  name: string;
+  description?: string;
+  required?: boolean;
+}
+
 declare global {
   interface Window {
     electron: IElectronAPI;
