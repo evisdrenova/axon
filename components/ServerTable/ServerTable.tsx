@@ -39,17 +39,18 @@ export default function ServerTable(props: ServerTableProps) {
         <TableBody>
           {servers.map((server) => (
             <TableRow key={server.id} className="text-xs">
-              <TableCell className="font-medium">
-                <div className="flex items-center space-x-2">
-                  <span className="hover:underline">{server.name}</span>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => handleEdit(server)}
-                  >
+              <TableCell className="font-medium text-left">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => handleEdit(server)}
+                  className="justify-start w-full text-xs"
+                >
+                  <div className="flex items-center space-x-2">
+                    <span className="hover:underline">{server.name}</span>
                     <ArrowTopRightIcon className="h-4 w-4" />
-                  </Button>
-                </div>
+                  </div>
+                </Button>
               </TableCell>
               <TableCell className="text-xs">{server.description}</TableCell>
               <TableCell>
