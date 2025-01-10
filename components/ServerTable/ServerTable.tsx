@@ -65,11 +65,3 @@ export default function ServerTable(props: ServerTableProps) {
     </div>
   );
 }
-
-// <Button
-//                     variant="outline"
-//                     size="icon"
-//                     onClick={(e) => handleDelete(e, server.id)}
-//                   >
-//                     {isDeleting ? <Spinner /> : <Trash className="h-4 w-4" />}
-//                   </Button>
