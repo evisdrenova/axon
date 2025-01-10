@@ -4,6 +4,7 @@ import { FilterThinkingContent } from "./utils";
 import { cn } from "../../src/lib/utils";
 import { ScrollArea } from "../../components/ui/scroll-area";
 import { Message } from "../../src/types";
+import remarkGfm from "remark-gfm";
 
 interface Props {
   messages: Message[];
@@ -16,34 +17,20 @@ const mes = [
     role: "user",
   },
   {
-    content: `"<thinking>
-To answer the question of what containers are running locally, the most relevant tool is:
-
-mcp-server-docker__list_containers
-
-This tool lists all Docker containers. It has two optional parameters:
-- all (boolean): Show all containers (default shows just running). This defaults to false, so by default it will only show running containers which matches the user's request.
-- filters (ListContainersFilters or null): Filter containers. This is optional and the user did not provide any filters, so we can omit this.
-
-No other tools are needed to answer this request. All required parameters are either provided or have suitable defaults, so we can proceed with calling the list_containers tool.
-</thinking>
-Here is a summary of the containers running locally:
-
-| Container Name | Image |
-| --- | --- |
-| neosync-worker | neosync-worker:latest |
-| temporal-ui | temporalio/ui:2.22.3 |
-| temporal | temporalio/auto-setup:1.22.6 |  
-| neosync-api | neosync-api:latest |
-| neosync-db | postgres:15 |
-| temporal-postgresql | postgres:13 |
-| neosync-redis | redis:7.2.4 |
-| test-prod-db | postgres:15 |
-| test-stage-db | postgres:15 |
-| temporal-elasticsearch | elasticsearch:7.16.2 |
-| neosync-app | neosync-app:latest |
-
-There are a total of 11 containers currently running, using images for various services like Postgres databases, Redis, Elasticsearch, and custom application images."`,
+    content: `
+| Name                   | Status   | Image                        |
+|-----------------------|----------|------------------------------|
+| neosync-app           | running  | neosync-app:latest           |
+| neosync-worker        | running  | neosync-worker:latest        |
+| temporal-ui           | running  | temporalio/ui:2.22.3         |
+| temporal              | running  | temporalio/auto-setup:1.22.6 |
+| neosync-api           | running  | neosync-api:latest           |
+| neosync-db            | running  | postgres:15                  |
+| temporal-postgresql   | running  | postgres:13                  |
+| neosync-redis         | running  | redis:7.2.4                  |
+| test-prod-db          | running  | postgres:15                  |
+| test-stage-db         | running  | postgres:15                  |
+| temporal-elasticsearch| running  | elasticsearch:7.16.2         |`,
     role: "assistant",
   },
 ];
@@ -54,7 +41,7 @@ export default function ChatInterface(props: Props) {
     <ScrollArea className="flex-1 pr-4">
       <div className="space-y-4">
         {/* {messages.map((message, index) => ( */}
-        {messages.map((message, index) => (
+        {mes.map((message, index) => (
           <div
             key={index}
             className={`flex ${
@@ -109,8 +96,8 @@ function renderMarkdown(content: string, role: string) {
   return (
     <ReactMarkdown
       className="prose max-w-none"
+      remarkPlugins={[remarkGfm]}
       components={{
-        // Basic elements
         p: ({ children }: { children: any }) => (
           <p className={cn(role == "user" ? "text-gray-100" : "text-gray-900")}>
             {children}
@@ -127,34 +114,37 @@ function renderMarkdown(content: string, role: string) {
             </li>
           );
         },
-
-        // Other elements
         strong: ({ children }) => (
           <span className="text-gray-600 font-mono">{children}</span>
         ),
         table: ({ children }) => (
-          <div className="overflow-x-auto my-4">
-            <table className="min-w-full divide-y divide-gray-200 border">
+          <div className="overflow-x-auto  py-2">
+            <table className="w-full border-collapse border border-gray-200 table-fixed md:table-auto ">
               {children}
             </table>
           </div>
         ),
         thead: ({ children }) => (
-          <thead className="bg-gray-50">{children}</thead>
-        ),
-        tbody: ({ children }) => (
-          <tbody className="bg-white divide-y divide-gray-200">
+          <thead className="bg-gray-50 border-b border-gray-200">
             {children}
-          </tbody>
+          </thead>
         ),
-        tr: ({ children }) => <tr className="hover:bg-gray-50">{children}</tr>,
+        tbody: ({ children }) => <tbody className="bg-white">{children}</tbody>,
+        tr: ({ children }) => (
+          <tr className="border-b border-gray-200 last:border-b-0">
+            {children}
+          </tr>
+        ),
         th: ({ children }) => (
-          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r last:border-r-0">
+          <th
+            scope="col"
+            className="px-3 py-2 text-left text-xs font-medium text-gray-800 uppercase break-words"
+          >
             {children}
           </th>
         ),
         td: ({ children }) => (
-          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 border-r last:border-r-0">
+          <td className="px-3 py-2 text-xs text-gray-800 break-words">
             {children}
           </td>
         ),

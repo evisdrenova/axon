@@ -77,19 +77,6 @@ export default class AnthropicHandler {
       );
     }
     try {
-      // const systemMessage: Anthropic.MessageParam = {
-      //   role: "assistant",
-      //   content: [
-      //     {
-      //       type: "text",
-      //       text: "You have access to tools that you should use directly when appropriate. Instead of describing how you would use the tools, you should actually use them to help the user. When a user asks about files or directories, use the filesystem tools to help them.",
-      //     },
-      //     {
-      //       type: "text",
-      //       text: "Always return your response in properly formatted markdown.",
-      //     },
-      //   ],
-      // };
       const convertedMessages = this.createAnthropicMessage(messages);
       return await provider.client.messages.create({
         model: currentProvider.model,
@@ -100,8 +87,8 @@ export default class AnthropicHandler {
           
           1. Instead of describing how you would use the tools, you should actually use them to help the user. 
           2. Always return properly formatted markdown.
-          3. Don't return your thought process or what is in between two <thinking> tags, just return the final answer that the user is asking for. 
-          4. Always format lists as tables with a column header. `,
+          3. Only return the output that the user requested without any explanation or example output. Don't return your thought process or what is in between two <thinking> tags, just return the final answer that the user is asking for. 
+          4. Always format lists as markdown tables with column headers.`,
       });
     } catch (e) {
       throw new Error(`Error calling the anthropic API, got: ${e}`);
