@@ -82,12 +82,7 @@ export default function Servers() {
           initialData={editingServer}
         />
       ) : (
-        <ServerTable
-          servers={servers}
-          handleDelete={handleDelete}
-          handleEdit={handleEdit}
-          isDeleting={isDeleting}
-        />
+        <ServerTable servers={servers} handleEdit={handleEdit} />
       )}
     </div>
   );

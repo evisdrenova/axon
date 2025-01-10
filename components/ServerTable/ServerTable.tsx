@@ -2,38 +2,30 @@ import { ServerConfig } from "src/types";
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
-  TableFooter,
   TableHead,
   TableHeader,
   TableRow,
 } from "../../components/ui/table";
 import { Button } from "../../components/ui/button";
-import Spinner from "../../components/ui/Spinner";
-import { Circle, Pencil, Trash } from "lucide-react";
 import { ArrowTopRightIcon } from "@radix-ui/react-icons";
 import { Switch } from "../../components/ui/switch";
 
 interface ServerTableProps {
   servers: ServerConfig[];
-  handleDelete: (e: React.MouseEvent, pId: number) => void;
   handleEdit: (server: ServerConfig) => void;
-  isDeleting: boolean;
 }
 
 export default function ServerTable(props: ServerTableProps) {
-  const { servers, handleDelete, handleEdit, isDeleting } = props;
-
-  console.log(servers);
+  const { servers, handleEdit } = props;
   return (
     <div className="grid gap-4">
       <Table>
         <TableHeader>
           <TableRow className="text-xs">
-            <TableHead className="w-1/3">Name</TableHead>
-            <TableHead className="w-1/3">Description</TableHead>
-            <TableHead className="w-1/3">Enable/Disable</TableHead>
+            <TableHead className="w-[30%]">Name</TableHead>
+            <TableHead className="w-[60%]">Description</TableHead>
+            <TableHead className="w-[10%]">Enable/Disable</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -54,9 +46,7 @@ export default function ServerTable(props: ServerTableProps) {
               </TableCell>
               <TableCell className="text-xs">{server.description}</TableCell>
               <TableCell>
-                <div className="flex justify-center">
-                  <Switch />
-                </div>
+                <Switch />
               </TableCell>
             </TableRow>
           ))}
