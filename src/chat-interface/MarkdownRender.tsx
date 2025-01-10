@@ -115,7 +115,7 @@ function renderMarkdown(content: string, role: string) {
           );
         },
         strong: ({ children }) => (
-          <span className="text-gray-600 font-mono">{children}</span>
+          <span className="text-gray-600 ">{children}</span>
         ),
         table: ({ children }) => (
           <div className="overflow-x-auto  py-2">
