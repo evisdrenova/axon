@@ -8,4 +8,4 @@ A desktop app that allows you to talk to different models, register MCP servers 
    - dynamically create the mcp config based on what is enabled and not enabled
 2. streaming the chat back?
 3. conversation branching
-4. add timezone
+4. first broken servers and uncommnet out the init

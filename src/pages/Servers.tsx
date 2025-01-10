@@ -208,7 +208,7 @@ function ServerForm(props: ServerProps) {
             />
           </div>
 
-          <div className="flex justify-end gap-2">
+          <div className="flex justify-between w-full gap-2">
             <Button type="button" variant="outline" onClick={onCancel}>
               Cancel
             </Button>
