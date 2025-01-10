@@ -23,6 +23,7 @@ export interface IElectronAPI {
 export interface ServerConfig {
   id?: number;
   name: string;
+  description?: string;
   command: string;
   args: string[];
 }

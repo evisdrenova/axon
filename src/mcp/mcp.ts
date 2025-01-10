@@ -34,11 +34,12 @@ export default class MCP {
   public getServers(): ServerConfig[] {
     try {
       const stmt = this.db.prepare(
-        "SELECT id, name, command, args FROM servers"
+        "SELECT id, name, description, command, args FROM servers"
       );
       const rows = stmt.all() as {
         id: number;
         name: string;
+        description: string;
         command: string;
         args: string;
       }[];
@@ -46,6 +47,7 @@ export default class MCP {
       return rows.map((row) => ({
         id: row.id,
         name: row.name,
+        description: row.description,
         command: row.command,
         args: JSON.parse(row.args) as string[],
       }));

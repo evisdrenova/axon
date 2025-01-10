@@ -1,9 +1,8 @@
 import { useState, useEffect } from "react";
 import { ServerConfig } from "../types";
 import { Button } from "../../components/ui/button";
-import Spinner from "../../components/ui/Spinner";
-import { Pencil, Trash } from "lucide-react";
 import { Card, CardContent } from "../../components/ui/card";
+import ServerTable from "../../components/ServerTable/ServerTable";
 
 export default function Servers() {
   const [servers, setServers] = useState<ServerConfig[] | null>(null);
@@ -83,55 +82,12 @@ export default function Servers() {
           initialData={editingServer}
         />
       ) : (
-        <div className="grid gap-4">
-          {servers.map((s) => (
-            <Card key={s.name}>
-              <CardContent className="pt-6">
-                <div className="flex flex-row items-center justify-between mb-4">
-                  <h2 className="text-xl font-bold">{s.name}</h2>
-                  <div className="gap-2 flex flex-row">
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={() => handleEdit(s)}
-                    >
-                      <Pencil className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={(e) => handleDelete(e, s.id)}
-                    >
-                      {isDeleting ? <Spinner /> : <Trash className="h-4 w-4" />}
-                    </Button>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <div>
-                    <span className="font-semibold">Command:</span>
-                    <code className="ml-2 bg-muted p-1 rounded">
-                      {s.command}
-                    </code>
-                  </div>
-                  <div>
-                    <span className="font-semibold">Arguments:</span>
-                    <ul className="ml-2 list-disc list-inside flex flex-col space-y-2">
-                      {s.args.map((arg) => (
-                        <li
-                          key={arg}
-                          className="bg-muted p-1 rounded inline-block mr-2 mb-1"
-                        >
-                          {arg}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        <ServerTable
+          servers={servers}
+          handleDelete={handleDelete}
+          handleEdit={handleEdit}
+          isDeleting={isDeleting}
+        />
       )}
     </div>
   );
@@ -145,6 +101,7 @@ interface ServerProps {
 
 interface FormData {
   name: string;
+  description?: string;
   command: string;
   args: string[];
   id?: number;
@@ -158,12 +115,14 @@ function ServerForm(props: ServerProps) {
       return {
         id: initialData.id,
         name: initialData.name,
+        description: initialData.description,
         command: initialData.command,
         args: initialData.args,
       };
     }
     return {
       name: "",
+      description: "",
       command: "",
       args: [],
     };
@@ -174,6 +133,7 @@ function ServerForm(props: ServerProps) {
     const config = {
       id: formData.id,
       name: formData.name,
+      description: formData.description ?? "",
       command: formData.command,
       args: formData.args,
     };
@@ -196,6 +156,20 @@ function ServerForm(props: ServerProps) {
             <input
               type="text"
               value={formData.name}
+              onChange={(e) =>
+                setFormData({ ...formData, name: e.target.value })
+              }
+              className="w-full p-2 border rounded"
+              required
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1">
+              Description
+            </label>
+            <input
+              type="text"
+              value={formData.description}
               onChange={(e) =>
                 setFormData({ ...formData, name: e.target.value })
               }

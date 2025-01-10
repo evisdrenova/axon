@@ -11,29 +11,29 @@ interface Props {
   isLoading: boolean;
 }
 
-const mes = [
-  {
-    content: "what docker containers do i have running locally?",
-    role: "user",
-  },
-  {
-    content: `
-| Name                   | Status   | Image                        |
-|-----------------------|----------|------------------------------|
-| neosync-app           | running  | neosync-app:latest           |
-| neosync-worker        | running  | neosync-worker:latest        |
-| temporal-ui           | running  | temporalio/ui:2.22.3         |
-| temporal              | running  | temporalio/auto-setup:1.22.6 |
-| neosync-api           | running  | neosync-api:latest           |
-| neosync-db            | running  | postgres:15                  |
-| temporal-postgresql   | running  | postgres:13                  |
-| neosync-redis         | running  | redis:7.2.4                  |
-| test-prod-db          | running  | postgres:15                  |
-| test-stage-db         | running  | postgres:15                  |
-| temporal-elasticsearch| running  | elasticsearch:7.16.2         |`,
-    role: "assistant",
-  },
-];
+// const mes = [
+//   {
+//     content: "what docker containers do i have running locally?",
+//     role: "user",
+//   },
+//   {
+//     content: `
+// | Name                   | Status   | Image                        |
+// |-----------------------|----------|------------------------------|
+// | neosync-app           | running  | neosync-app:latest           |
+// | neosync-worker        | running  | neosync-worker:latest        |
+// | temporal-ui           | running  | temporalio/ui:2.22.3         |
+// | temporal              | running  | temporalio/auto-setup:1.22.6 |
+// | neosync-api           | running  | neosync-api:latest           |
+// | neosync-db            | running  | postgres:15                  |
+// | temporal-postgresql   | running  | postgres:13                  |
+// | neosync-redis         | running  | redis:7.2.4                  |
+// | test-prod-db          | running  | postgres:15                  |
+// | test-stage-db         | running  | postgres:15                  |
+// | temporal-elasticsearch| running  | elasticsearch:7.16.2         |`,
+//     role: "assistant",
+//   },
+// ];
 
 export default function ChatInterface(props: Props) {
   const { messages, isLoading } = props;
@@ -41,7 +41,7 @@ export default function ChatInterface(props: Props) {
     <ScrollArea className="flex-1 pr-4">
       <div className="space-y-4">
         {/* {messages.map((message, index) => ( */}
-        {mes.map((message, index) => (
+        {messages.map((message, index) => (
           <div
             key={index}
             className={`flex ${

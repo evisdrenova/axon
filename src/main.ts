@@ -77,12 +77,12 @@ const initializeDatabase = () => {
 const createWindow = async () => {
   initializeDatabase();
   mcp = new MCP(db);
-  await mcp.init();
+  // await mcp.init();
   providers = new Providers(mcp);
-  await mcp.createClients();
+  // await mcp.createClients();
   // Create the browser window.
   const mainWindow = new BrowserWindow({
-    width: 800,
+    width: 1000,
     height: 900,
     webPreferences: {
       nodeIntegration: false,
@@ -189,10 +189,11 @@ ipcMain.handle("get-servers", () => {
 
 ipcMain.handle("add-server", (_, config: ServerConfig) => {
   const stmt = db.prepare(
-    "INSERT INTO servers (name, command, args) VALUES(?,?,?)"
+    "INSERT INTO servers (name, description, command, args) VALUES(?,?,?,?)"
   );
   stmt.run(
     config.name,
+    config.description,
     config.command,
     JSON.stringify(config.args) // store as json string
   );
@@ -216,10 +217,11 @@ ipcMain.handle("delete-server", (_, id: number) => {
 
 ipcMain.handle("update-server", (_, config: ServerConfig) => {
   const stmt = db.prepare(
-    "UPDATE servers SET name = ?, command = ?, args = ? WHERE id = ?"
+    "UPDATE servers SET name = ?, description = ?, command = ?, args = ? WHERE id = ?"
   );
   return stmt.run(
     config.name,
+    config.description,
     config.command,
     JSON.stringify(config.args),
     config.id
