@@ -11,63 +11,40 @@ interface Props {
   isLoading: boolean;
 }
 
-// const mes = [
-//   {
-//     content: "what docker containers do i have running locally?",
-//     role: "user",
-//   },
-//   {
-//     content: `
-// | Name                   | Status   | Image                        |
-// |-----------------------|----------|------------------------------|
-// | neosync-app           | running  | neosync-app:latest           |
-// | neosync-worker        | running  | neosync-worker:latest        |
-// | temporal-ui           | running  | temporalio/ui:2.22.3         |
-// | temporal              | running  | temporalio/auto-setup:1.22.6 |
-// | neosync-api           | running  | neosync-api:latest           |
-// | neosync-db            | running  | postgres:15                  |
-// | temporal-postgresql   | running  | postgres:13                  |
-// | neosync-redis         | running  | redis:7.2.4                  |
-// | test-prod-db          | running  | postgres:15                  |
-// | test-stage-db         | running  | postgres:15                  |
-// | temporal-elasticsearch| running  | elasticsearch:7.16.2         |`,
-//     role: "assistant",
-//   },
-// ];
-
 export default function ChatInterface(props: Props) {
   const { messages, isLoading } = props;
   return (
-    <ScrollArea className="flex-1 pr-4">
-      <div className="space-y-4">
-        {/* {messages.map((message, index) => ( */}
-        {messages.map((message, index) => (
-          <div
-            key={index}
-            className={`flex ${
-              message.role === "user" ? "justify-end" : "justify-start"
-            }`}
-          >
+    <div className="flex flex-col">
+      <ScrollArea className="h-[500px]">
+        <div className="space-y-4">
+          {messages.map((message, index) => (
             <div
-              className={`rounded-lg px-4 py-2 max-w-[80%] ${
-                message.role === "user"
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-muted"
+              key={index}
+              className={`flex ${
+                message.role === "user" ? "justify-end" : "justify-start"
               }`}
             >
-              {renderMessageContent(message)}
+              <div
+                className={`rounded-lg px-4 py-2 max-w-[80%] ${
+                  message.role === "user"
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-muted"
+                }`}
+              >
+                {renderMessageContent(message)}
+              </div>
             </div>
-          </div>
-        ))}
-        {isLoading && (
-          <div className="flex justify-start">
-            <div className="bg-muted rounded-lg px-4 py-2">
-              <div className="animate-pulse">Analyzing...</div>
+          ))}
+          {isLoading && (
+            <div className="flex justify-start">
+              <div className="bg-muted rounded-lg px-4 py-2">
+                <div className="animate-pulse">Analyzing...</div>
+              </div>
             </div>
-          </div>
-        )}
-      </div>
-    </ScrollArea>
+          )}
+        </div>
+      </ScrollArea>
+    </div>
   );
 }
 

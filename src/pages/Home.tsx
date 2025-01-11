@@ -1,14 +1,6 @@
 import { useEffect, useState } from "react";
 import { Message, Provider } from "../types";
 import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "../../components/ui/card";
-import { Input } from "../../components/ui/input";
-import { Button } from "../../components/ui/button";
-import {
   Select,
   SelectContent,
   SelectItem,
@@ -17,6 +9,7 @@ import {
 } from "../../components/ui/select";
 import { Separator } from "../../components/ui/separator";
 import ChatInterface from "../../src/chat-interface/MarkdownRender";
+import ChatInput from "../../components/ChatInput/ChatInput";
 
 export default function Home() {
   const [providers, setProviders] = useState<Provider[]>([]);
@@ -89,53 +82,34 @@ export default function Home() {
   };
 
   return (
-    <div className="container max-w-4xl mx-auto p-4">
-      <Card className="min-h-[80vh] flex flex-col">
-        <CardHeader>
-          <CardTitle className="text-2xl font-bold">Chat Interface</CardTitle>
-        </CardHeader>
-        <CardContent className="flex-1 flex flex-col">
-          <div className="mb-4">
-            <Select
-              onValueChange={handleProviderSelect}
-              value={selectedProvider}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select a provider" />
-              </SelectTrigger>
-              <SelectContent>
-                {providers.map((provider) => (
-                  <SelectItem
-                    key={provider.id}
-                    value={provider.id?.toString() || ""}
-                  >
-                    {provider.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {error && <p className="text-destructive text-sm mt-2">{error}</p>}
-          </div>
-          <Separator className="my-4" />
-          <ChatInterface messages={messages} isLoading={isLoading} />
-          <Separator className="my-4" />
-          <form onSubmit={handleSubmit} className="flex gap-2">
-            <Input
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              placeholder="Type a message..."
-              disabled={!currentProvider || isLoading}
-              className="flex-1"
-            />
-            <Button
-              type="submit"
-              disabled={!currentProvider || isLoading || !inputValue.trim()}
-            >
-              Send
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
+    <div className="min-h-[80vh] flex-col">
+      <ChatInterface messages={messages} isLoading={isLoading} />
+      <Separator className="my-4" />
+      <div className="mb-4">
+        <Select onValueChange={handleProviderSelect} value={selectedProvider}>
+          <SelectTrigger>
+            <SelectValue placeholder="Select a provider" />
+          </SelectTrigger>
+          <SelectContent>
+            {providers.map((provider) => (
+              <SelectItem
+                key={provider.id}
+                value={provider.id?.toString() || ""}
+              >
+                {provider.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+      <ChatInput
+        inputValue={inputValue}
+        setInputValue={setInputValue}
+        currentProvider={currentProvider}
+        isLoading={isLoading}
+        handleSubmit={handleSubmit}
+      />
+      {error && <p className="text-destructive text-sm mt-2">{error}</p>}
     </div>
   );
 }
