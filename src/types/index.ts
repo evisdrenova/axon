@@ -18,6 +18,9 @@ export interface IElectronAPI {
   updateServer: (data: ServerConfig) => Promise<void>;
   // chat methods
   chat: (data: Message[]) => Promise<string>;
+  minimizeWindow: () => void;
+  maximizeWindow: () => void;
+  closeWindow: () => void;
 }
 
 export interface ServerConfig {

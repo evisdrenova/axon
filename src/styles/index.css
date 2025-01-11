@@ -62,3 +62,11 @@
     @apply font-sans antialiased bg-background text-foreground text-sm;
   }
 }
+
+.dragable {
+  -webkit-app-region: drag;
+}
+
+.no-drag {
+  -webkit-app-region: no-drag;
+}

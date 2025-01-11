@@ -1,5 +1,5 @@
 import { contextBridge, ipcRenderer } from "electron";
-import { ServerConfig, Provider, ChatRequest } from "./types";
+import { ServerConfig, Provider, Message } from "./types";
 
 contextBridge.exposeInMainWorld("electron", {
   // settings methods
@@ -42,7 +42,13 @@ contextBridge.exposeInMainWorld("electron", {
   },
 
   //chat methods
-  chat: (data: ChatRequest) => {
+  chat: (data: Message[]) => {
     return ipcRenderer.invoke("chat", data);
   },
+
+  // window methods
+  // send() is for one-way communication, invoke() returns a promise
+  minimizeWindow: () => ipcRenderer.send("window-minimize"),
+  maximizeWindow: () => ipcRenderer.send("window-maximize"),
+  closeWindow: () => ipcRenderer.send("window-close"),
 });

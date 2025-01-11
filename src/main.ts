@@ -16,6 +16,7 @@ let db = new Database();
 let mcp: MCP;
 let providers: Providers;
 log.initialize();
+let mainWindow: BrowserWindow | null = null;
 
 const initializeDatabase = () => {
   const dbPath = path.join(app.getPath("userData"), "database.sqlite");
@@ -81,9 +82,10 @@ const createWindow = async () => {
   providers = new Providers(mcp);
   // await mcp.createClients();
   // Create the browser window.
-  const mainWindow = new BrowserWindow({
+  mainWindow = new BrowserWindow({
     width: 1000,
     height: 900,
+    frame: false,
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
@@ -103,6 +105,22 @@ const createWindow = async () => {
   // Open the DevTools.
   mainWindow.webContents.openDevTools();
 };
+
+ipcMain.on("window-minimize", () => {
+  mainWindow.minimize();
+});
+
+ipcMain.on("window-maximize", () => {
+  if (mainWindow.isMaximized()) {
+    mainWindow.unmaximize();
+  } else {
+    mainWindow.maximize();
+  }
+});
+
+ipcMain.on("window-close", () => {
+  mainWindow.close();
+});
 
 ipcMain.handle("db-get-setting", async (_, key) => {
   const stmt = db.prepare("SELECT value FROM settings WHERE key = ?");
