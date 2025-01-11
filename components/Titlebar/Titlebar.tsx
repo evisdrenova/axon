@@ -1,21 +1,50 @@
 import { RiExpandUpDownFill } from "react-icons/ri";
 import { IoSearchOutline } from "react-icons/io5";
 import { VscSettings } from "react-icons/vsc";
+import { useState, useEffect } from "react";
+
+import {
+  CommandDialog,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+  CommandSeparator,
+  CommandShortcut,
+} from "../../components/ui/command";
+import { DialogTitle } from "../../components/ui/dialog";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 
 export default function TitleBar() {
   const handleClose = () => window.electron.closeWindow();
   const handleMinimize = () => window.electron.minimizeWindow();
   const handleMaximize = () => window.electron.maximizeWindow();
 
-  //   const handleSettings = () => {
-  //   };
+  const [open, setOpen] = useState(false);
 
-  const handleSearch = () => {};
+  useEffect(() => {
+    const down = (e: KeyboardEvent) => {
+      if (e.key === "s" && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault();
+        setOpen((open) => !open);
+      }
+    };
+
+    document.addEventListener("keydown", down);
+    return () => document.removeEventListener("keydown", down);
+  }, []);
+
+  const handleSearch = (e: React.MouseEvent) => {
+    console.log("called");
+    e.preventDefault();
+    setOpen((open) => !open);
+  };
 
   return (
-    <div className="h-8 border-b border-b-gray-300  bg-main-50 flex justify-between items-center select-none dragable">
+    <div className="h-8 border-b border-b-gray-300  bg-main-50 flex justify-between items-center select-none dragable px-3">
       <div
-        className="flex items-center gap-2 px-3 no-drag group" // Added group class
+        className="flex items-center gap-2  no-drag group" // Added group class
       >
         <button
           onClick={handleClose}
@@ -43,26 +72,81 @@ export default function TitleBar() {
           </span>
         </button>
       </div>
-      <div className="absolute left-1/2 transform -translate-x-1/2 text-gray-900">
+      <div className="absolute left-1/2 transform -translate-x-1/2 text-main-900 text-xs font-semibold">
         Axon
       </div>
-
-      <div className="flex gap-2 px-3 no-drag">
-        {/* <button
-          onClick={handleSettings}
-          className="px-2 text-white"
-          title="Settings"
-        >
-          <VscSettings />
-        </button> */}
+      <div className="flex flex-row items-center gap-1 border border-main-200 rounded-lg no-drag">
         <button
-          onClick={handleSearch}
-          className="px-2 text-gray-900"
-          title="Notifications"
+          type="button"
+          onClick={(e) => handleSearch(e)}
+          className=" flex flex-row items-center gap-1 x-2 text-gray-900 px-2 z-10"
         >
           <IoSearchOutline />
+          <p className="text-sm text-muted-foreground">
+            <kbd className=" inline-flex h-5 select-none items-center gap-1 rounded bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
+              <span className="text-lg">⌘</span>s
+            </kbd>
+          </p>
         </button>
       </div>
+      <CommandDialogComponent open={open} setOpen={setOpen} />
     </div>
+  );
+}
+
+interface CommandProps {
+  open: boolean;
+  setOpen: (val: boolean) => void;
+}
+
+function CommandDialogComponent(props: CommandProps) {
+  const { open, setOpen } = props;
+  return (
+    <CommandDialog open={open} onOpenChange={setOpen}>
+      <VisuallyHidden>
+        <DialogTitle />
+      </VisuallyHidden>
+      <CommandInput
+        placeholder="Type a command or search..."
+        className="text-xs"
+      />
+      <CommandList>
+        <CommandEmpty className="text-xs text-main-900 p-4">
+          No results found.
+        </CommandEmpty>
+        {/* <CommandGroup heading="Suggestions">
+            <CommandItem>
+              <Calendar />
+              <span>Calendar</span>
+            </CommandItem>
+            <CommandItem>
+              <Smile />
+              <span>Search Emoji</span>
+            </CommandItem>
+            <CommandItem>
+              <Calculator />
+              <span>Calculator</span>
+            </CommandItem>
+          </CommandGroup>
+          <CommandSeparator />
+          <CommandGroup heading="Settings">
+            <CommandItem>
+              <User />
+              <span>Profile</span>
+              <CommandShortcut>⌘P</CommandShortcut>
+            </CommandItem>
+            <CommandItem>
+              <CreditCard />
+              <span>Billing</span>
+              <CommandShortcut>⌘B</CommandShortcut>
+            </CommandItem>
+            <CommandItem>
+              <Settings />
+              <span>Settings</span>
+              <CommandShortcut>⌘S</CommandShortcut>
+            </CommandItem>
+          </CommandGroup> */}
+      </CommandList>
+    </CommandDialog>
   );
 }
