@@ -4,7 +4,7 @@ import { Button } from "../../components/ui/button";
 import { Card, CardContent } from "../../components/ui/card";
 import ServerTable from "../../components/ServerTable/ServerTable";
 
-export default function Servers() {
+export default function tools() {
   const [servers, setServers] = useState<ServerConfig[] | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [isDeleting, setIsDeleting] = useState<boolean>(false);

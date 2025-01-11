@@ -10,3 +10,4 @@ A desktop app that allows you to talk to different models, register MCP servers 
 3. conversation branching
 4. first broken servers and uncommnet out the init
 5. implement cmdk all app search with hotkey
+6. support for images

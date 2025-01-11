@@ -2,24 +2,18 @@ import { RiExpandUpDownFill } from "react-icons/ri";
 import { IoSearchOutline } from "react-icons/io5";
 import { VscSettings } from "react-icons/vsc";
 
-interface TitleBarProps {
-  title?: string;
-}
-
-export default function TitleBar(props: TitleBarProps) {
-  const { title } = props;
+export default function TitleBar() {
   const handleClose = () => window.electron.closeWindow();
   const handleMinimize = () => window.electron.minimizeWindow();
   const handleMaximize = () => window.electron.maximizeWindow();
 
-  // Add your custom button handlers
   //   const handleSettings = () => {
   //   };
 
   const handleSearch = () => {};
 
   return (
-    <div className="h-8 bg-gray-800 flex justify-between items-center select-none dragable">
+    <div className="h-8 border-b border-b-gray-300  bg-main-50 flex justify-between items-center select-none dragable">
       <div
         className="flex items-center gap-2 px-3 no-drag group" // Added group class
       >
@@ -49,8 +43,8 @@ export default function TitleBar(props: TitleBarProps) {
           </span>
         </button>
       </div>
-      <div className="absolute left-1/2 transform -translate-x-1/2 text-white">
-        {title}
+      <div className="absolute left-1/2 transform -translate-x-1/2 text-gray-900">
+        Axon
       </div>
 
       <div className="flex gap-2 px-3 no-drag">
@@ -63,7 +57,7 @@ export default function TitleBar(props: TitleBarProps) {
         </button> */}
         <button
           onClick={handleSearch}
-          className="px-2 text-white"
+          className="px-2 text-gray-900"
           title="Notifications"
         >
           <IoSearchOutline />

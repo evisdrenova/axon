@@ -19,7 +19,7 @@ import {
 } from "../../components/ui/select";
 import { Alert, AlertDescription } from "../../components/ui/alert";
 
-export default function Providers() {
+export default function Models() {
   const [providers, setProviders] = useState<Provider[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [isDeleting, setIsDeleting] = useState<boolean>(false);

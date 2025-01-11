@@ -2,17 +2,17 @@ import { createRoot } from "react-dom/client";
 import "./styles/index.css";
 import Layout from "./layout";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Servers from "./pages/Servers";
+import Tools from "./pages/Tools";
 import Home from "./pages/Home";
-import Providers from "./pages/Providers";
+import Models from "./pages/Models";
 
 const App = () => (
   <BrowserRouter>
     <Layout>
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/servers" element={<Servers />} />
-        <Route path="/providers" element={<Providers />} />
+        <Route path="/tools" element={<Tools />} />
+        <Route path="/models" element={<Models />} />
       </Routes>
     </Layout>
   </BrowserRouter>
