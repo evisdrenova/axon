@@ -11,13 +11,14 @@ export default function Layout(props: Props) {
   const [isOpen, setIsOpen] = useState(true);
 
   return (
-    <div className="flex flex-col h-screen">
+    <div className="flex flex-col w-full h-screen">
       <TitleBar />
-      <div className="flex flex-row items-center w-full h-screen">
-        <NavBar isOpen={isOpen} setIsOpen={setIsOpen} />
-        <div className="flex-1 overflow-auto bg-gray-100 h-full">
+      <div className="flex flex-col w-full h-screen">
+        {/* <NavBar isOpen={isOpen} setIsOpen={setIsOpen} /> */}
+        <div className="flex-1 w-full h-full">
           <main>{children}</main>
         </div>
+        <NavBar isOpen={isOpen} setIsOpen={setIsOpen} />
       </div>
     </div>
   );

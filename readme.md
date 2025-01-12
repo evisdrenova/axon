@@ -15,3 +15,5 @@ A desktop app that allows you to talk to different models, register MCP servers 
 8. finish fixing the height of the scrollarea
 9. finish fixing the alignment of the chat input
 10. update dark mode styling
+11. name of convo is just a sumamrize version of the prompt
+12. convo branching should show parent child like a tree
