@@ -14,7 +14,6 @@ export default function Layout(props: Props) {
     <div className="flex flex-col w-full h-screen">
       <TitleBar />
       <div className="flex flex-col w-full h-screen">
-        {/* <NavBar isOpen={isOpen} setIsOpen={setIsOpen} /> */}
         <div className="flex-1 w-full h-full">
           <main>{children}</main>
         </div>

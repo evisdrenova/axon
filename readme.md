@@ -17,3 +17,4 @@ A desktop app that allows you to talk to different models, register MCP servers 
 10. update dark mode styling
 11. name of convo is just a sumamrize version of the prompt
 12. convo branching should show parent child like a tree
+13. should be able to update a .zshrc config and pipe questions to axon

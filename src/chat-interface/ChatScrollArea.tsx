@@ -1,9 +1,9 @@
 import Anthropic from "@anthropic-ai/sdk";
 import ReactMarkdown from "react-markdown";
 import { FilterThinkingContent } from "./utils";
-import { cn } from "../../src/lib/utils";
+import { cn } from "../lib/utils";
 import { ScrollArea } from "../../components/ui/scroll-area";
-import { Message } from "../../src/types";
+import { Message } from "../types";
 import remarkGfm from "remark-gfm";
 
 interface Props {
@@ -11,40 +11,38 @@ interface Props {
   isLoading: boolean;
 }
 
-export default function ChatInterface(props: Props) {
+export default function ChatScrollArea(props: Props) {
   const { messages, isLoading } = props;
   return (
-    <div className="flex flex-col">
-      <ScrollArea className="h-[500px]">
-        <div className="space-y-4">
-          {messages.map((message, index) => (
+    <ScrollArea className="h-full w-full">
+      <div className="space-y-4">
+        {messages.map((message, index) => (
+          <div
+            key={index}
+            className={`flex ${
+              message.role === "user" ? "justify-end" : "justify-start"
+            }`}
+          >
             <div
-              key={index}
-              className={`flex ${
-                message.role === "user" ? "justify-end" : "justify-start"
+              className={`rounded-lg px-4 py-2 max-w-[80%] ${
+                message.role === "user"
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-muted"
               }`}
             >
-              <div
-                className={`rounded-lg px-4 py-2 max-w-[80%] ${
-                  message.role === "user"
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-muted"
-                }`}
-              >
-                {renderMessageContent(message)}
-              </div>
+              {renderMessageContent(message)}
             </div>
-          ))}
-          {isLoading && (
-            <div className="flex justify-start">
-              <div className="bg-muted rounded-lg px-4 py-2">
-                <div className="animate-pulse">Analyzing...</div>
-              </div>
+          </div>
+        ))}
+        {isLoading && (
+          <div className="flex justify-start">
+            <div className="bg-muted rounded-lg px-4 py-2">
+              <div className="animate-pulse">Analyzing...</div>
             </div>
-          )}
-        </div>
-      </ScrollArea>
-    </div>
+          </div>
+        )}
+      </div>
+    </ScrollArea>
   );
 }
 

@@ -1,79 +1,84 @@
 "use client";
 
-import { ArrowRight, ArrowUp, Paperclip, Send } from "lucide-react";
+import { ArrowUp } from "lucide-react";
 import { Textarea } from "../ui/textarea";
 import { cn } from "../../src/lib/utils";
-import useAutoResizeTextarea from "../../hooks/useAutoResizeTextArea";
 import { Button } from "../ui/button";
 import { Provider } from "../../src/types";
-import { useEffect } from "react";
+import { RefObject, useEffect, useState, useRef } from "react";
 
 interface Props {
-  minHeight?: number;
-  maxHeight?: number;
-  onFileSelect?: (file: File) => void;
   inputValue: string;
   setInputValue: (val: string) => void;
   currentProvider: Provider;
   isLoading: boolean;
   handleSubmit: (e: React.FormEvent) => Promise<void>;
+  chatInputRef: RefObject<HTMLTextAreaElement>;
+  containerHeight: number;
 }
+
+const BASE_HEIGHT = 88; // Minimum starting height
 
 export default function ChatInput(props: Props) {
   const {
-    minHeight = 48,
-    maxHeight = 164,
     handleSubmit,
-    onFileSelect,
     inputValue,
     setInputValue,
     currentProvider,
     isLoading,
+    containerHeight,
   } = props;
 
-  const { textareaRef, adjustHeight } = useAutoResizeTextarea({
-    minHeight,
-    maxHeight,
-  });
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [actualHeight, setActualHeight] = useState(BASE_HEIGHT);
 
   useEffect(() => {
-    textareaRef.current?.focus();
-  }, []);
+    if (containerRef.current) {
+      // const parentHeight =
+      //   containerRef.current.parentElement?.clientHeight || 0;
+      const ratio = 88 / 900;
+      const calculatedHeight = Math.max(ratio * 100, containerHeight);
+      console.log("container height", containerHeight);
+      setActualHeight(calculatedHeight);
+      console.log("ratio height", ratio * 100);
+      console.log("Calculated height:", calculatedHeight);
+    }
+  }, [containerHeight]);
+
+  //TODO: finish fixing the sizing behavior on the chat area
+  // as the input area container grows then the text area should grow in heiht as well and then contract as well
+  // the resizeable panels are expressed in numbers but we can treat them as percents
+  // so we need to transofrm the resiazable height numbers to pixels
 
   return (
-    <div className="w-full pt-4 relative flex flex-col">
-      <div
-        className="overflow-y-auto w-full"
-        style={{ maxHeight: `${maxHeight}px` }}
-      >
-        <form onSubmit={handleSubmit} className="flex w-full">
-          <div className="relative flex-1">
+    <div className="w-full relative flex flex-col" ref={containerRef}>
+      <div className="w-full">
+        <form onSubmit={handleSubmit} className="flex-1">
+          <div className="relative h-full">
             <Textarea
-              value={inputValue}
-              placeholder="What are you working on?"
-              className="w-full py-3 placeholder:text-main/40 placeholder:text-xs resize-none leading-[1.2] pr-10 border-0 focus:ring-0 focus-visible:ring-0 text-xs shadow-none"
               ref={textareaRef}
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              placeholder="What are you working on?"
+              className="w-full resize-none p-3 text-sm border-0 focus:ring-0 focus-visible:ring-0 shadow-none"
+              style={{
+                minHeight: `${BASE_HEIGHT}px`,
+                height: `${actualHeight}%`,
+              }}
               onKeyDown={(e) => {
                 if (e.key === "Enter" && !e.shiftKey) {
                   e.preventDefault();
                   handleSubmit(e);
                 }
               }}
-              onChange={(e) => {
-                setInputValue(e.target.value);
-                adjustHeight();
-              }}
-              rows={1}
             />
             <div className="absolute right-2 bottom-2">
               <Button
                 onClick={handleSubmit}
                 variant="ghost"
                 disabled={!inputValue || !currentProvider || isLoading}
-                className={cn(
-                  "rounded-lg p-2 transition-colors",
-                  inputValue ? "bg-foreground text-muted" : "text-main-400"
-                )}
+                className="rounded-lg p-2 transition-colors hover:bg-gray-100"
               >
                 <ArrowUp className="w-4 h-4" />
               </Button>
