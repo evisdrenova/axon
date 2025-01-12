@@ -84,7 +84,7 @@ export default function Home() {
   return (
     <div className="min-h-[80vh] flex-col">
       <ChatInterface messages={messages} isLoading={isLoading} />
-      <Separator className="my-4" />
+      <Separator className="my-2" />
       <ModelSelect
         handleProviderSelect={handleProviderSelect}
         selectedProvider={selectedProvider}

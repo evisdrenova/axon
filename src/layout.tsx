@@ -16,7 +16,7 @@ export default function Layout(props: Props) {
       <div className="flex flex-row items-center w-full h-screen">
         <NavBar isOpen={isOpen} setIsOpen={setIsOpen} />
         <div className="flex-1 overflow-auto bg-gray-100 h-full">
-          <main className="p-6">{children}</main>
+          <main>{children}</main>
         </div>
       </div>
     </div>

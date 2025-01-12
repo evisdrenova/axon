@@ -16,17 +16,19 @@ export default function ModelSelect(props: Props) {
   const { handleProviderSelect, selectedProvider, providers } = props;
 
   return (
-    <Select onValueChange={handleProviderSelect} value={selectedProvider}>
-      <SelectTrigger>
-        <SelectValue placeholder="Select a model" />
-      </SelectTrigger>
-      <SelectContent>
-        {providers.map((provider) => (
-          <SelectItem key={provider.id} value={provider.id?.toString() || ""}>
-            {provider.name}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
+    <div className="inline-block">
+      <Select onValueChange={handleProviderSelect} value={selectedProvider}>
+        <SelectTrigger className="border-0 shadow-none text-xs ring-0 focus:outline-none focus:ring-0 gap-2">
+          <SelectValue placeholder="Select a model" />
+        </SelectTrigger>
+        <SelectContent>
+          {providers.map((provider) => (
+            <SelectItem key={provider.id} value={provider.id?.toString() || ""}>
+              {provider.name}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
   );
 }
