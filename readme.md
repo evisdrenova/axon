@@ -14,3 +14,4 @@ A desktop app that allows you to talk to different models, register MCP servers 
 7. be kinda cool if the title bar where the title was, was like an axon firing and traveling back and forth, showing that it's working and thinking
 8. finish fixing the height of the scrollarea
 9. finish fixing the alignment of the chat input
+10. update dark mode styling

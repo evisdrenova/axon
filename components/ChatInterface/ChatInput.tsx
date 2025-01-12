@@ -2,11 +2,11 @@
 
 import { Globe, Paperclip, Send } from "lucide-react";
 import { useState } from "react";
-import { Textarea } from "../../components/ui/textarea";
+import { Textarea } from "../ui/textarea";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "../../src/lib/utils";
 import useAutoResizeTextarea from "../../hooks/useAutoResizeTextArea";
-import { Button } from "../../components/ui/button";
+import { Button } from "../ui/button";
 import { Provider } from "../../src/types";
 
 interface Props {

@@ -1,15 +1,9 @@
 import { useEffect, useState } from "react";
 import { Message, Provider } from "../types";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "../../components/ui/select";
 import { Separator } from "../../components/ui/separator";
 import ChatInterface from "../../src/chat-interface/MarkdownRender";
-import ChatInput from "../../components/ChatInput/ChatInput";
+import ChatInput from "../../components/ChatInterface/ChatInput";
+import ModelSelect from "../../components/ChatInterface/ModelSelect";
 
 export default function Home() {
   const [providers, setProviders] = useState<Provider[]>([]);
@@ -24,6 +18,12 @@ export default function Home() {
     try {
       const providers = await window.electron.getProviders();
       setProviders(providers);
+      if (providers.length > 0) {
+        const defaultProvider = providers[0];
+        setSelectedProvider(defaultProvider.id?.toString() || "");
+        setCurrentProvider(defaultProvider);
+        window.electron.selectProvider(defaultProvider);
+      }
     } catch (err) {
       setError("Failed to load providers");
     }
@@ -85,23 +85,11 @@ export default function Home() {
     <div className="min-h-[80vh] flex-col">
       <ChatInterface messages={messages} isLoading={isLoading} />
       <Separator className="my-4" />
-      <div className="mb-4">
-        <Select onValueChange={handleProviderSelect} value={selectedProvider}>
-          <SelectTrigger>
-            <SelectValue placeholder="Select a provider" />
-          </SelectTrigger>
-          <SelectContent>
-            {providers.map((provider) => (
-              <SelectItem
-                key={provider.id}
-                value={provider.id?.toString() || ""}
-              >
-                {provider.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
+      <ModelSelect
+        handleProviderSelect={handleProviderSelect}
+        selectedProvider={selectedProvider}
+        providers={providers}
+      />
       <ChatInput
         inputValue={inputValue}
         setInputValue={setInputValue}
