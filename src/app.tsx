@@ -5,6 +5,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Tools from "./pages/Tools";
 import Home from "./pages/Home";
 import Models from "./pages/Models";
+import { ThemeProvider } from "./ThemeProvider";
 
 const App = () => (
   <BrowserRouter>
@@ -21,4 +22,8 @@ const App = () => (
 const container = document.getElementById("root");
 if (!container) throw new Error("Failed to find root element");
 const root = createRoot(container);
-root.render(<App />);
+root.render(
+  <ThemeProvider>
+    <App />
+  </ThemeProvider>
+);

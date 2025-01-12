@@ -1,20 +1,17 @@
 import { RiExpandUpDownFill } from "react-icons/ri";
 import { IoSearchOutline } from "react-icons/io5";
-import { VscSettings } from "react-icons/vsc";
 import { useState, useEffect } from "react";
 
 import {
   CommandDialog,
   CommandEmpty,
-  CommandGroup,
   CommandInput,
-  CommandItem,
   CommandList,
-  CommandSeparator,
-  CommandShortcut,
 } from "../../components/ui/command";
 import { DialogTitle } from "../../components/ui/dialog";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
+import { ThemeToggle } from "../../src/ThemeProvider";
+import { Button } from "../../components/ui/button";
 
 export default function TitleBar() {
   const handleClose = () => window.electron.closeWindow();
@@ -36,13 +33,14 @@ export default function TitleBar() {
   }, []);
 
   const handleSearch = (e: React.MouseEvent) => {
-    console.log("called");
     e.preventDefault();
     setOpen((open) => !open);
   };
 
+  const toggleTheme = () => {};
+
   return (
-    <div className="h-8 border-b border-b-gray-300  bg-main-50 flex justify-between items-center select-none dragable px-3">
+    <div className="h-8 border-b border-b-gray-300  bg-background flex justify-between items-center select-none dragable px-3">
       <div
         className="flex items-center gap-2  no-drag group" // Added group class
       >
@@ -75,19 +73,21 @@ export default function TitleBar() {
       <div className="absolute left-1/2 transform -translate-x-1/2 text-main-900 text-xs font-semibold">
         Axon
       </div>
-      <div className="flex flex-row items-center gap-1 rounded-lg no-drag">
-        <button
-          type="button"
+      <div className="flex flex-row items-center rounded-lg no-drag ">
+        <Button
+          variant="titleBar"
           onClick={(e) => handleSearch(e)}
-          className=" flex flex-row items-center gap-1 x-2 text-gray-900 px-2 z-10"
+          size="sm"
+          className="group flex flex-row items-center gap-1 z-10 "
         >
           <IoSearchOutline size={14} />
-          <p className="text-sm text-muted-foreground">
-            <kbd className=" inline-flex h-5 select-none items-center gap-1 rounded bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
+          <p className="text-sm">
+            <kbd className="inline-flex h-5 select-none items-center gap-1 rounded bg-muted group-hover:bg-main-200 px-1.5 font-mono text-[10px] font-medium opacity-100">
               <span className="text-lg">⌘</span>S
             </kbd>
           </p>
-        </button>
+        </Button>
+        <ThemeToggle />
       </div>
       <CommandDialogComponent open={open} setOpen={setOpen} />
     </div>

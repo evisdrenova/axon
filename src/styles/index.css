@@ -7,6 +7,70 @@
 @tailwind components;
 @tailwind utilities;
 
+/*
+main color palette in HSL:
+
+main-50:  234 42% 97%   (#F4F5FA)
+main-100: 234 38% 93%   (#E6E8F3)
+main-200: 234 45% 87%   (#D3D7EA)
+main-300: 234 36% 79%   (#B4BCDC)
+main-400: 234 48% 68%   (#909ACA)
+main-500: 234 35% 60%   (#757FBC)
+main-600: 234 31% 53%   (#636BAD)
+main-700: 240 34% 52%   (#5757B2)
+main-800: 236 26% 40%   (#4D4B82)
+main-900: 236 24% 33%   (#414068)
+main-950: 236 23% 20%   (#282A41)
+*/
+
+@layer base {
+  :root {
+    --background: 234 42% 97%; /* main-50  ~ bg-slate-50 */
+    --foreground: 236 23% 20%; /* main-950 ~ bg-indigo-950 */
+    --muted: 234 38% 93%; /* main-100 ~ bg-slate-100 */
+    --muted-foreground: 234 31% 53%; /* main-600 ~ bg-indigo-600 */
+    --popover: 0 0% 100%; /* ~ bg-white */
+    --popover-foreground: 236 23% 20%; /* main-950 ~ bg-indigo-950 */
+    --border: 234 45% 87%; /* main-200 ~ bg-slate-200 */
+    --input: 234 45% 87%; /* main-200 ~ bg-slate-200 */
+    --card: 0 0% 100%; /* ~ bg-white */
+    --card-foreground: 236 23% 20%; /* main-950 ~ bg-indigo-950 */
+    --primary: 234 35% 53%; /* main-600 ~ bg-indigo-600 */
+    --primary-foreground: 0 0% 100%; /* ~ bg-white */
+    --secondary: 234 38% 93%; /* main-100 ~ bg-slate-100 */
+    --secondary-foreground: 236 23% 20%; /* main-950 ~ bg-indigo-950 */
+    --accent: 234 38% 93%; /* main-100 ~ bg-slate-100 */
+    --accent-foreground: 236 23% 20%; /* main-950 ~ bg-indigo-950 */
+    --destructive: 0 84% 60%; /* ~ bg-red-500 */
+    --destructive-foreground: 0 0% 100%; /* ~ bg-white */
+    --ring: 234 35% 53%; /* main-600 ~ bg-indigo-600 */
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 236 23% 20%; /* main-950 ~ bg-indigo-950 */
+    --foreground: 234 42% 97%; /* main-50 ~ bg-slate-50 */
+    --muted: 236 26% 40%; /* main-800 ~ bg-indigo-800 */
+    --muted-foreground: 234 38% 93%; /* main-100 ~ bg-slate-100 */
+    --popover: 236 24% 33%; /* main-900 ~ bg-indigo-900 */
+    --popover-foreground: 234 42% 97%; /* main-50 ~ bg-slate-50 */
+    --border: 236 26% 40%; /* main-800 ~ bg-indigo-800 */
+    --input: 236 26% 40%; /* main-800 ~ bg-indigo-800 */
+    --card: 236 24% 33%; /* main-900 ~ bg-indigo-900 */
+    --card-foreground: 234 42% 97%; /* main-50 ~ bg-slate-50 */
+    --primary: 234 35% 53%; /* main-500 ~ bg-indigo-500 */
+    --primary-foreground: 0 0% 100%; /* ~ bg-white */
+    --secondary: 236 26% 40%; /* main-800 ~ bg-indigo-800 */
+    --secondary-foreground: 234 42% 97%; /* main-50 ~ bg-slate-50 */
+    --accent: 236 26% 40%; /* main-800 ~ bg-indigo-800 */
+    --accent-foreground: 234 42% 97%; /* main-50 ~ bg-slate-50 */
+    --destructive: 0 63% 31%; /* ~ bg-red-900 */
+    --destructive-foreground: 234 42% 97%; /* main-50 ~ bg-slate-50 */
+    --ring: 236 26% 40%; /* main-800 ~ bg-indigo-800 */
+  }
+}
+
+/* 
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -52,7 +116,7 @@
     --destructive-foreground: 210 40% 98%;
     --ring: 216 34% 17%;
   }
-}
+} */
 
 @layer base {
   * {

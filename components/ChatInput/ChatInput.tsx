@@ -77,7 +77,7 @@ export default function ChatInput(props: Props) {
                   disabled={!inputValue || !currentProvider || isLoading}
                   className={cn(
                     "rounded-lg p-2 transition-colors",
-                    value ? "bg-main-900 text-main-100" : "text-main-400"
+                    value ? "bg-foreground text-muted" : "text-main-400"
                   )}
                 >
                   <Send className="w-4 h-4" />
@@ -93,7 +93,7 @@ export default function ChatInput(props: Props) {
                   className="hidden"
                   onChange={handleFileChange}
                 />
-                <Paperclip className="w-4 h-4 text-black/40 dark:text-white/40 hover:text-main-900 dark:hover:text-white transition-colors" />
+                <Paperclip className="w-4 h-4 text-black/40 dark:text-white/40 hover:text-foreground dark:hover:text-white transition-colors" />
               </label>{" "}
             </div>
             <div className="absolute right-3 bottom-3">
@@ -103,7 +103,7 @@ export default function ChatInput(props: Props) {
                 disabled={!inputValue || !currentProvider || isLoading}
                 className={cn(
                   "rounded-lg p-2 transition-colors",
-                  value ? "bg-main-900 text-main-100" : "text-main-400"
+                  value ? "bg-foreground text-main-100" : "text-main-400"
                 )}
               >
                 <Send className="w-4 h-4" />

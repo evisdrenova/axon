@@ -17,7 +17,7 @@ export default function NavBar(props: Props) {
   const { isOpen, setIsOpen } = props;
   return (
     <div
-      className={`bg-main-50 border-r border-r-gray-300 px-4 text-gray-900 transition-all duration-300 h-full ${
+      className={`bg-background border-r border-r-gray-300 px-4 text-gray-900 transition-all duration-300 h-full ${
         isOpen ? "w-64" : "w-16"
       }`}
     >
@@ -25,7 +25,7 @@ export default function NavBar(props: Props) {
         <Button
           variant="ghost"
           onClick={() => setIsOpen(!isOpen)}
-          className="hover:bg-main-100 p-2 rounded-xl"
+          className="hover:bg-muted p-2 rounded-xl"
         >
           {isOpen ? <ChevronLeft size={16} /> : <ChevronRight size={16} />}
         </Button>
@@ -35,9 +35,9 @@ export default function NavBar(props: Props) {
           <Link
             key={path}
             to={path}
-            className={`p-2 hover:bg-main-100 rounded-xl  cursor-pointer text-xs flex items-center ${
+            className={`p-2 hover:bg-muted rounded-xl  cursor-pointer text-xs flex items-center ${
               location.pathname === path
-                ? "bg-main-100 border border-main-200 text-main-900"
+                ? "bg-muted border border-main-200 text-main-900"
                 : ""
             }`}
           >
