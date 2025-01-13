@@ -31,7 +31,7 @@ export default function ChatInput(props: Props) {
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
           placeholder="What are you working on?"
-          className="flex-1 w-full resize-none p-3 text-sm border-0 focus:ring-0 focus-visible:ring-0 shadow-none mb-20"
+          className="placeholder:text-gray-900/50 placeholder:text-xs flex-1 w-full resize-none p-3 text-sm border-0 focus:ring-0 focus-visible:ring-0 shadow-none mb-20"
           onKeyDown={(e) => {
             if (e.key === "Enter" && !e.shiftKey) {
               e.preventDefault();
