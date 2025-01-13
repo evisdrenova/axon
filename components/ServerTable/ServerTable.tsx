@@ -14,10 +14,11 @@ import { Switch } from "../../components/ui/switch";
 interface ServerTableProps {
   servers: ServerConfig[];
   handleEdit: (server: ServerConfig) => void;
+  handleEnableDisableSwitch: (id: number, val: boolean) => void;
 }
 
 export default function ServerTable(props: ServerTableProps) {
-  const { servers, handleEdit } = props;
+  const { servers, handleEdit, handleEnableDisableSwitch } = props;
   return (
     <div className="grid gap-4">
       <Table>
@@ -25,7 +26,7 @@ export default function ServerTable(props: ServerTableProps) {
           <TableRow className="text-xs">
             <TableHead className="w-[30%]">Name</TableHead>
             <TableHead className="w-[60%]">Description</TableHead>
-            <TableHead className="w-[10%]">Enable/Disable</TableHead>
+            <TableHead className="w-[10%]">Status</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -46,7 +47,12 @@ export default function ServerTable(props: ServerTableProps) {
               </TableCell>
               <TableCell className="text-xs">{server.description}</TableCell>
               <TableCell>
-                <Switch />
+                <Switch
+                  checked={server.enabled}
+                  onCheckedChange={(checked) =>
+                    handleEnableDisableSwitch(server.id, checked)
+                  }
+                />
               </TableCell>
             </TableRow>
           ))}

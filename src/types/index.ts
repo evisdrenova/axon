@@ -21,6 +21,9 @@ export interface IElectronAPI {
   minimizeWindow: () => void;
   maximizeWindow: () => void;
   closeWindow: () => void;
+  //server commands
+  enableServer: (id: number) => void;
+  disableServer: (id: number) => void;
 }
 
 export interface ServerConfig {

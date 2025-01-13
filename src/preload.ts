@@ -40,6 +40,12 @@ contextBridge.exposeInMainWorld("electron", {
   updateServer: (data: ServerConfig) => {
     return ipcRenderer.invoke("update-server", data);
   },
+  enableServer: (id: number) => {
+    return ipcRenderer.invoke("enable-server", id);
+  },
+  disableServer: (id: number) => {
+    return ipcRenderer.invoke("disbale-server", id);
+  },
 
   //chat methods
   chat: (data: Message[]) => {

@@ -59,6 +59,17 @@ export default function tools() {
     setEditingServer(null);
   };
 
+  const handleEnableDisableSwitch = async (
+    serverId: number,
+    checked: boolean
+  ) => {
+    if (checked) {
+      await window.electron.enableServer(serverId);
+    } else {
+      await window.electron.disableServer(serverId);
+    }
+  };
+
   return (
     <div className="p-4">
       <div className="flex justify-between items-center mb-6">
@@ -82,7 +93,11 @@ export default function tools() {
           initialData={editingServer}
         />
       ) : (
-        <ServerTable servers={servers} handleEdit={handleEdit} />
+        <ServerTable
+          servers={servers}
+          handleEdit={handleEdit}
+          handleEnableDisableSwitch={handleEnableDisableSwitch}
+        />
       )}
     </div>
   );
