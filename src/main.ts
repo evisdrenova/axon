@@ -300,6 +300,7 @@ app.on("window-all-closed", () => {
 app.on("will-quit", () => {
   if (db) {
     mcp.closeClients();
+    mcp.serverManager.cleanup();
     db.close();
   }
 });

@@ -39,7 +39,7 @@ export default class MCP {
   public getServers(): ServerConfig[] {
     try {
       const stmt = this.db.prepare(
-        "SELECT id, name, description, command, args, enabled FROM servers WHERE enabled = 1"
+        "SELECT id, name, description, command, args, enabled FROM servers"
       );
       const rows = stmt.all() as {
         id: number;
