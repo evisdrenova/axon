@@ -85,57 +85,30 @@ export default function Home() {
     }
   };
 
-  const chatInputRef = useRef<HTMLTextAreaElement>(null);
-  const parentRef = useRef<HTMLTextAreaElement>(null);
-  const [chatscrollareaHeight, setChatscrollareaHeight] = useState(70);
-  const [chatinputHeight, setChatinputHeight] = useState(30);
-
-  const handleChatScrollAreaPanelResize = (size: number) => {
-    setChatscrollareaHeight(size);
-  };
-
-  const handleChatInputAreaPanelResize = (size: number) => {
-    setChatinputHeight(size);
-  };
-
-  console.log("chat scroll area height", chatscrollareaHeight);
-  console.log("chat input height", chatinputHeight);
-
   return (
     <div className="flex flex-col h-full">
       <ResizablePanelGroup direction="vertical">
-        <ResizablePanel
-          defaultSize={70}
-          minSize={10}
-          onResize={handleChatScrollAreaPanelResize}
-        >
+        <ResizablePanel defaultSize={70} minSize={10}>
           <div className="flex-1  overflow-auto  px-40">
             <ChatScrollArea messages={messages} isLoading={isLoading} />
           </div>
         </ResizablePanel>
         <ResizableHandle withHandle />
-        <ResizablePanel
-          minSize={30}
-          defaultSize={30}
-          onResize={handleChatInputAreaPanelResize}
-        >
-          <div className="flex flex-col overflow-auto px-40">
-            <div>
-              <ModelSelect
-                handleProviderSelect={handleProviderSelect}
-                selectedProvider={selectedProvider}
-                providers={providers}
-              />
-            </div>
+        <ResizablePanel minSize={30} defaultSize={30}>
+          <div className="flex flex-col h-full overflow-hidden px-40">
+            <ModelSelect
+              handleProviderSelect={handleProviderSelect}
+              selectedProvider={selectedProvider}
+              providers={providers}
+            />
             <ChatInput
               inputValue={inputValue}
               setInputValue={setInputValue}
               currentProvider={currentProvider}
               isLoading={isLoading}
               handleSubmit={handleSubmit}
-              chatInputRef={chatInputRef}
-              containerHeight={chatinputHeight}
             />
+            {error && <p className="text-destructive text-sm mt-2">{error}</p>}
           </div>
           {error && <p className="text-destructive text-sm mt-2">{error}</p>}
         </ResizablePanel>
