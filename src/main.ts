@@ -6,6 +6,7 @@ import { ServerConfig, Provider, Message } from "./types";
 import log from "electron-log/main";
 import MCP from "./mcp/mcp";
 import Providers from "./providers/providers";
+import { MCPServerManager, ServerMetadata } from "./mcp/mcpManager";
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (started) {
@@ -207,13 +208,14 @@ ipcMain.handle("get-servers", () => {
 
 ipcMain.handle("add-server", (_, config: ServerConfig) => {
   const stmt = db.prepare(
-    "INSERT INTO servers (name, description, command, args) VALUES(?,?,?,?)"
+    "INSERT INTO servers (name, description, command, args, enabled) VALUES(?,?,?,?,?)"
   );
   stmt.run(
     config.name,
     config.description,
     config.command,
-    JSON.stringify(config.args) // store as json string
+    JSON.stringify(config.args),
+    config.enabled ?? true
   );
 
   return true;
@@ -244,6 +246,35 @@ ipcMain.handle("update-server", (_, config: ServerConfig) => {
     JSON.stringify(config.args),
     config.id
   );
+});
+
+ipcMain.handle(
+  "install-server",
+  async (_, config: ServerConfig, metadata: ServerMetadata) => {
+    return mcp.serverManager.installServer(config, metadata);
+  }
+);
+
+ipcMain.handle("stop-server", async (_, id: number) => {
+  return mcp.serverManager.stopServer(id);
+});
+
+//TODO: can make this smarter by only creating the clients that we need to
+// not all of the clients
+ipcMain.handle("enable-server", async (_, id: number) => {
+  await mcp.serverManager.enableServer(id);
+  // Recreate the client for this server
+  await mcp.createClients();
+});
+
+//TODO: can make this smarter by only disabled the clients that we need to
+// not all of the clients
+ipcMain.handle("disable-server", async (_, id: number) => {
+  await mcp.serverManager.disableServer(id);
+  // This will close the client connection
+  await mcp.closeClients();
+  // Recreate clients for remaining enabled servers
+  await mcp.createClients();
 });
 
 ipcMain.handle("chat", async (_, data: Message[]) => {
