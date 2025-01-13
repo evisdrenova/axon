@@ -12,9 +12,7 @@ A desktop app that allows you to talk to different models, register MCP servers 
 5. implement cmdk all app search with hotkey
 6. support for images
 7. be kinda cool if the title bar where the title was, was like an axon firing and traveling back and forth, showing that it's working and thinking
-8. finish fixing the height of the scrollarea
-9. finish fixing the alignment of the chat input
-10. update dark mode styling
-11. name of convo is just a sumamrize version of the prompt
-12. convo branching should show parent child like a tree
-13. should be able to update a .zshrc config and pipe questions to axon
+8. update dark mode styling
+9. name of convo is just a sumamrize version of the prompt
+10. convo branching should show parent child like a tree
+11. should be able to update a .zshrc config and pipe questions to axon

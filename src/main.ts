@@ -78,9 +78,9 @@ const initializeDatabase = () => {
 const createWindow = async () => {
   initializeDatabase();
   mcp = new MCP(db);
-  // await mcp.init();
+  await mcp.init();
   providers = new Providers(mcp);
-  // await mcp.createClients();
+  await mcp.createClients();
   // Create the browser window.
   mainWindow = new BrowserWindow({
     width: 1000,
