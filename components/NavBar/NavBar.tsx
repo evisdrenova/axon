@@ -26,7 +26,7 @@ export default function NavBar(props: Props) {
               to={path}
               className={`p-2 hover:bg-muted rounded-lg cursor-pointer text-xs flex items-center space-x-2 ${
                 location.pathname === path
-                  ? "bg-muted border border-main-200 text-main-900"
+                  ? "bg-muted  border-main-200 text-main-900"
                   : ""
               }`}
             >
@@ -37,36 +37,5 @@ export default function NavBar(props: Props) {
         </nav>
       </div>
     </div>
-    // <div
-    //   className={`bg-background border-r border-r-gray-300 px-4 text-gray-900 transition-all duration-300 h-full ${
-    //     isOpen ? "w-64" : "w-16"
-    //   }`}
-    // >
-    //   <div className="flex items-center justify-end mt-6">
-    //     <Button
-    //       variant="ghost"
-    //       onClick={() => setIsOpen(!isOpen)}
-    //       className="hover:bg-muted p-2 rounded-xl"
-    //     >
-    //       {isOpen ? <ChevronLeft size={16} /> : <ChevronRight size={16} />}
-    //     </Button>
-    //   </div>
-    //   <nav className="mt-4 flex flex-row gap-1">
-    //     {navItems.map(({ path, icon, label }) => (
-    //       <Link
-    //         key={path}
-    //         to={path}
-    //         className={`p-2 hover:bg-muted rounded-xl  cursor-pointer text-xs flex items-center ${
-    //           location.pathname === path
-    //             ? "bg-muted border border-main-200 text-main-900"
-    //             : ""
-    //         }`}
-    //       >
-    //         {icon}
-    //         {isOpen && <span className="ml-2">{label}</span>}
-    //       </Link>
-    //     ))}
-    //   </nav>
-    // </div>
   );
 }

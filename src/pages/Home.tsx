@@ -95,12 +95,14 @@ export default function Home() {
         </ResizablePanel>
         <ResizableHandle withHandle />
         <ResizablePanel minSize={30} defaultSize={30}>
-          <div className="flex flex-col h-full overflow-hidden px-40">
-            <ModelSelect
-              handleProviderSelect={handleProviderSelect}
-              selectedProvider={selectedProvider}
-              providers={providers}
-            />
+          <div className="flex flex-col gap-2 h-full overflow-hidden px-40">
+            <div>
+              <ModelSelect
+                handleProviderSelect={handleProviderSelect}
+                selectedProvider={selectedProvider}
+                providers={providers}
+              />
+            </div>
             <ChatInput
               inputValue={inputValue}
               setInputValue={setInputValue}

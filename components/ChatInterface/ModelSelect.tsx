@@ -6,6 +6,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../../components/ui/select";
+import { Box } from "lucide-react";
 
 interface Props {
   handleProviderSelect: (providerId: string) => void;
@@ -16,7 +17,8 @@ export default function ModelSelect(props: Props) {
   const { handleProviderSelect, selectedProvider, providers } = props;
 
   return (
-    <div className="inline-block">
+    <div className="inline-flex flex-row items-center">
+      <Box size={16} />
       <Select onValueChange={handleProviderSelect} value={selectedProvider}>
         <SelectTrigger className="border-0 shadow-none text-xs ring-0 focus:outline-none focus:ring-0 gap-2">
           <SelectValue placeholder="Select a model" />
