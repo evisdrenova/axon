@@ -3,6 +3,7 @@ import { Database } from "better-sqlite3";
 import { Client } from "@modelcontextprotocol/sdk/client/index";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio";
 import Anthropic from "@anthropic-ai/sdk";
+import { MCPServerManager } from "./mcpManager";
 
 type MCPClient = typeof Client;
 type MCPTransport = typeof StdioClientTransport;
@@ -11,12 +12,16 @@ export default class MCP {
   private clients: Record<string, InstanceType<MCPClient>> = {};
   private client: MCPClient;
   private transport: MCPTransport;
+  public serverManager: MCPServerManager;
 
-  constructor(private readonly db: Database) {}
+  constructor(private readonly db: Database) {
+    this.serverManager = new MCPServerManager(db);
+  }
 
   public async init(): Promise<void> {
     this.client = await this.importClient();
     this.transport = await this.importTransport();
+    await this.serverManager.initialize();
   }
 
   private async importClient(): Promise<MCPClient> {
@@ -34,7 +39,7 @@ export default class MCP {
   public getServers(): ServerConfig[] {
     try {
       const stmt = this.db.prepare(
-        "SELECT id, name, description, command, args FROM servers"
+        "SELECT id, name, description, command, args, enabled FROM servers"
       );
       const rows = stmt.all() as {
         id: number;
@@ -42,6 +47,7 @@ export default class MCP {
         description: string;
         command: string;
         args: string;
+        enabled: boolean;
       }[];
 
       return rows.map((row) => ({
@@ -50,6 +56,7 @@ export default class MCP {
         description: row.description,
         command: row.command,
         args: JSON.parse(row.args) as string[],
+        enabled: row.enabled,
       }));
     } catch (error) {
       console.log("database error", error);
@@ -63,10 +70,17 @@ export default class MCP {
         await this.init();
       }
       const servers = this.getServers();
+
       if (servers.length > 0) {
         await Promise.all(
           servers.map(async (server) => {
             console.log(`Initializing server: ${server.name}`);
+
+            // Get or start the server process
+            let process = this.serverManager.getServerProcess(server.id!);
+            if (!process) {
+              process = await this.serverManager.startServer(server);
+            }
 
             const clientName = `${server.name}`;
             const client = new this.client(
@@ -97,6 +111,7 @@ export default class MCP {
         Object.values(this.clients).map((client) => client.close())
       );
       this.clients = {};
+      await this.serverManager.cleanup();
     } catch (error) {
       console.error("Failed to close clients:", error);
       throw new Error("Unable to close clients");

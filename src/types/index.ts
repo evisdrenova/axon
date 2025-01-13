@@ -29,6 +29,7 @@ export interface ServerConfig {
   description?: string;
   command: string;
   args: string[];
+  enabled?: boolean;
 }
 
 export interface Provider {
