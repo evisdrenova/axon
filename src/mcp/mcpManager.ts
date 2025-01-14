@@ -157,12 +157,39 @@ export class MCPServerManager {
       switch (config.installType) {
         case "npm":
           const npmBinPath = path.join(serverPath, "node_modules", ".bin");
-          const commandPath = path.join(
-            npmBinPath,
-            config.startCommand || config.package.split("/").pop()!
-          );
 
-          serverProcess = spawn(commandPath, config.args, {
+          // Get binary name from package
+          const binaryName =
+            config.startCommand ||
+            config.package
+              .split("/")
+              .pop()!
+              .replace("@modelcontextprotocol/", "");
+
+          const commandPath = path.join(npmBinPath, binaryName);
+
+          const args =
+            typeof config.args === "string"
+              ? JSON.parse(config.args)
+              : config.args;
+
+          log.info("Starting server with:", {
+            npmBinPath,
+            binaryName,
+            commandPath,
+            args: args,
+            cwd: serverPath,
+          });
+
+          // Check if binary exists
+          try {
+            await fs.access(commandPath);
+          } catch (error) {
+            log.error(`Binary not found at ${commandPath}`);
+            throw new Error(`Binary not found: ${binaryName}`);
+          }
+
+          serverProcess = spawn(commandPath, args, {
             cwd: serverPath,
             env: {
               ...process.env,
@@ -171,7 +198,6 @@ export class MCPServerManager {
             shell: true,
           });
           break;
-
         case "pip":
         case "uv":
           const pythonPath =
@@ -232,7 +258,7 @@ export class MCPServerManager {
       try {
         await this.startServer(server);
       } catch (error) {
-        log.error(`Failed to start server ${server.name}:`, error);
+        log.error(`Failed to start enabled server ${server.name}:`, error);
       }
     }
   }

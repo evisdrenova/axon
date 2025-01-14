@@ -173,11 +173,12 @@ function ServerForm(props: ServerProps) {
 
       // Install the server
       setStatus({ stage: "installing", message: "Installing server..." });
+      // works fine
       await window.electron.installServer(serverId);
 
       // Start the server
       setStatus({ stage: "starting", message: "Starting server..." });
-      await window.electron.startServer(serverId);
+      // await window.electron.startServer(serverId);
 
       setStatus({ stage: "complete", message: "Server is ready!" });
 
