@@ -30,8 +30,11 @@ export interface ServerConfig {
   id?: number;
   name: string;
   description?: string;
-  command: string;
+  installType: string; //"npm" | "pip" | "binary" | "uv";
+  package: string;
+  startCommand?: string;
   args: string[];
+  version?: string;
   enabled?: boolean;
 }
 

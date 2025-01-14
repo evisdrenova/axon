@@ -47,13 +47,17 @@ const initializeDatabase = () => {
   db.exec(`
       CREATE TABLE IF NOT EXISTS servers (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT,
-        command TEXT,
-        args TEXT,
+        name TEXT NOT NULL,
+        description TEXT,
+        installType TEXT NOT NULL,
+        package TEXT NOT NULL,
+        startCommand TEXT,
+        args TEXT NOT NULL,
+        version TEXT,
+        enabled BOOLEAN DEFAULT 1,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP
       );
     `);
-
   db.exec(`
     CREATE TABLE IF NOT EXISTS conversations (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -207,15 +211,28 @@ ipcMain.handle("get-servers", () => {
 });
 
 ipcMain.handle("add-server", (_, config: ServerConfig) => {
-  const stmt = db.prepare(
-    "INSERT INTO servers (name, description, command, args, enabled) VALUES(?,?,?,?,?)"
-  );
+  const stmt = db.prepare(`
+    INSERT INTO servers (
+      name,
+      description,
+      installType,
+      package,
+      startCommand,
+      args,
+      version,
+      enabled
+    ) VALUES (?,?,?,?,?,?,?,?)
+  `);
+
   stmt.run(
     config.name,
-    config.description,
-    config.command,
+    config.description || null,
+    config.installType,
+    config.package,
+    config.startCommand || null,
     JSON.stringify(config.args),
-    config.enabled ?? true
+    config.version || null,
+    config.enabled ? 1 : 0
   );
 
   return true;
@@ -236,14 +253,28 @@ ipcMain.handle("delete-server", (_, id: number) => {
 });
 
 ipcMain.handle("update-server", (_, config: ServerConfig) => {
-  const stmt = db.prepare(
-    "UPDATE servers SET name = ?, description = ?, command = ?, args = ? WHERE id = ?"
-  );
+  const stmt = db.prepare(`
+    UPDATE servers SET
+      name = ?,
+      description = ?,
+      installType = ?,
+      package = ?,
+      startCommand = ?,
+      args = ?,
+      version = ?,
+      enabled = ?
+    WHERE id = ?
+  `);
+
   return stmt.run(
     config.name,
-    config.description,
-    config.command,
+    config.description || null,
+    config.installType,
+    config.package,
+    config.startCommand || null,
     JSON.stringify(config.args),
+    config.version || null,
+    config.enabled ?? true,
     config.id
   );
 });

@@ -3,16 +3,17 @@ import { ServerConfig } from "../types";
 import { Button } from "../../components/ui/button";
 import { Card, CardContent } from "../../components/ui/card";
 import ServerTable from "../../components/ServerTable/ServerTable";
+import { Wrench } from "lucide-react";
 
-export default function tools() {
-  const [servers, setServers] = useState<ServerConfig[] | null>(null);
+export default function servers() {
+  const [servers, setservers] = useState<ServerConfig[] | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
   const [editingServer, setEditingServer] = useState<ServerConfig | null>(null);
 
   const loadServers = async () => {
     const servers = await window.electron.getServers();
-    setServers(servers);
+    setservers(servers);
   };
 
   useEffect(() => {
@@ -25,23 +26,21 @@ export default function tools() {
 
   if (servers.length === 0 && !showForm) {
     return (
-      <div className="p-4">
-        <Card className="text-center py-8">
-          <CardContent>
-            <p className="text-muted-foreground mb-4">No servers created yet</p>
-            <Button onClick={() => setShowForm(true)}>Create New Server</Button>
-          </CardContent>
-        </Card>
+      <div className="p-4 border-2 border-main-200 m-4 rounded-lg border-dashed">
+        <div className="flex flex-col gap-2 items-center py-8">
+          <Wrench size={20} className="text-primary" />
+          <p className="text-foreground mb-4">No servers added yet</p>
+          <Button onClick={() => setShowForm(true)}>+ Add New Server</Button>
+        </div>
       </div>
     );
   }
 
-  const handleDelete = async (e: React.MouseEvent, pId: number) => {
-    e.preventDefault();
+  const handleDelete = async (pId: number) => {
     setIsDeleting(true);
     try {
       await window.electron.deleteServer(pId);
-      setServers(servers.filter((server) => server.id !== pId));
+      setservers(servers!.filter((server) => server.id !== pId));
     } catch (error) {
       console.error("Error deleting server:", error);
     } finally {
@@ -63,6 +62,7 @@ export default function tools() {
     serverId: number,
     checked: boolean
   ) => {
+    console.log("checked", checked);
     if (checked) {
       await window.electron.enableServer(serverId);
     } else {
@@ -81,7 +81,7 @@ export default function tools() {
               setShowForm(true);
             }}
           >
-            New Server
+            + New Server
           </Button>
         )}
       </div>
@@ -91,6 +91,7 @@ export default function tools() {
           onSave={loadServers}
           onCancel={handleCloseForm}
           initialData={editingServer}
+          handleDelete={handleDelete}
         />
       ) : (
         <ServerTable
@@ -107,18 +108,23 @@ interface ServerProps {
   onSave: () => void;
   onCancel: () => void;
   initialData?: ServerConfig | null;
+  handleDelete: (val: number) => void;
 }
 
 interface FormData {
+  id?: number;
   name: string;
   description?: string;
-  command: string;
+  installType: string; //"npm" | "pip" | "binary" | "uv";
+  package: string;
+  startCommand?: string;
   args: string[];
-  id?: number;
+  version?: string;
+  enabled: boolean;
 }
 
 function ServerForm(props: ServerProps) {
-  const { onSave, onCancel, initialData } = props;
+  const { onSave, onCancel, initialData, handleDelete } = props;
 
   const [formData, setFormData] = useState<FormData>(() => {
     if (initialData) {
@@ -126,26 +132,38 @@ function ServerForm(props: ServerProps) {
         id: initialData.id,
         name: initialData.name,
         description: initialData.description,
-        command: initialData.command,
+        installType: initialData.installType,
+        package: initialData.package,
+        startCommand: initialData.startCommand,
         args: initialData.args,
+        version: initialData.version,
+        enabled: initialData.enabled,
       };
     }
     return {
       name: "",
       description: "",
-      command: "",
+      installType: "npm",
+      package: "",
+      startCommand: "",
       args: [],
+      version: "latest",
+      enabled: true,
     };
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const config = {
+    const config: ServerConfig = {
       id: formData.id,
       name: formData.name,
-      description: formData.description ?? "",
-      command: formData.command,
+      description: formData.description,
+      installType: formData.installType,
+      package: formData.package,
+      startCommand: formData.startCommand || null,
       args: formData.args,
+      version: formData.version || "latest",
+      enabled: formData.enabled,
     };
 
     if (initialData) {
@@ -156,11 +174,27 @@ function ServerForm(props: ServerProps) {
     onSave();
     onCancel();
   };
-
   return (
     <Card>
       <CardContent className="pt-6">
         <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="flex justify-end ">
+            {initialData && ( // Only show delete button when editing
+              <Button
+                type="button"
+                variant="destructive"
+                onClick={(e) => {
+                  e.preventDefault();
+                  if (initialData.id) {
+                    handleDelete(initialData.id);
+                    onCancel(); // Close the form after deletion
+                  }
+                }}
+              >
+                Delete
+              </Button>
+            )}
+          </div>
           <div>
             <label className="block text-sm font-medium mb-1">Name</label>
             <input
@@ -181,32 +215,84 @@ function ServerForm(props: ServerProps) {
               type="text"
               value={formData.description}
               onChange={(e) =>
-                setFormData({ ...formData, name: e.target.value })
+                setFormData({ ...formData, description: e.target.value })
               }
               className="w-full p-2 border rounded"
-              required
             />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-1">Command</label>
-            <input
-              type="text"
-              value={formData.command}
+            <label className="block text-sm font-medium mb-1">
+              Install Type
+            </label>
+            <select
+              value={formData.installType}
               onChange={(e) =>
-                setFormData({ ...formData, command: e.target.value })
+                setFormData({
+                  ...formData,
+                  installType: e.target.value as
+                    | "npm"
+                    | "pip"
+                    | "binary"
+                    | "uv",
+                })
               }
               className="w-full p-2 border rounded"
               required
+            >
+              <option value="npm">NPM</option>
+              <option value="pip">PIP</option>
+              <option value="uv">UV</option>
+              <option value="binary">Binary</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1">
+              Package Name
+            </label>
+            <input
+              type="text"
+              value={formData.package}
+              onChange={(e) =>
+                setFormData({ ...formData, package: e.target.value })
+              }
+              className="w-full p-2 border rounded"
+              required
+              placeholder="e.g., @modelcontextprotocol/server-filesystem"
             />
           </div>
-
+          <div>
+            <label className="block text-sm font-medium mb-1">
+              Start Command (optional)
+            </label>
+            <input
+              type="text"
+              value={formData.startCommand}
+              onChange={(e) =>
+                setFormData({ ...formData, startCommand: e.target.value })
+              }
+              className="w-full p-2 border rounded"
+              placeholder="Leave empty to use package name"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1">Version</label>
+            <input
+              type="text"
+              value={formData.version}
+              onChange={(e) =>
+                setFormData({ ...formData, version: e.target.value })
+              }
+              className="w-full p-2 border rounded"
+              placeholder="latest"
+            />
+          </div>
           <div>
             <label className="block text-sm font-medium mb-1">
               Arguments (comma-separated)
             </label>
             <input
               type="text"
-              value={formData.args ? formData.args.join(",") : ""}
+              value={formData.args.join(",")}
               onChange={(e) => {
                 const newArgs =
                   e.target.value === ""
@@ -224,9 +310,11 @@ function ServerForm(props: ServerProps) {
           </div>
 
           <div className="flex justify-between w-full gap-2">
-            <Button type="button" variant="outline" onClick={onCancel}>
-              Cancel
-            </Button>
+            <div className="flex gap-2">
+              <Button type="button" variant="outline" onClick={onCancel}>
+                Cancel
+              </Button>
+            </div>
             <Button type="submit">
               {initialData ? "Update Server" : "Save Server Config"}
             </Button>

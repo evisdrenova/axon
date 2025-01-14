@@ -1,4 +1,4 @@
-import { Box, Home, MessagesSquare, Settings2, Wrench } from "lucide-react";
+import { Box, MessagesSquare, Settings2, Wrench } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 
 interface Props {

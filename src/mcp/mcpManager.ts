@@ -11,8 +11,12 @@ import { ServerConfig } from "../../src/types";
 McpManager manages the install, initialization, management and enablement/disablement of mcp servers
 */
 
+export interface ServerMetadataObject {
+  [key: string]: ServerMetadata;
+}
+
 export interface ServerMetadata {
-  installType: "npm" | "pip" | "binary" | "uv";
+  installType: "npm" | "npx" | "pip" | "binary" | "uv";
   package: string;
   version?: string;
 }
@@ -56,7 +60,7 @@ export class MCPServerManager {
 
       if (exists) {
         const data = await fs.readFile(this.metadataPath, "utf-8");
-        const metadata = JSON.parse(data);
+        const metadata: ServerMetadataObject = JSON.parse(data);
         this.serverMetadata = new Map(Object.entries(metadata));
       }
     } catch (error) {
@@ -176,9 +180,29 @@ export class MCPServerManager {
     try {
       switch (metadata.installType) {
         case "npm":
-          serverProcess = spawn("npx", [config.command, ...config.args], {
-            cwd: serverPath,
-          });
+          const npxPath =
+            process.platform === "win32"
+              ? path.join(
+                  process.execPath,
+                  "..",
+                  "node_modules",
+                  "npm",
+                  "bin",
+                  "npx-cli.js"
+                )
+              : "/usr/local/bin/npx"; // Default path on Unix systems
+
+          serverProcess = spawn(
+            "npx",
+            [npxPath, config.command, ...config.args],
+            {
+              cwd: serverPath,
+              env: {
+                ...process.env,
+                NODE_PATH: path.join(serverPath, "node_modules"),
+              },
+            }
+          );
           break;
 
         case "pip":

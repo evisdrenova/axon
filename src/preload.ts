@@ -44,7 +44,7 @@ contextBridge.exposeInMainWorld("electron", {
     return ipcRenderer.invoke("enable-server", id);
   },
   disableServer: (id: number) => {
-    return ipcRenderer.invoke("disbale-server", id);
+    return ipcRenderer.invoke("disable-server", id);
   },
 
   //chat methods

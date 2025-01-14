@@ -39,14 +39,26 @@ export default class MCP {
   public getServers(): ServerConfig[] {
     try {
       const stmt = this.db.prepare(
-        "SELECT id, name, description, command, args, enabled FROM servers"
+        `SELECT 
+         id, 
+         name, 
+         description, 
+         installType, 
+         package, 
+         startCommand, 
+         args, 
+         version, 
+         enabled FROM servers`
       );
       const rows = stmt.all() as {
         id: number;
         name: string;
         description: string;
-        command: string;
+        installType: string;
+        package: string;
+        startCommand: string;
         args: string;
+        version: string;
         enabled: boolean;
       }[];
 
@@ -54,8 +66,11 @@ export default class MCP {
         id: row.id,
         name: row.name,
         description: row.description,
-        command: row.command,
+        installType: row.installType,
+        package: row.package,
+        startCommand: row.startCommand,
         args: JSON.parse(row.args) as string[],
+        version: row.version,
         enabled: row.enabled,
       }));
     } catch (error) {
@@ -90,7 +105,7 @@ export default class MCP {
 
             await client.connect(
               new this.transport({
-                command: server.command,
+                command: server.startCommand,
                 args: server.args,
               })
             );
