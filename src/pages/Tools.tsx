@@ -150,6 +150,12 @@ function ServerForm(props: ServerProps) {
     };
   });
 
+  //TODO:
+  // install server seems to complete but need to verify where it actually downloads the packages
+  // the start server is failing, so need to see what's happening there
+  //i may not even need to start it and just let the callTool() call
+  // start the server, but before that i need to create a client for it
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
