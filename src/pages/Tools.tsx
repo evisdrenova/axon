@@ -4,8 +4,15 @@ import { Button } from "../../components/ui/button";
 import { Card, CardContent } from "../../components/ui/card";
 import ServerTable from "../../components/ServerTable/ServerTable";
 import { Wrench } from "lucide-react";
+import ButtonText from "../../src/lib/ButtonText";
+import Spinner from "../../src/lib/Spinner";
 
-export default function servers() {
+export type InstallStatus = {
+  stage: "saving" | "installing" | "starting" | "complete" | "error";
+  message: string;
+};
+
+export default function Servers() {
   const [servers, setservers] = useState<ServerConfig[] | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
@@ -91,6 +98,7 @@ export default function servers() {
           onSave={loadServers}
           onCancel={handleCloseForm}
           initialData={editingServer}
+          isDeleting={isDeleting}
           handleDelete={handleDelete}
         />
       ) : (
@@ -108,25 +116,15 @@ interface ServerProps {
   onSave: () => void;
   onCancel: () => void;
   initialData?: ServerConfig | null;
+  isDeleting: boolean;
   handleDelete: (val: number) => void;
 }
 
-interface FormData {
-  id?: number;
-  name: string;
-  description?: string;
-  installType: string; //"npm" | "pip" | "binary" | "uv";
-  package: string;
-  startCommand?: string;
-  args: string[];
-  version?: string;
-  enabled: boolean;
-}
-
 function ServerForm(props: ServerProps) {
-  const { onSave, onCancel, initialData, handleDelete } = props;
+  const { onSave, onCancel, initialData, isDeleting, handleDelete } = props;
+  const [status, setStatus] = useState<InstallStatus | null>();
 
-  const [formData, setFormData] = useState<FormData>(() => {
+  const [formData, setFormData] = useState<ServerConfig>(() => {
     if (initialData) {
       return {
         id: initialData.id,
@@ -154,30 +152,73 @@ function ServerForm(props: ServerProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const config: ServerConfig = {
-      id: formData.id,
-      name: formData.name,
-      description: formData.description,
-      installType: formData.installType,
-      package: formData.package,
-      startCommand: formData.startCommand || null,
-      args: formData.args,
-      version: formData.version || "latest",
-      enabled: formData.enabled,
-    };
+    try {
+      // Start the process
+      setStatus({ stage: "saving", message: "Saving server configuration..." });
 
-    if (initialData) {
-      await window.electron.updateServer(config);
-    } else {
-      await window.electron.addServer(config);
+      const config: ServerConfig = {
+        id: formData.id,
+        name: formData.name,
+        description: formData.description,
+        installType: formData.installType,
+        package: formData.package,
+        startCommand: formData.startCommand || null,
+        args: formData.args,
+        version: formData.version || "latest",
+        enabled: true, // Always enabled when first created
+      };
+
+      // Save to database
+      const serverId = await window.electron.addServer(config);
+
+      // Install the server
+      setStatus({ stage: "installing", message: "Installing server..." });
+      await window.electron.installServer(serverId);
+
+      // Start the server
+      setStatus({ stage: "starting", message: "Starting server..." });
+      await window.electron.startServer(serverId);
+
+      setStatus({ stage: "complete", message: "Server is ready!" });
+
+      // Wait a moment to show success state
+      setTimeout(() => {
+        onSave();
+        onCancel();
+      }, 1000);
+    } catch (error) {
+      setStatus({
+        stage: "error",
+        message: `Error: ${error.message}`,
+      });
     }
-    onSave();
-    onCancel();
   };
+
   return (
     <Card>
       <CardContent className="pt-6">
         <form onSubmit={handleSubmit} className="space-y-4">
+          {status && (
+            <div
+              className={`p-4 rounded ${
+                status.stage === "error"
+                  ? "bg-red-100"
+                  : status.stage === "complete"
+                  ? "bg-green-100"
+                  : "bg-blue-100"
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                {status.stage !== "complete" && status.stage !== "error" && (
+                  <div className="animate-spin">⚙️</div>
+                )}
+                {status.stage === "complete" && "✅"}
+                {status.stage === "error" && "❌"}
+                <span>{status.message}</span>
+              </div>
+            </div>
+          )}
+
           <div className="flex justify-end ">
             {initialData && ( // Only show delete button when editing
               <Button
@@ -191,7 +232,16 @@ function ServerForm(props: ServerProps) {
                   }
                 }}
               >
-                Delete
+                <ButtonText
+                  leftIcon={
+                    isDeleting ? (
+                      <Spinner className="text-black dark:text-white" />
+                    ) : (
+                      <div />
+                    )
+                  }
+                  text="Test Connection"
+                />
               </Button>
             )}
           </div>
@@ -311,11 +361,16 @@ function ServerForm(props: ServerProps) {
 
           <div className="flex justify-between w-full gap-2">
             <div className="flex gap-2">
-              <Button type="button" variant="outline" onClick={onCancel}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={onCancel}
+                disabled={status && status.stage !== "error"}
+              >
                 Cancel
               </Button>
             </div>
-            <Button type="submit">
+            <Button type="submit" disabled={status && status.stage !== "error"}>
               {initialData ? "Update Server" : "Save Server Config"}
             </Button>
           </div>

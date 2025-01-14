@@ -81,17 +81,17 @@ export class MCPServerManager {
   }
 
   // builds the right installation command based on the installation type and OS
-  async installServer(config: ServerConfig, metadata: ServerMetadata) {
+  async installServer(config: ServerConfig): Promise<boolean> {
     const serverPath = path.join(this.serversPath, config.name);
 
     try {
       await fs.mkdir(serverPath, { recursive: true });
 
-      switch (metadata.installType) {
+      switch (config.installType) {
         case "npm":
           await execAsync(
-            `npm install ${metadata.package}${
-              metadata.version ? `@${metadata.version}` : ""
+            `npm install ${config.package}${
+              config.version ? `@${config.version}` : ""
             }`,
             {
               cwd: serverPath,
@@ -106,8 +106,7 @@ export class MCPServerManager {
             cwd: serverPath,
           });
 
-          if (metadata.installType === "uv") {
-            // Install uv if not already installed
+          if (config.installType === "uv") {
             try {
               await execAsync("pip install uv");
             } catch (error) {
@@ -115,24 +114,21 @@ export class MCPServerManager {
               throw error;
             }
 
-            // Use uv to install the package
-            const uvCommand = "uv";
             await execAsync(
-              `${uvCommand} pip install ${metadata.package}${
-                metadata.version ? `==${metadata.version}` : ""
+              `uv pip install ${config.package}${
+                config.version ? `==${config.version}` : ""
               }`,
               { cwd: serverPath }
             );
           } else {
-            // Use pip for installation
             const pipCommand =
               process.platform === "win32"
                 ? path.join(serverPath, "venv", "Scripts", "pip")
                 : path.join(serverPath, "venv", "bin", "pip");
 
             await execAsync(
-              `"${pipCommand}" install ${metadata.package}${
-                metadata.version ? `==${metadata.version}` : ""
+              `"${pipCommand}" install ${config.package}${
+                config.version ? `==${config.version}` : ""
               }`,
               { cwd: serverPath }
             );
@@ -144,21 +140,6 @@ export class MCPServerManager {
           break;
       }
 
-      // Store metadata
-      this.serverMetadata.set(config.name, metadata);
-      await this.saveMetadata();
-
-      // Add to database
-      const stmt = this.db.prepare(
-        "INSERT INTO servers (name, description, command, args) VALUES (?, ?, ?, ?)"
-      );
-      stmt.run(
-        config.name,
-        config.description || "",
-        config.command,
-        JSON.stringify(config.args)
-      );
-
       return true;
     } catch (error) {
       log.error(`Failed to install server ${config.name}:`, error);
@@ -169,43 +150,30 @@ export class MCPServerManager {
   // builds the right start command based on the install type and the OS
   // and starts a new process for each server
   async startServer(config: ServerConfig): Promise<ChildProcess> {
-    const metadata = this.serverMetadata.get(config.name);
-    if (!metadata) {
-      throw new Error(`No metadata found for server ${config.name}`);
-    }
-
     const serverPath = path.join(this.serversPath, config.name);
     let serverProcess: ChildProcess;
 
     try {
-      switch (metadata.installType) {
+      switch (config.installType) {
         case "npm":
-          const npxPath =
-            process.platform === "win32"
-              ? path.join(
-                  process.execPath,
-                  "..",
-                  "node_modules",
-                  "npm",
-                  "bin",
-                  "npx-cli.js"
-                )
-              : "/usr/local/bin/npx"; // Default path on Unix systems
-
-          serverProcess = spawn(
-            "npx",
-            [npxPath, config.command, ...config.args],
-            {
-              cwd: serverPath,
-              env: {
-                ...process.env,
-                NODE_PATH: path.join(serverPath, "node_modules"),
-              },
-            }
+          const npmBinPath = path.join(serverPath, "node_modules", ".bin");
+          const commandPath = path.join(
+            npmBinPath,
+            config.startCommand || config.package.split("/").pop()!
           );
+
+          serverProcess = spawn(commandPath, config.args, {
+            cwd: serverPath,
+            env: {
+              ...process.env,
+              NODE_PATH: path.join(serverPath, "node_modules"),
+            },
+            shell: true,
+          });
           break;
 
         case "pip":
+        case "uv":
           const pythonPath =
             process.platform === "win32"
               ? path.join(serverPath, "venv", "Scripts", "python")
@@ -213,7 +181,7 @@ export class MCPServerManager {
 
           serverProcess = spawn(
             pythonPath,
-            ["-m", config.command, ...config.args],
+            ["-m", config.startCommand || config.package, ...config.args],
             {
               cwd: serverPath,
             }
@@ -221,9 +189,13 @@ export class MCPServerManager {
           break;
 
         case "binary":
-          serverProcess = spawn(config.command, config.args, {
-            cwd: serverPath,
-          });
+          serverProcess = spawn(
+            config.startCommand || config.package,
+            config.args,
+            {
+              cwd: serverPath,
+            }
+          );
           break;
       }
 
@@ -233,6 +205,10 @@ export class MCPServerManager {
 
       serverProcess.stderr?.on("data", (data) => {
         log.error(`[${config.name}] ${data}`);
+      });
+
+      serverProcess.on("error", (error) => {
+        log.error(`Server ${config.name} process error:`, error);
       });
 
       serverProcess.on("close", (code) => {

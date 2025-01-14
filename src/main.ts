@@ -216,7 +216,7 @@ ipcMain.handle("add-server", (_, config: ServerConfig) => {
       name,
       description,
       installType,
-      package,
+      package, 
       startCommand,
       args,
       version,
@@ -224,7 +224,7 @@ ipcMain.handle("add-server", (_, config: ServerConfig) => {
     ) VALUES (?,?,?,?,?,?,?,?)
   `);
 
-  stmt.run(
+  const result = stmt.run(
     config.name,
     config.description || null,
     config.installType,
@@ -235,7 +235,7 @@ ipcMain.handle("add-server", (_, config: ServerConfig) => {
     config.enabled ? 1 : 0
   );
 
-  return true;
+  return result.lastInsertRowid;
 });
 
 ipcMain.handle("delete-server", (_, id: number) => {
@@ -279,12 +279,45 @@ ipcMain.handle("update-server", (_, config: ServerConfig) => {
   );
 });
 
-ipcMain.handle(
-  "install-server",
-  async (_, config: ServerConfig, metadata: ServerMetadata) => {
-    return mcp.serverManager.installServer(config, metadata);
-  }
-);
+ipcMain.handle("install-server", async (_, serverId: number) => {
+  const stmt = db.prepare("SELECT * FROM servers WHERE id = ?");
+  const dbRecord = stmt.get(serverId) as ServerConfig;
+  if (!dbRecord) throw new Error("Server not found");
+
+  const server: ServerConfig = {
+    id: dbRecord.id,
+    name: dbRecord.name,
+    description: dbRecord.description || undefined,
+    installType: dbRecord.installType,
+    package: dbRecord.package,
+    startCommand: dbRecord.startCommand || undefined,
+    args: JSON.parse(String(dbRecord.args)),
+    version: dbRecord.version || undefined,
+    enabled: dbRecord.enabled === true,
+  };
+
+  return mcp.serverManager.installServer(server);
+});
+
+ipcMain.handle("start-server", async (_, serverId: number) => {
+  const stmt = db.prepare("SELECT * FROM servers WHERE id = ?");
+  const dbRecord = stmt.get(serverId) as ServerConfig;
+  if (!dbRecord) throw new Error("Server not found");
+
+  const server: ServerConfig = {
+    id: dbRecord.id,
+    name: dbRecord.name,
+    description: dbRecord.description || undefined,
+    installType: dbRecord.installType,
+    package: dbRecord.package,
+    startCommand: dbRecord.startCommand || undefined,
+    args: JSON.parse(String(dbRecord.args)),
+    version: dbRecord.version || undefined,
+    enabled: dbRecord.enabled === true,
+  };
+
+  return mcp.serverManager.startServer(server);
+});
 
 ipcMain.handle("stop-server", async (_, id: number) => {
   return mcp.serverManager.stopServer(id);

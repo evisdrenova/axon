@@ -13,9 +13,11 @@ export interface IElectronAPI {
   selectProvider: (provider: Provider) => Promise<void>;
   // mcp methods
   getServers: () => Promise<ServerConfig[]>;
-  addServer: (server: ServerConfig) => Promise<void>;
+  addServer: (server: ServerConfig) => Promise<number>;
   deleteServer: (id: number) => Promise<void>;
   updateServer: (data: ServerConfig) => Promise<void>;
+  installServer: (serverId: number) => Promise<void>;
+  startServer: (serverId: number) => Promise<void>;
   // chat methods
   chat: (data: Message[]) => Promise<string>;
   minimizeWindow: () => void;
