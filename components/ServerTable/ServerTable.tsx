@@ -37,7 +37,7 @@ export default function ServerTable(props: ServerTableProps) {
                   variant="ghost"
                   size="icon"
                   onClick={() => handleEdit(server)}
-                  className="justify-start w-full text-xs"
+                  className="justify-start w-full text-xs hover:bg-transparent hover:no-underline"
                 >
                   <div className="flex items-center space-x-2">
                     <span className="hover:underline">{server.name}</span>
