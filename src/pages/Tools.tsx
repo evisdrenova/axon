@@ -69,14 +69,21 @@ export default function Servers() {
     serverId: number,
     checked: boolean
   ) => {
-    console.log("checked", checked);
-    if (checked) {
-      await window.electron.enableServer(serverId);
-    } else {
-      await window.electron.disableServer(serverId);
+    try {
+      if (checked) {
+        await window.electron.enableServer(serverId);
+      } else {
+        await window.electron.disableServer(serverId);
+      }
+      setservers(
+        servers!.map((server) =>
+          server.id === serverId ? { ...server, enabled: checked } : server
+        )
+      );
+    } catch (error) {
+      await loadServers();
     }
   };
-
   return (
     <div className="p-4">
       <div className="flex justify-between items-center mb-6">
