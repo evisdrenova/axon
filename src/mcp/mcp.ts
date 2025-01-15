@@ -91,8 +91,11 @@ export default class MCP {
           servers.map(async (server) => {
             console.log(`Initializing server: ${server.name}`);
 
+            console.log("server", server);
+
             // Get or start the server process
             let process = this.serverManager.getServerProcess(server.id!);
+            // console.log("process", process);
             if (!process) {
               process = await this.serverManager.startServer(server);
             }
@@ -103,9 +106,13 @@ export default class MCP {
               { capabilities: {} }
             );
 
+            //TODO: update so that the command here is where the binary is stored
+
             await client.connect(
               new this.transport({
-                command: server.startCommand,
+                //  command: server.startCommand, // this  needs to be the server path
+                command:
+                  "/Users/evisdrenova/Library/Application Support/axon/mcp-servers/filesystem/node_modules/.bin/mcp-server-filesystem",
                 args: server.args,
               })
             );

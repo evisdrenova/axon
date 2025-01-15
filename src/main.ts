@@ -238,16 +238,29 @@ ipcMain.handle("add-server", (_, config: ServerConfig) => {
   return result.lastInsertRowid;
 });
 
-ipcMain.handle("delete-server", (_, id: number) => {
+ipcMain.handle("delete-server", async (_, id: number) => {
   try {
-    const stmt = db.prepare("DELETE FROM servers WHERE id = ?");
-    const result = stmt.run(id);
-    if (result.changes === 0) {
+    const getStmt = db.prepare("SELECT name FROM servers WHERE id = ?");
+    const server = getStmt.get(id) as { name: string } | undefined;
+
+    if (!server) {
       throw new Error(`No server found with id ${id}`);
     }
+
+    // Clean up the server
+    await mcp.serverManager.cleanupServer(id, server.name);
+
+    // Delete from database
+    const deleteStmt = db.prepare("DELETE FROM servers WHERE id = ?");
+    const result = deleteStmt.run(id);
+
+    if (result.changes === 0) {
+      throw new Error(`Failed to delete server from database`);
+    }
+
     return result;
   } catch (error) {
-    console.error("Error deleting server:", error);
+    log.error("Error deleting server:", error);
     throw error;
   }
 });

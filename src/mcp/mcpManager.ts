@@ -25,18 +25,16 @@ const execAsync = promisify(exec);
 
 export class MCPServerManager {
   private serversPath: string;
-  private metadataPath: string;
   private activeProcesses: Map<number, ChildProcess> = new Map();
   private serverMetadata: Map<string, ServerMetadata> = new Map();
 
   constructor(private readonly db: Database) {
     this.serversPath = path.join(app.getPath("userData"), "mcp-servers");
-    this.metadataPath = path.join(this.serversPath, "metadata.json");
   }
 
   async initialize() {
     await this.ensureDirectories();
-    await this.loadMetadata();
+    // load in configs from db
     await this.startEnabledServers();
   }
 
@@ -46,36 +44,6 @@ export class MCPServerManager {
       await fs.mkdir(this.serversPath, { recursive: true });
     } catch (error) {
       log.error("Failed to create MCP servers directory:", error);
-      throw error;
-    }
-  }
-
-  // loads the mcp metadata
-  private async loadMetadata() {
-    try {
-      const exists = await fs
-        .access(this.metadataPath)
-        .then(() => true)
-        .catch(() => false);
-
-      if (exists) {
-        const data = await fs.readFile(this.metadataPath, "utf-8");
-        const metadata: ServerMetadataObject = JSON.parse(data);
-        this.serverMetadata = new Map(Object.entries(metadata));
-      }
-    } catch (error) {
-      log.error("Failed to load server metadata:", error);
-      throw error;
-    }
-  }
-
-  // saves the mcp server metadata
-  private async saveMetadata() {
-    try {
-      const metadata = Object.fromEntries(this.serverMetadata);
-      await fs.writeFile(this.metadataPath, JSON.stringify(metadata, null, 2));
-    } catch (error) {
-      log.error("Failed to save server metadata:", error);
       throw error;
     }
   }
@@ -153,18 +121,30 @@ export class MCPServerManager {
     const serverPath = path.join(this.serversPath, config.name);
     let serverProcess: ChildProcess;
 
+    console.log("server path", serverPath);
+    console.log("config", config);
+
     try {
       switch (config.installType) {
         case "npm":
+          // builds the path to the bin in the node_modules
           const npmBinPath = path.join(serverPath, "node_modules", ".bin");
 
-          // Get binary name from package
+          console.log("npmBinPath");
+
+          // determines binary name
           const binaryName =
             config.startCommand ||
-            config.package
-              .split("/")
-              .pop()!
-              .replace("@modelcontextprotocol/", "");
+            (config.package.includes("server-")
+              ? "mcp-" +
+                config.package
+                  .split("/")
+                  .pop()!
+                  .replace("@modelcontextprotocol/", "")
+              : config.package
+                  .split("/")
+                  .pop()!
+                  .replace("@modelcontextprotocol/", ""));
 
           const commandPath = path.join(npmBinPath, binaryName);
 
@@ -250,6 +230,8 @@ export class MCPServerManager {
     }
   }
 
+  // starts servers that are marked as enabled in the database
+  // by default any newly added server is enabled
   async startEnabledServers() {
     const stmt = this.db.prepare("SELECT * FROM servers WHERE enabled = 1");
     const servers = stmt.all() as ServerConfig[];
@@ -293,6 +275,13 @@ export class MCPServerManager {
     for (const [id, process] of this.activeProcesses) {
       await this.stopServer(id);
     }
+  }
+
+  // used when we delete a server
+  async cleanupServer(id: number, name: string) {
+    await this.stopServer(id);
+    const serverPath = path.join(this.serversPath, name);
+    await fs.rm(serverPath, { recursive: true, force: true });
   }
 
   getServerProcess(id: number): ChildProcess | undefined {

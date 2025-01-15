@@ -18,3 +18,4 @@ A desktop app that allows you to talk to different models, register MCP servers 
 11. should be able to update a .zshrc config and pipe questions to axon
 12. persist conversation across different page clicks
 13. update server ids from sequential to uuid
+14. updates creates two of the same servers
