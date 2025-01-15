@@ -79,6 +79,16 @@ export default class MCP {
     }
   }
 
+  // TODO: update the start server logic
+  // right now the createClients method calls the startServer, but it doesn't need to rely on that to start the server
+  // we just need an install server method (which is kinda okay)
+  // and then the startServer method can be a combo of the createClients and start server method
+  // which creates a client for each enabled server and then connects to it
+  // then if someone wants to disable a server, we just remove the remove the active client, cleanup the server
+  // same on the reverse, if someone wants to start/enable a server, we check to see if we have a client, if not, then we create the client and start the server using the same method
+  // so there is an initial initiailziation step of all enabled servers in the db
+  // then ongoing enable/disable depending on what the user wants to do
+
   public async createClients(): Promise<void> {
     try {
       if (!this.client || !this.transport) {
