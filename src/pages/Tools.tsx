@@ -185,7 +185,7 @@ function ServerForm(props: ServerProps) {
 
       // Start the server
       setStatus({ stage: "starting", message: "Starting server..." });
-      // await window.electron.startServer(serverId);
+      await window.electron.startServer(serverId);
 
       setStatus({ stage: "complete", message: "Server is ready!" });
 

@@ -159,6 +159,10 @@ export default class MCP {
   public async closeClient(server: ServerConfig): Promise<void> {
     console.log("Closing server:", server);
     const clientName = this.getClientNameFromServer(server);
+    if (!this.clients[clientName]) {
+      console.error("Unable to find running server:", clientName);
+      throw new Error(`Unable to find running server ${clientName}`);
+    }
     try {
       await this.clients[clientName].close();
     } catch (error) {
