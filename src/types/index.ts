@@ -18,14 +18,12 @@ export interface IElectronAPI {
   updateServer: (data: ServerConfig) => Promise<void>;
   installServer: (serverId: number) => Promise<void>;
   startServer: (serverId: number) => Promise<void>;
+  stopServer: (serverId: number) => Promise<void>;
   // chat methods
   chat: (data: Message[]) => Promise<string>;
   minimizeWindow: () => void;
   maximizeWindow: () => void;
   closeWindow: () => void;
-  //server commands
-  enableServer: (id: number) => void;
-  disableServer: (id: number) => void;
 }
 
 export interface ServerConfig {

@@ -71,9 +71,9 @@ export default function Servers() {
   ) => {
     try {
       if (checked) {
-        await window.electron.enableServer(serverId);
+        await window.electron.startServer(serverId);
       } else {
-        await window.electron.disableServer(serverId);
+        await window.electron.stopServer(serverId);
       }
       setservers(
         servers!.map((server) =>

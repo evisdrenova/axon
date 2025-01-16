@@ -329,29 +329,26 @@ ipcMain.handle("start-server", async (_, serverId: number) => {
     enabled: dbRecord.enabled === true,
   };
 
-  return mcp.serverManager.startServer(server);
+  return mcp.createClient(server);
 });
 
 ipcMain.handle("stop-server", async (_, id: number) => {
-  return mcp.serverManager.stopServer(id);
-});
+  const stmt = db.prepare("SELECT * FROM servers WHERE id = ?");
+  const dbRecord = stmt.get(id) as ServerConfig;
+  if (!dbRecord) throw new Error("Server not found");
 
-//TODO: can make this smarter by only creating the clients that we need to
-// not all of the clients
-ipcMain.handle("enable-server", async (_, id: number) => {
-  await mcp.serverManager.enableServer(id);
-  // Recreate the client for this server
-  await mcp.createClients();
-});
-
-//TODO: can make this smarter by only disabled the clients that we need to
-// not all of the clients
-ipcMain.handle("disable-server", async (_, id: number) => {
-  await mcp.serverManager.disableServer(id);
-  // This will close the client connection
-  await mcp.closeClients();
-  // Recreate clients for remaining enabled servers
-  await mcp.createClients();
+  const server: ServerConfig = {
+    id: dbRecord.id,
+    name: dbRecord.name,
+    description: dbRecord.description || undefined,
+    installType: dbRecord.installType,
+    package: dbRecord.package,
+    startCommand: dbRecord.startCommand || undefined,
+    args: JSON.parse(String(dbRecord.args)),
+    version: dbRecord.version || undefined,
+    enabled: dbRecord.enabled === true,
+  };
+  return mcp.closeClient(server);
 });
 
 ipcMain.handle("chat", async (_, data: Message[]) => {

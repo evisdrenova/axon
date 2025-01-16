@@ -89,6 +89,7 @@ export default class MCP {
   // so there is an initial initiailziation step of all enabled servers in the db
   // then ongoing enable/disable depending on what the user wants to do
 
+  // create clients for the enabled servers
   public async createClients(): Promise<void> {
     try {
       if (!this.client || !this.transport) {
@@ -99,41 +100,46 @@ export default class MCP {
       if (servers.length > 0) {
         await Promise.all(
           servers.map(async (server) => {
-            console.log(`Initializing server: ${server.name}`);
-
-            console.log("server", server);
-
-            // Get or start the server process
-            let process = this.serverManager.getServerProcess(server.id!);
-            // console.log("process", process);
-            if (!process) {
-              process = await this.serverManager.startServer(server);
+            if (server.enabled) {
+              await this.createClient(server);
             }
-
-            const clientName = `${server.name}`;
-            const client = new this.client(
-              { name: clientName, version: "0.0.1" },
-              { capabilities: {} }
-            );
-
-            //TODO: update so that the command here is where the binary is stored
-
-            await client.connect(
-              new this.transport({
-                //  command: server.startCommand, // this  needs to be the server path
-                command:
-                  "/Users/evisdrenova/Library/Application Support/axon/mcp-servers/filesystem/node_modules/.bin/mcp-server-filesystem",
-                args: server.args,
-              })
-            );
-
-            this.clients[clientName] = client;
           })
         );
       }
     } catch (error) {
       console.error("Failed to initialize servers:", error);
       throw new Error("Unable to initialize servers");
+    }
+  }
+
+  public async createClient(server: ServerConfig): Promise<void> {
+    try {
+      console.log(`Initializing server`, server);
+
+      const clientName = `${server.name}`;
+
+      //client already exists for this server
+      if (this.clients[clientName]) {
+        return;
+      }
+      const client = new this.client(
+        { name: clientName, version: "0.0.1" },
+        { capabilities: {} }
+      );
+
+      await client.connect(
+        new this.transport({
+          //  command: server.startCommand, // this  needs to be the server path
+          command:
+            "/Users/evisdrenova/Library/Application Support/axon/mcp-servers/filesystem/node_modules/.bin/mcp-server-filesystem",
+          args: server.args,
+        })
+      );
+
+      this.clients[clientName] = client;
+    } catch (error) {
+      console.error("Failed to create client:", error);
+      throw new Error("Failed to create client");
     }
   }
 
@@ -148,6 +154,21 @@ export default class MCP {
       console.error("Failed to close clients:", error);
       throw new Error("Unable to close clients");
     }
+  }
+
+  public async closeClient(server: ServerConfig): Promise<void> {
+    console.log("Closing server:", server);
+    const clientName = this.getClientNameFromServer(server);
+    try {
+      await this.clients[clientName].close();
+    } catch (error) {
+      console.error("Failed to close client:", clientName);
+      throw new Error(`Unable to close client ${clientName}`);
+    }
+  }
+
+  private getClientNameFromServer(server: ServerConfig): string {
+    return `${server.name}`;
   }
 
   public async listTools(client?: string): Promise<Anthropic.Tool[]> {
