@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Provider } from "../types";
-import { Pencil, Trash } from "lucide-react";
+import { Box, Pencil, Trash } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -18,6 +18,9 @@ import {
   SelectValue,
 } from "../../components/ui/select";
 import { Alert, AlertDescription } from "../../components/ui/alert";
+import ModelTable from "../../components/Tables/ModelTable";
+import ButtonText from "../../src/lib/ButtonText";
+import Spinner from "../../src/lib/Spinner";
 
 export default function Models() {
   const [providers, setProviders] = useState<Provider[]>([]);
@@ -41,23 +44,17 @@ export default function Models() {
 
   if (providers.length === 0 && !showForm) {
     return (
-      <div className="p-4">
-        <Card className="text-center py-8">
-          <CardContent>
-            <p className="text-muted-foreground mb-4">
-              No providers created yet
-            </p>
-            <Button onClick={() => setShowForm(true)}>
-              Create New Provider
-            </Button>
-          </CardContent>
-        </Card>
+      <div className="p-4 border-2 border-main-200 m-4 rounded-lg border-dashed">
+        <div className="flex flex-col gap-2 items-center py-8">
+          <Box size={20} className="text-primary" />
+          <p className="text-foreground mb-4">No Models added yet</p>
+          <Button onClick={() => setShowForm(true)}>+ Add New Model</Button>
+        </div>
       </div>
     );
   }
 
-  const handleDelete = async (e: React.MouseEvent, pId: number) => {
-    e.preventDefault();
+  const handleDelete = async (pId: number) => {
     setIsDeleting(true);
     try {
       await window.electron.deleteProvider(pId);
@@ -82,14 +79,8 @@ export default function Models() {
 
   return (
     <div className="p-4">
-      {error && (
-        <Alert variant="destructive" className="mb-4">
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
-      )}
-
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Providers</h1>
+        <h1 className="text-2xl font-bold">Servers</h1>
         {!showForm && (
           <Button
             onClick={() => {
@@ -97,60 +88,32 @@ export default function Models() {
               setShowForm(true);
             }}
           >
-            New Provider
+            + New Server
           </Button>
         )}
       </div>
 
       {showForm ? (
-        <ProviderForm
+        <ModelForm
           onSave={loadProviders}
           onCancel={handleCloseForm}
           initialData={editingProvider}
+          isDeleting={isDeleting}
+          handleDelete={handleDelete}
         />
       ) : (
-        <div className="grid gap-4">
-          {providers.map((provider) => (
-            <Card key={provider.id}>
-              <CardContent className="flex justify-between items-center pt-6">
-                <div>
-                  <h3 className="font-bold">{provider.name}</h3>
-                  <p className="text-sm text-muted-foreground">
-                    {provider.baseUrl}
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    Model: {provider.model}
-                  </p>
-                </div>
-                <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() => handleEdit(provider)}
-                  >
-                    <Pencil className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={(e) => handleDelete(e, provider.id)}
-                    disabled={isDeleting}
-                  >
-                    <Trash className="h-4 w-4" />
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        <ModelTable models={providers} handleEdit={handleEdit} />
       )}
     </div>
   );
 }
+
 interface ProviderProps {
   onSave: () => void;
   onCancel: () => void;
   initialData?: Provider | null;
+  isDeleting: boolean;
+  handleDelete: (val: number) => void;
 }
 
 const PROVIDER_TYPES = [
@@ -177,8 +140,8 @@ const PROVIDER_TYPES = [
   },
 ];
 
-function ProviderForm(props: ProviderProps) {
-  const { onSave, onCancel, initialData } = props;
+function ModelForm(props: ProviderProps) {
+  const { onSave, onCancel, initialData, isDeleting, handleDelete } = props;
   const [error, setError] = useState<string | null>(null);
 
   const [formData, setFormData] = useState<Provider>(() => {
@@ -240,6 +203,32 @@ function ProviderForm(props: ProviderProps) {
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="flex justify-end ">
+            {initialData && ( // Only show delete button when editing
+              <Button
+                type="button"
+                variant="destructive"
+                onClick={(e) => {
+                  e.preventDefault();
+                  if (initialData.id) {
+                    handleDelete(initialData.id);
+                    onCancel(); // Close the form after deletion
+                  }
+                }}
+              >
+                <ButtonText
+                  leftIcon={
+                    isDeleting ? (
+                      <Spinner className="text-black dark:text-white" />
+                    ) : (
+                      <div />
+                    )
+                  }
+                  text="Delete Server"
+                />
+              </Button>
+            )}
+          </div>
           <div className="space-y-2">
             <Label htmlFor="name">Name</Label>
             <Input

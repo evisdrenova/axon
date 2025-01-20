@@ -6,10 +6,10 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "../../components/ui/table";
-import { Button } from "../../components/ui/button";
+} from "../ui/table";
+import { Button } from "../ui/button";
 import { ArrowTopRightIcon } from "@radix-ui/react-icons";
-import { Switch } from "../../components/ui/switch";
+import { Switch } from "../ui/switch";
 
 interface ServerTableProps {
   servers: ServerConfig[];

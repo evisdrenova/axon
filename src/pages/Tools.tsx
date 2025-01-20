@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { ServerConfig } from "../types";
 import { Button } from "../../components/ui/button";
 import { Card, CardContent } from "../../components/ui/card";
-import ServerTable from "../../components/ServerTable/ServerTable";
+import ServerTable from "../../components/Tables/ServerTable";
 import { Wrench } from "lucide-react";
 import ButtonText from "../../src/lib/ButtonText";
 import Spinner from "../../src/lib/Spinner";
@@ -156,6 +156,7 @@ function ServerForm(props: ServerProps) {
       enabled: true,
     };
   });
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
