@@ -89,8 +89,13 @@ export default function Home() {
     <div className="flex flex-col h-full">
       <ResizablePanelGroup direction="vertical">
         <ResizablePanel defaultSize={70} minSize={10}>
-          <div className="flex-1  overflow-auto  px-40">
-            <ChatScrollArea messages={messages} isLoading={isLoading} />
+          <div className="flex-1 overflow-auto px-36 relative py-6">
+            <ChatScrollArea
+              messages={messages}
+              isLoading={isLoading}
+              provider={currentProvider}
+              user={"Evis"}
+            />
           </div>
         </ResizablePanel>
         <ResizableHandle withHandle />
