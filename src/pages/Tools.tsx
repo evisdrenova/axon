@@ -194,7 +194,7 @@ function ServerForm(props: ServerProps) {
 
         // Install the server
         setStatus({ stage: "installing", message: "Installing server..." });
-        await window.electron.installServer(serverId);
+        // await window.electron.installServer(serverId);
 
         // Start the server
         setStatus({ stage: "starting", message: "Starting server..." });
@@ -262,7 +262,7 @@ function ServerForm(props: ServerProps) {
                       <div />
                     )
                   }
-                  text="Test Connection"
+                  text="Delete Server"
                 />
               </Button>
             )}

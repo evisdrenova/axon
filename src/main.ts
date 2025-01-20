@@ -210,32 +210,45 @@ ipcMain.handle("get-servers", () => {
   return mcp.getServers();
 });
 
-ipcMain.handle("add-server", (_, config: ServerConfig) => {
-  const stmt = db.prepare(`
-    INSERT INTO servers (
-      name,
-      description,
-      installType,
-      package, 
-      startCommand,
-      args,
-      version,
-      enabled
-    ) VALUES (?,?,?,?,?,?,?,?)
-  `);
+ipcMain.handle("add-server", async (_, config: ServerConfig) => {
+  try {
+    // Install the server and get updated config
+    const server = await mcp.serverManager.installServer(config, db);
 
-  const result = stmt.run(
-    config.name,
-    config.description || null,
-    config.installType,
-    config.package,
-    config.startCommand || null,
-    JSON.stringify(config.args),
-    config.version || null,
-    config.enabled ? 1 : 0
-  );
+    // Save to database
+    const stmt = db.prepare(`
+      INSERT INTO servers (
+        name,
+        description,
+        installType,
+        package, 
+        startCommand,
+        args,
+        version,
+        enabled
+      ) VALUES (?,?,?,?,?,?,?,?)
+    `);
 
-  return result.lastInsertRowid;
+    const result = stmt.run(
+      server.name,
+      server.description || null,
+      server.installType,
+      server.package,
+      server.startCommand || null,
+      JSON.stringify(server.args),
+      server.version || null,
+      server.enabled ? 1 : 0
+    );
+
+    if (result.changes === 0) {
+      throw new Error("Failed to save server to database");
+    }
+
+    return result.lastInsertRowid;
+  } catch (error) {
+    log.error("Error adding server:", error);
+    throw error;
+  }
 });
 
 ipcMain.handle("delete-server", async (_, id: number) => {
@@ -294,25 +307,25 @@ ipcMain.handle("update-server", (_, config: ServerConfig) => {
   return result;
 });
 
-ipcMain.handle("install-server", async (_, serverId: number) => {
-  const stmt = db.prepare("SELECT * FROM servers WHERE id = ?");
-  const dbRecord = stmt.get(serverId) as ServerConfig;
-  if (!dbRecord) throw new Error("Server not found");
+// ipcMain.handle("install-server", async (_, serverId: number) => {
+//   // const stmt = db.prepare("SELECT * FROM servers WHERE id = ?");
+//   // const dbRecord = stmt.get(serverId) as ServerConfig;
+//   // if (!dbRecord) throw new Error("Server not found");
 
-  const server: ServerConfig = {
-    id: dbRecord.id,
-    name: dbRecord.name,
-    description: dbRecord.description || undefined,
-    installType: dbRecord.installType,
-    package: dbRecord.package,
-    startCommand: dbRecord.startCommand || undefined,
-    args: JSON.parse(String(dbRecord.args)),
-    version: dbRecord.version || undefined,
-    enabled: dbRecord.enabled === true,
-  };
+//   const server: ServerConfig = {
+//     id: dbRecord.id,
+//     name: dbRecord.name,
+//     description: dbRecord.description || undefined,
+//     installType: dbRecord.installType,
+//     package: dbRecord.package,
+//     startCommand: dbRecord.startCommand || undefined,
+//     args: JSON.parse(String(dbRecord.args)),
+//     version: dbRecord.version || undefined,
+//     enabled: dbRecord.enabled === true,
+//   };
 
-  return mcp.serverManager.installServer(server);
-});
+//   return mcp.serverManager.installServer(server, db);
+// });
 
 ipcMain.handle("start-server", async (_, serverId: number) => {
   const stmt = db.prepare("SELECT * FROM servers WHERE id = ?");

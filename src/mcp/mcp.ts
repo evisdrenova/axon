@@ -151,7 +151,11 @@ export default class MCP {
         const npmBinPath = path.join(basePath, "node_modules", ".bin");
 
         const splitName = server.package.split("/");
-        const binaryName = splitName[1];
+        const binaryName = server.startCommand;
+
+        console.log("servername", splitName);
+
+        console.log("split name", splitName);
 
         // // determines binary name
         // const binaryName =
@@ -168,6 +172,7 @@ export default class MCP {
         //         .replace("@modelcontextprotocol/", ""));
 
         const commandPath = path.join(npmBinPath, binaryName);
+        console.log("command path", commandPath);
         if (this.doesBinaryExist(commandPath, binaryName)) {
           return commandPath; // Return the full path to the binary
         }

@@ -20,3 +20,4 @@ A desktop app that allows you to talk to different models, register MCP servers 
 13. update server ids from sequential to uuid
 14. updates creates two of the same servers
 15. error messages not flowing through to front-end
+16. filesystem is case senesitive

@@ -26,7 +26,6 @@ const execAsync = promisify(exec);
 export class MCPServerManager {
   private serversPath: string;
   private activeProcesses: Map<number, ChildProcess> = new Map();
-  private serverMetadata: Map<string, ServerMetadata> = new Map();
 
   constructor(private readonly db: Database) {
     this.serversPath = path.join(app.getPath("userData"), "mcp-servers");
@@ -49,7 +48,10 @@ export class MCPServerManager {
   }
 
   // builds the right installation command based on the installation type and OS
-  async installServer(config: ServerConfig): Promise<boolean> {
+  async installServer(
+    config: ServerConfig,
+    db: Database
+  ): Promise<ServerConfig> {
     const serverPath = path.join(this.serversPath, config.name);
 
     try {
@@ -65,11 +67,14 @@ export class MCPServerManager {
               cwd: serverPath,
             }
           );
-          break;
+          config.startCommand = await this.getNpmBinaryName(
+            serverPath,
+            config.package
+          );
+          return config;
 
         case "pip":
         case "uv":
-          // Create virtual environment
           await execAsync("python3 -m venv venv", {
             cwd: serverPath,
           });
@@ -101,20 +106,70 @@ export class MCPServerManager {
               { cwd: serverPath }
             );
           }
-          break;
+          return config;
 
         case "binary":
-          // Implement binary installation logic based on your needs
-          break;
-      }
+          //TODO
+          return config;
 
-      return true;
+        default:
+          throw new Error(`Unknown install type: ${config.installType}`);
+      }
     } catch (error) {
       log.error(`Failed to install server ${config.name}:`, error);
+      // Clean up directory if installation fails
+      try {
+        await fs.rm(serverPath, { recursive: true, force: true });
+      } catch (cleanupError) {
+        log.error(
+          "Failed to clean up after failed installation:",
+          cleanupError
+        );
+      }
       throw error;
     }
   }
 
+  // gets the binary name from the package.json file in the node_module in order to construct the start command
+  private async getNpmBinaryName(
+    serverPath: string,
+    packageName: string
+  ): Promise<string> {
+    try {
+      const packageJsonPath = path.join(
+        serverPath,
+        "node_modules",
+        packageName,
+        "package.json"
+      );
+
+      const packageJson = JSON.parse(
+        await fs.readFile(packageJsonPath, "utf-8")
+      );
+
+      if (!packageJson.bin) {
+        throw new Error(
+          `Package ${packageName} does not have a bin field in package.json`
+        );
+      }
+
+      // Get binary name from the bin field
+      let binaryName: string;
+      if (typeof packageJson.bin === "string") {
+        // If bin is a string, use the package name
+        binaryName = packageName.split("/").pop()!;
+      } else {
+        // If bin is an object, get the first key
+        binaryName = Object.keys(packageJson.bin)[0];
+      }
+
+      log.info(`Found binary name from package.json: ${binaryName}`);
+      return binaryName;
+    } catch (error) {
+      log.error(`Failed to get binary name for ${packageName}:`, error);
+      throw error;
+    }
+  }
   // builds the right start command based on the install type and the OS
   // and starts a new process for each server
   async startServer(config: ServerConfig): Promise<ChildProcess> {
