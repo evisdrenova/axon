@@ -279,17 +279,19 @@ ipcMain.handle("update-server", (_, config: ServerConfig) => {
     WHERE id = ?
   `);
 
-  return stmt.run(
+  const args = Array.isArray(config.args) ? JSON.stringify(config.args) : "[]";
+  const result = stmt.run(
     config.name,
     config.description || null,
     config.installType,
     config.package,
     config.startCommand || null,
-    JSON.stringify(config.args),
+    args,
     config.version || null,
-    config.enabled ?? true,
+    config.enabled ? 1 : 0,
     config.id
   );
+  return result;
 });
 
 ipcMain.handle("install-server", async (_, serverId: number) => {

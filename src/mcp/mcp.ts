@@ -137,12 +137,9 @@ export default class MCP {
     }
   }
 
-  //TODO: verify the path construction is working correctly
-
   // returns the path to the server binary for execution
   private getServerBinaryPath(server: ServerConfig): string {
-    let serverPath: string;
-    const dirPath = path.join(
+    const basePath = path.join(
       app.getPath("userData"),
       "mcp-servers",
       server.name
@@ -151,30 +148,30 @@ export default class MCP {
     switch (server.installType) {
       case "npm":
         // builds the path to the bin in the node_modules
-        const npmBinPath = path.join(serverPath, "node_modules", ".bin");
+        const npmBinPath = path.join(basePath, "node_modules", ".bin");
 
-        console.log("npmBinPath", npmBinPath);
+        const splitName = server.package.split("/");
+        const binaryName = splitName[1];
 
-        // determines binary name
-        const binaryName =
-          server.startCommand ||
-          (server.package.includes("server-")
-            ? "mcp-" +
-              server.package
-                .split("/")
-                .pop()!
-                .replace("@modelcontextprotocol/", "")
-            : server.package
-                .split("/")
-                .pop()!
-                .replace("@modelcontextprotocol/", ""));
+        // // determines binary name
+        // const binaryName =
+        //   server.startCommand ||
+        //   (server.package.includes("server-")
+        //     ? "mcp-" +
+        //       server.package
+        //         .split("/")
+        //         .pop()!
+        //         .replace("@modelcontextprotocol/", "")
+        //     : server.package
+        //         .split("/")
+        //         .pop()!
+        //         .replace("@modelcontextprotocol/", ""));
 
         const commandPath = path.join(npmBinPath, binaryName);
-
         if (this.doesBinaryExist(commandPath, binaryName)) {
-          serverPath = path.join(serverPath, "node_modules");
+          return commandPath; // Return the full path to the binary
         }
-        break;
+        throw new Error(`Binary ${binaryName} not found at ${commandPath}`);
       // case "pip":
       // case "uv":
       //   const pythonPath =
@@ -201,8 +198,6 @@ export default class MCP {
       //   );
       //   break;
     }
-
-    return serverPath;
   }
 
   private async doesBinaryExist(path: string, name: string): Promise<boolean> {

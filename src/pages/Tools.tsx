@@ -156,11 +156,10 @@ function ServerForm(props: ServerProps) {
       enabled: true,
     };
   });
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
     try {
-      // Start the process
       setStatus({ stage: "saving", message: "Saving server configuration..." });
 
       const config: ServerConfig = {
@@ -172,20 +171,35 @@ function ServerForm(props: ServerProps) {
         startCommand: formData.startCommand || null,
         args: formData.args,
         version: formData.version || "latest",
-        enabled: true, // Always enabled when first created
+        enabled: formData.enabled,
       };
 
-      // Save to database
-      const serverId = await window.electron.addServer(config);
+      if (initialData) {
+        // Save to database
+        await window.electron.updateServer(config);
 
-      // Install the server
-      setStatus({ stage: "installing", message: "Installing server..." });
-      // works fine
-      await window.electron.installServer(serverId);
+        if (config.enabled) {
+          //TODO: determine when we need to uninstall and re-install instead of just restarting
+          // setStatus({ stage: "installing", message: "Installing server..." });
+          // await window.electron.installServer(config.id);
+          // Restart the server
+          await window.electron.stopServer(config.id!);
+          // Start the server
+          setStatus({ stage: "starting", message: "Starting server..." });
+          await window.electron.startServer(config.id!);
+        }
+      } else {
+        // Save to database
+        const serverId = await window.electron.addServer(config);
 
-      // Start the server
-      setStatus({ stage: "starting", message: "Starting server..." });
-      await window.electron.startServer(serverId);
+        // Install the server
+        setStatus({ stage: "installing", message: "Installing server..." });
+        await window.electron.installServer(serverId);
+
+        // Start the server
+        setStatus({ stage: "starting", message: "Starting server..." });
+        await window.electron.startServer(serverId);
+      }
 
       setStatus({ stage: "complete", message: "Server is ready!" });
 
