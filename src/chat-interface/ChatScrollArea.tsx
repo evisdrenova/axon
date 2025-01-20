@@ -93,14 +93,15 @@ export default function ChatScrollArea(props: Props) {
                   `flex px-2 `
                 )}
               >
-                {renderMessageMetadat(message.role, provider, user)}
+                {renderMessageMetadata(message.role, provider, user)}
               </div>
               <div
-                className={`rounded-lg px-4 py-2  ${
+                className={cn(
                   message.role === "user"
                     ? "bg-primary text-primary-foreground"
-                    : "bg-muted"
-                }`}
+                    : "bg-muted",
+                  `rounded-lg px-4 py-2`
+                )}
               >
                 {renderMessageContent(message)}
               </div>
@@ -203,7 +204,7 @@ function renderMarkdown(content: string, role: string) {
   );
 }
 
-function renderMessageMetadat(
+function renderMessageMetadata(
   role: string,
   provider: Provider,
   user: string

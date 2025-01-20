@@ -1,7 +1,14 @@
 import { contextBridge, ipcRenderer } from "electron";
-import { ServerConfig, Provider, Message } from "./types";
+import { ServerConfig, Provider, Message, User } from "./types";
 
 contextBridge.exposeInMainWorld("electron", {
+  // user methods
+  setUser: (user: User) => {
+    return ipcRenderer.invoke("set-user", user);
+  },
+  getUser: () => {
+    return ipcRenderer.invoke("get-user");
+  },
   // settings methods
   getSetting: (key: string) => {
     return ipcRenderer.invoke("db-get-setting", key);

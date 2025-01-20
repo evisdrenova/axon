@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Message, Provider } from "../types";
+import { Message, Provider, User } from "../types";
 import ChatScrollArea from "../chat-interface/ChatScrollArea";
 import ChatInput from "../../components/ChatInterface/ChatInput";
 import ModelSelect from "../../components/ChatInterface/ModelSelect";
@@ -10,6 +10,7 @@ import {
 } from "../../components/ui/resizable";
 
 export default function Home() {
+  const [user, setUser] = useState<User | null>(null);
   const [providers, setProviders] = useState<Provider[]>([]);
   const [selectedProvider, setSelectedProvider] = useState<string>("");
   const [currentProvider, setCurrentProvider] = useState<Provider | null>(null);
@@ -33,7 +34,18 @@ export default function Home() {
     }
   };
 
+  const loadUser = async () => {
+    try {
+      const user = await window.electron.getUser();
+      console.log("Raw user data from IPC:", user); // Add this log
+      setUser(user);
+    } catch (err) {
+      console.error("Error loading user:", err);
+    }
+  };
+
   useEffect(() => {
+    loadUser();
     loadProviders();
   }, []);
 
@@ -94,13 +106,13 @@ export default function Home() {
               messages={messages}
               isLoading={isLoading}
               provider={currentProvider}
-              user={"Evis"}
+              user={user?.name ?? ""}
             />
           </div>
         </ResizablePanel>
         <ResizableHandle withHandle />
         <ResizablePanel minSize={30} defaultSize={30}>
-          <div className="flex flex-col gap-2 h-full overflow-hidden px-40">
+          <div className="flex flex-col gap-2 h-full overflow-auto px-40">
             <div>
               <ModelSelect
                 handleProviderSelect={handleProviderSelect}

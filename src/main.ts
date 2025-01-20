@@ -2,11 +2,10 @@ import { app, BrowserWindow, ipcMain } from "electron";
 import path from "path";
 import started from "electron-squirrel-startup";
 import Database from "better-sqlite3";
-import { ServerConfig, Provider, Message } from "./types";
+import { ServerConfig, Provider, Message, User } from "./types";
 import log from "electron-log/main";
 import MCP from "./mcp/mcp";
 import Providers from "./providers/providers";
-import { MCPServerManager, ServerMetadata } from "./mcp/mcpManager";
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (started) {
@@ -77,6 +76,13 @@ const initializeDatabase = () => {
     FOREIGN KEY (conversationId) REFERENCES conversations(id)
 );`);
 
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS user (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT
+   )
+  `);
+
   return db;
 };
 
@@ -127,18 +133,36 @@ ipcMain.on("window-close", () => {
   mainWindow.close();
 });
 
-ipcMain.handle("db-get-setting", async (_, key) => {
+ipcMain.handle("db-get-setting", (_, key) => {
   const stmt = db.prepare("SELECT value FROM settings WHERE key = ?");
   return stmt.get(key);
 });
 
-ipcMain.handle("db-set-setting", async (_, key, value) => {
+ipcMain.handle("db-set-setting", (_, key, value) => {
   const stmt = db.prepare(
     "INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)"
   );
   return stmt.run(key, value);
 });
 
+ipcMain.handle("set-user", (_, user: User) => {
+  const stmt = db.prepare(`
+    INSERT into user (name) values (?)`);
+
+  return stmt.run(user.name);
+});
+
+ipcMain.handle("get-user", () => {
+  try {
+    const stmt = db.prepare(`SELECT id, name from user`);
+    const user = stmt.get();
+    console.log("User from database:", user);
+    return user;
+  } catch (error) {
+    console.error("Error getting user:", error);
+    throw error;
+  }
+});
 ipcMain.handle("get-providers", () => {
   const stmt = db.prepare(
     "SELECT id, name, type, baseUrl, apiPath, apiKey, model, config FROM providers"
@@ -180,7 +204,7 @@ ipcMain.handle("delete-provider", (_, id: number) => {
   }
 });
 
-ipcMain.handle("update-provider", (_, provider: Provider) => {
+ipcMain.handle("update-provider", async (_, provider: Provider) => {
   try {
     const stmt = db.prepare(
       "UPDATE providers SET name = ?, type = ?, baseUrl = ?, apiPath = ?, apiKey = ?, model = ?, config = ? WHERE id = ?"
@@ -306,26 +330,6 @@ ipcMain.handle("update-server", (_, config: ServerConfig) => {
   );
   return result;
 });
-
-// ipcMain.handle("install-server", async (_, serverId: number) => {
-//   // const stmt = db.prepare("SELECT * FROM servers WHERE id = ?");
-//   // const dbRecord = stmt.get(serverId) as ServerConfig;
-//   // if (!dbRecord) throw new Error("Server not found");
-
-//   const server: ServerConfig = {
-//     id: dbRecord.id,
-//     name: dbRecord.name,
-//     description: dbRecord.description || undefined,
-//     installType: dbRecord.installType,
-//     package: dbRecord.package,
-//     startCommand: dbRecord.startCommand || undefined,
-//     args: JSON.parse(String(dbRecord.args)),
-//     version: dbRecord.version || undefined,
-//     enabled: dbRecord.enabled === true,
-//   };
-
-//   return mcp.serverManager.installServer(server, db);
-// });
 
 ipcMain.handle("start-server", async (_, serverId: number) => {
   const stmt = db.prepare("SELECT * FROM servers WHERE id = ?");

@@ -1,10 +1,14 @@
 import OpenAI from "openai";
 import Anthropic from "@anthropic-ai/sdk";
 
+// always returns a promise since the IPC communication is async even if the underlying implementation is synchronous
 export interface IElectronAPI {
   // settings methods
   getSetting: (key: string) => Promise<string>;
   setSetting: (key: string, value: string) => Promise<void>;
+  // User methods
+  setUser: (user: User) => Promise<void>;
+  getUser: () => Promise<User>;
   // provider methods
   getProviders: () => Promise<Provider[]>;
   addProvider: (provider: Provider) => Promise<void>;
@@ -47,6 +51,11 @@ export interface Provider {
   apiKey: string;
   model: string;
   config: string;
+}
+
+export interface User {
+  id?: number;
+  name: string;
 }
 
 export interface Message {

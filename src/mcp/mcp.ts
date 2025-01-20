@@ -89,7 +89,7 @@ export default class MCP {
       if (!this.client || !this.transport) {
         await this.init();
       }
-      const servers = this.getServers();
+      const servers = await this.getServers();
 
       if (servers.length > 0) {
         await Promise.all(
