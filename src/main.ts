@@ -156,18 +156,20 @@ ipcMain.handle("get-user", () => {
   try {
     const stmt = db.prepare(`SELECT id, name from user`);
     const user = stmt.get();
-    console.log("User from database:", user);
     return user;
   } catch (error) {
-    console.error("Error getting user:", error);
     throw error;
   }
 });
 ipcMain.handle("get-providers", () => {
-  const stmt = db.prepare(
-    "SELECT id, name, type, baseUrl, apiPath, apiKey, model, config FROM providers"
-  );
-  return stmt.all();
+  try {
+    const stmt = db.prepare(
+      "SELECT id, name, type, baseUrl, apiPath, apiKey, model, config FROM providers"
+    );
+    return stmt.all();
+  } catch (error) {
+    throw error;
+  }
 });
 
 ipcMain.handle("add-provider", (_, provider: Provider) => {

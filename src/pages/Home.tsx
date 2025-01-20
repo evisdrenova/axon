@@ -37,7 +37,6 @@ export default function Home() {
   const loadUser = async () => {
     try {
       const user = await window.electron.getUser();
-      console.log("Raw user data from IPC:", user); // Add this log
       setUser(user);
     } catch (err) {
       console.error("Error loading user:", err);
