@@ -8,6 +8,46 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "../../components/ui/resizable";
+import ConversationHistory from "../../components/ConversationHistory/ConversationHistory";
+
+export interface Conversation {
+  id: string;
+  name: string;
+  parentId: string;
+}
+
+const mes: Conversation[] = [
+  {
+    id: "1",
+    name: "convo1",
+    parentId: "",
+  },
+  {
+    id: "2",
+    name: "convo2",
+    parentId: "1",
+  },
+  {
+    id: "3",
+    name: "convo3",
+    parentId: "",
+  },
+  {
+    id: "4",
+    name: "convo4",
+    parentId: "3",
+  },
+  {
+    id: "5",
+    name: "convo5",
+    parentId: "",
+  },
+  {
+    id: "6",
+    name: "convo6",
+    parentId: "5",
+  },
+];
 
 export default function Home() {
   const [user, setUser] = useState<User | null>(null);
@@ -100,13 +140,18 @@ export default function Home() {
     <div className="flex flex-col h-full">
       <ResizablePanelGroup direction="vertical">
         <ResizablePanel defaultSize={70} minSize={10}>
-          <div className="flex-1 overflow-auto px-36 relative py-6">
-            <ChatScrollArea
-              messages={messages}
-              isLoading={isLoading}
-              provider={currentProvider}
-              user={user?.name ?? ""}
-            />
+          <div className="flex flex-row gap-2 w-full h-full">
+            <div className="w-1/4 border-r border-r-gray-300 h-full">
+              <ConversationHistory messages={mes} />
+            </div>
+            <div className="flex-1 overflow-auto  relative py-6 w-3/4 ">
+              <ChatScrollArea
+                messages={messages}
+                isLoading={isLoading}
+                provider={currentProvider}
+                user={user?.name ?? ""}
+              />
+            </div>
           </div>
         </ResizablePanel>
         <ResizableHandle withHandle />
