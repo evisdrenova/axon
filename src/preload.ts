@@ -57,6 +57,14 @@ contextBridge.exposeInMainWorld("electron", {
     return ipcRenderer.invoke("stop-server", serverId);
   },
 
+  // conversation methods
+  createConversation: () => {
+    return ipcRenderer.invoke("create-conversation");
+  },
+  deleteConversation: (id: number) => {
+    return ipcRenderer.invoke("delete-converaation", id);
+  },
+
   //chat methods
   chat: (data: Message[]) => {
     return ipcRenderer.invoke("chat", data);

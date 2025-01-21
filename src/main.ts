@@ -2,7 +2,7 @@ import { app, BrowserWindow, ipcMain } from "electron";
 import path from "path";
 import started from "electron-squirrel-startup";
 import Database from "better-sqlite3";
-import { ServerConfig, Provider, Message, User } from "./types";
+import { ServerConfig, Provider, Message, User, Conversation } from "./types";
 import log from "electron-log/main";
 import MCP from "./mcp/mcp";
 import Providers from "./providers/providers";
@@ -62,8 +62,10 @@ const initializeDatabase = () => {
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       providerId INTEGER,
       title TEXT,
+      parent_conversation_id INTEGER,
       createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (providerId) REFERENCES providers(id)
+      FOREIGN KEY (parent_conversation_id) REFERENCES conversations(id)
 );`);
 
   db.exec(`
@@ -377,6 +379,43 @@ ipcMain.handle("chat", async (_, data: Message[]) => {
     throw new Error("No provider selected");
   }
   return providers.processQuery(data);
+});
+
+ipcMain.handle("create-conversation", (_, convo: Conversation) => {
+  try {
+    const stmt = db.prepare(`
+    INSERT into conversations (providerId, title, parent_conversation_id ) VALUES(?,?,?)
+    `);
+    return stmt.run(convo.providerId, convo.title, convo.parent_conversation_id)
+      .lastInsertRowid;
+  } catch (error) {
+    console.log("unable to create new conversation");
+    throw error;
+  }
+});
+
+ipcMain.handle("delete-conversation", (_, convoId: number) => {
+  try {
+    const getStmt = db.prepare("SELECT title FROM conversations WHERE id = ?");
+    const convo = getStmt.get(convoId) as { title: string } | undefined;
+
+    if (!convo) {
+      throw new Error(`No conversation found with id ${convoId}`);
+    }
+
+    // Delete from database
+    const deleteStmt = db.prepare("DELETE FROM conversations WHERE id = ?");
+    const result = deleteStmt.run(convoId);
+
+    if (result.changes === 0) {
+      throw new Error(`Failed to delete convo from database`);
+    }
+
+    return result;
+  } catch (error) {
+    console.log("unable to delete conversation");
+    throw error;
+  }
 });
 
 // called when Electron has initialized and is ready to create browser windows.

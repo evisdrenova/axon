@@ -23,6 +23,9 @@ export interface IElectronAPI {
   installServer: (serverId: number) => Promise<void>;
   startServer: (serverId: number) => Promise<void>;
   stopServer: (serverId: number) => Promise<void>;
+  //conversation methods
+  createConversation: () => Promise<number>;
+  deleteConversation: (id: number) => Promise<void>;
   // chat methods
   chat: (data: Message[]) => Promise<string>;
   minimizeWindow: () => void;
@@ -51,6 +54,14 @@ export interface Provider {
   apiKey: string;
   model: string;
   config: string;
+}
+
+export interface Conversation {
+  id?: number;
+  providerId: number;
+  title: string;
+  createdAt: string;
+  parent_conversation_id: number;
 }
 
 export interface User {

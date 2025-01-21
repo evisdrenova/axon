@@ -1,8 +1,10 @@
-import { Conversation } from "../../src/pages/Home";
+import { Button } from "../../components/ui/button";
+import { TestConversation } from "../../src/pages/Home";
 import ConversationHistoryItem from "./ConversationHistoryItem";
 
 interface Props {
-  messages: Conversation[];
+  messages: TestConversation[];
+  handleNewConversation: () => void;
 }
 
 const nodes: Node[] = [
@@ -50,10 +52,15 @@ type Node = {
 };
 
 export default function ConversationHistory(props: Props) {
-  const { messages } = props;
+  const { messages, handleNewConversation } = props;
   console.log("messgaes", messages);
   return (
-    <div className="p-4 h-[600px] w-[400px] overflow-y-auto">
+    <div className="p-4 h-[600px] w-[400px] overflow-y-auto flex flex-col gap-4">
+      <div>
+        <Button variant="default" onClick={handleNewConversation}>
+          + New Conversation
+        </Button>
+      </div>
       <ul>
         {nodes.map((node) => (
           <ConversationHistoryItem node={node} key={node.name} animated />
@@ -61,13 +68,4 @@ export default function ConversationHistory(props: Props) {
       </ul>
     </div>
   );
-}
-
-// <div className="flex flex-col gap-2 w-full h-full">
-{
-  /* {messages.map((mes) => (
-        <div key={mes.id}>
-          <div className="text-sm text-gray-900">{mes.name}</div>
-        </div>
-      ))} */
 }

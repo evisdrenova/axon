@@ -10,13 +10,13 @@ import {
 } from "../../components/ui/resizable";
 import ConversationHistory from "../../components/ConversationHistory/ConversationHistory";
 
-export interface Conversation {
+export interface TestConversation {
   id: string;
   name: string;
   parentId: string;
 }
 
-const mes: Conversation[] = [
+const mes: TestConversation[] = [
   {
     id: "1",
     name: "convo1",
@@ -136,13 +136,20 @@ export default function Home() {
     }
   };
 
+  const handleNewConversation = async () => {
+    const convo = await window.electron.createConversation();
+  };
+
   return (
     <div className="flex flex-col h-full">
       <ResizablePanelGroup direction="vertical">
         <ResizablePanel defaultSize={70} minSize={10}>
           <div className="flex flex-row gap-2 w-full h-full">
             <div className="w-1/4 border-r border-r-gray-300 h-full">
-              <ConversationHistory messages={mes} />
+              <ConversationHistory
+                messages={mes}
+                handleNewConversation={handleNewConversation}
+              />
             </div>
             <div className="flex-1 overflow-auto  relative py-6 w-3/4 ">
               <ChatScrollArea

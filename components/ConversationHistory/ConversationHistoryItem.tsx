@@ -18,8 +18,6 @@ export default function ConversationHistoryItem(props: Props) {
 
   let [isOpen, setIsOpen] = useState(false);
 
-  // Common content for both options
-
   const ChevronIcon = () =>
     animated ? (
       <motion.span
