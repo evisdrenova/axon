@@ -13,7 +13,7 @@ interface Props {
   animated?: boolean;
 }
 
-export default function ConversationHistoryItem(props: Props) {
+export default function ConversationTreeItem(props: Props) {
   const { node, animated } = props;
 
   let [isOpen, setIsOpen] = useState(false);
@@ -35,11 +35,7 @@ export default function ConversationHistoryItem(props: Props) {
 
   const ChildrenList = () => {
     const children = node.nodes?.map((node) => (
-      <ConversationHistoryItem
-        node={node}
-        key={node.name}
-        animated={animated}
-      />
+      <ConversationTreeItem node={node} key={node.name} animated={animated} />
     ));
 
     if (animated) {

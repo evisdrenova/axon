@@ -163,6 +163,7 @@ ipcMain.handle("get-user", () => {
     throw error;
   }
 });
+
 ipcMain.handle("get-providers", () => {
   try {
     const stmt = db.prepare(
@@ -414,6 +415,24 @@ ipcMain.handle("delete-conversation", (_, convoId: number) => {
     return result;
   } catch (error) {
     console.log("unable to delete conversation");
+    throw error;
+  }
+});
+
+ipcMain.handle("get-conversations", () => {
+  try {
+    const stmt = db.prepare(`
+    SELECT id, 
+    providerId, 
+    title, 
+    createAt, 
+    parent_conversation_id
+    FROM conversations
+    `);
+
+    return stmt.all();
+  } catch (error) {
+    console.log("unable to get conversations");
     throw error;
   }
 });

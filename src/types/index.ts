@@ -24,6 +24,7 @@ export interface IElectronAPI {
   startServer: (serverId: number) => Promise<void>;
   stopServer: (serverId: number) => Promise<void>;
   //conversation methods
+  getConversations: () => Promise<Conversation[]>;
   createConversation: () => Promise<number>;
   deleteConversation: (id: number) => Promise<void>;
   // chat methods
@@ -56,24 +57,6 @@ export interface Provider {
   config: string;
 }
 
-export interface Conversation {
-  id?: number;
-  providerId: number;
-  title: string;
-  createdAt: string;
-  parent_conversation_id: number;
-}
-
-export interface User {
-  id?: number;
-  name: string;
-}
-
-export interface Message {
-  role: "user" | "assistant";
-  content: string | Anthropic.ContentBlock[];
-}
-
 export type ProviderClient =
   | {
       type: "openai";
@@ -84,10 +67,26 @@ export type ProviderClient =
       client: Anthropic;
     };
 
-export interface PromptTemplate {
+export interface User {
+  id?: number;
   name: string;
-  description?: string;
-  arguments?: PromptTemplateArguments;
+}
+
+export interface Message {
+  id?: number;
+  role: "user" | "assistant";
+  content: string | Anthropic.ContentBlock[];
+  createdAt?: string;
+  conversationId?: number;
+}
+
+export interface Conversation {
+  id?: number;
+  providerId: number;
+  title: string;
+  parent_conversation_id: number;
+  createdAt: string;
+  messages?: Message[];
 }
 
 export interface PromptTemplateArguments {

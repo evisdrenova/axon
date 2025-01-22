@@ -58,6 +58,9 @@ contextBridge.exposeInMainWorld("electron", {
   },
 
   // conversation methods
+  getConversations: () => {
+    return ipcRenderer.invoke("get-conversations");
+  },
   createConversation: () => {
     return ipcRenderer.invoke("create-conversation");
   },

@@ -1,10 +1,15 @@
-import { Button } from "../../components/ui/button";
-import { TestConversation } from "../../src/pages/Home";
-import ConversationHistoryItem from "./ConversationHistoryItem";
+import { Conversation } from "../../src/types";
+import { Button } from "../ui/button";
+import ConversationHistoryItem from "./ConversationTreeItem";
 
 interface Props {
-  messages: TestConversation[];
-  handleNewConversation: () => void;
+  conversations: Conversation[];
+  activeConversationId: number | null;
+  onNewConversation: (parentId?: string) => void;
+  onBranchConversation: (conversationId: number) => void;
+  onSelectConversation: (conversationId: number) => void;
+  onDeleteConversation: (convoId: number) => void;
+  onUpdateTitle: (convoId: number, newTitle: string) => void;
 }
 
 const nodes: Node[] = [
@@ -51,13 +56,20 @@ type Node = {
   nodes?: Node[];
 };
 
-export default function ConversationHistory(props: Props) {
-  const { messages, handleNewConversation } = props;
-  console.log("messgaes", messages);
+export default function ConversationTree(props: Props) {
+  const {
+    conversations,
+    activeConversationId,
+    onNewConversation,
+    onBranchConversation,
+    onSelectConversation,
+    onUpdateTitle,
+  } = props;
+  console.log("messgaes", conversations);
   return (
     <div className="p-4 h-[600px] w-[400px] overflow-y-auto flex flex-col gap-4">
       <div>
-        <Button variant="default" onClick={handleNewConversation}>
+        <Button variant="default" onClick={() => onNewConversation()}>
           + New Conversation
         </Button>
       </div>

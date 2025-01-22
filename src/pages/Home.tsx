@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Message, Provider, User } from "../types";
+import { Conversation, Message, Provider, User } from "../types";
 import ChatScrollArea from "../chat-interface/ChatScrollArea";
 import ChatInput from "../../components/ChatInterface/ChatInput";
 import ModelSelect from "../../components/ChatInterface/ModelSelect";
@@ -8,7 +8,7 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "../../components/ui/resizable";
-import ConversationHistory from "../../components/ConversationHistory/ConversationHistory";
+import ConversationTree from "../../components/ConversationTree/ConversationTree";
 
 export interface TestConversation {
   id: string;
@@ -52,10 +52,14 @@ const mes: TestConversation[] = [
 export default function Home() {
   const [user, setUser] = useState<User | null>(null);
   const [providers, setProviders] = useState<Provider[]>([]);
+  const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [activeConversationId, setActiveConversationId] = useState<
+    number | null
+  >(null);
   const [selectedProvider, setSelectedProvider] = useState<string>("");
   const [currentProvider, setCurrentProvider] = useState<Provider | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [messages, setMessages] = useState<Message[]>([]);
+  // const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
@@ -83,10 +87,29 @@ export default function Home() {
     }
   };
 
+  const loadConversations = async () => {
+    try {
+      const convos = await window.electron.getConversations();
+      setConversations(convos);
+      // set the first convo as the active one if the active conversation id isn't set
+      if (convos.length > 0 && !activeConversationId) {
+        setActiveConversationId(convos[0].id);
+      }
+    } catch (err) {
+      console.error("Error loading conversations:", err);
+    }
+  };
+
   useEffect(() => {
     loadUser();
     loadProviders();
+    loadConversations();
   }, []);
+
+  const activeConversation = conversations.find(
+    (c) => c.id == activeConversationId
+  );
+  const messages = activeConversation.messages ?? [];
 
   const handleProviderSelect = (providerId: string) => {
     setSelectedProvider(providerId);
@@ -103,7 +126,12 @@ export default function Home() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!inputValue.trim() || !currentProvider || isLoading) {
+    if (
+      !inputValue.trim() ||
+      !currentProvider ||
+      isLoading ||
+      !activeConversationId
+    ) {
       return;
     }
 
@@ -111,24 +139,33 @@ export default function Home() {
     const userMessage: Message = {
       role: "user",
       content: inputValue.trim(),
+      conversationId: activeConversationId,
     };
 
     // Update messages with user input
-    setMessages((prev) => [...prev, userMessage]);
+    // setMessages((prev) => [...prev, userMessage]);
     setInputValue("");
     setIsLoading(true);
     setError(null);
 
     try {
+      await window.electron.saveMessage(userMessage);
+
+      //this shouldn't include the conversationId when we send it
       const response = await window.electron.chat([...messages, userMessage]);
 
-      // Add assistant's response
       const assistantMessage: Message = {
         role: "assistant",
         content: response,
+        conversationId: activeConversationId,
       };
+
+      await window.electron.saveMessage(assistantMessage);
+
+      await loadConversations();
+
       // append assistant response to chat log
-      setMessages((prev) => [...prev, assistantMessage]);
+      // setMessages((prev) => [...prev, assistantMessage]);
     } catch (err: any) {
       setError(err.message || "Failed to get response");
     } finally {
@@ -136,8 +173,80 @@ export default function Home() {
     }
   };
 
-  const handleNewConversation = async () => {
-    const convo = await window.electron.createConversation();
+  const onNewConversation = async () => {
+    if (!currentProvider) return;
+
+    try {
+      const newConversation: Partial<Conversation> = {
+        title: `Conversation ${new Date().toLocaleTimeString()}`,
+        providerId: currentProvider.id,
+        parent_conversation_id: null,
+      };
+      const newConvoId = await window.electron.createConversation(
+        newConversation
+      );
+      await loadConversations();
+      setActiveConversationId(newConvoId);
+    } catch (err) {
+      setError("Failed to create new conversation");
+    }
+  };
+
+  const handleBranchConversation = async (conversationId: number) => {
+    if (!currentProvider) return;
+
+    const sourceConversation = conversations.find(
+      (c) => c.id === conversationId
+    );
+    if (!sourceConversation) return;
+
+    try {
+      const branchedConversation: Partial<Conversation> = {
+        title: `${sourceConversation.title} (Branch)`,
+        providerId: currentProvider.id,
+        parent_conversation_id: sourceConversation.id,
+      };
+
+      const newConvoId = await window.electron.createConversation(
+        branchedConversation
+      );
+      await loadConversations();
+      setActiveConversationId(newConvoId);
+    } catch (err) {
+      setError("Failed to create branched conversation");
+    }
+  };
+
+  const handleSelectConversation = (conversationId: number) => {
+    setActiveConversationId(conversationId);
+  };
+
+  const handleDeleteConversation = async (conversationId: number) => {
+    try {
+      await window.electron.deleteConversation(conversationId);
+      await loadConversations();
+
+      if (activeConversationId === conversationId) {
+        const remainingConvos = conversations.filter(
+          (c) => c.id !== conversationId
+        );
+        setActiveConversationId(remainingConvos[0]?.id || null);
+      }
+    } catch (err) {
+      setError("Failed to delete conversation");
+    }
+  };
+
+  const handleUpdateConversationTitle = async (
+    conversationId: number,
+    newTitle: string
+  ) => {
+    try {
+      await window.electron.updateConversationTitle(conversationId, newTitle);
+      await loadConversations();
+    } catch (err) {
+      setError("Failed to update conversation title");
+    }
   };
 
   return (
@@ -146,9 +255,14 @@ export default function Home() {
         <ResizablePanel defaultSize={70} minSize={10}>
           <div className="flex flex-row gap-2 w-full h-full">
             <div className="w-1/4 border-r border-r-gray-300 h-full">
-              <ConversationHistory
-                messages={mes}
-                handleNewConversation={handleNewConversation}
+              <ConversationTree
+                conversations={conversations}
+                activeConversationId={activeConversationId}
+                onNewConversation={onNewConversation}
+                onBranchConversation={handleBranchConversation}
+                onSelectConversation={handleSelectConversation}
+                onDeleteConversation={handleDeleteConversation}
+                onUpdateTitle={handleUpdateConversationTitle}
               />
             </div>
             <div className="flex-1 overflow-auto  relative py-6 w-3/4 ">
