@@ -399,10 +399,26 @@ ipcMain.handle("get-conversations", () => {
       GROUP BY c.id
     `);
 
-    const conversations = stmt.all().map((convo: Conversation) => ({
-      ...convo,
-      messages: convo.messages.filter((m) => m.id !== null),
-    }));
+    const rawResults = stmt.all() as {
+      id: number;
+      providerId: number;
+      title: string;
+      createdAt: string;
+      parent_conversation_id: number | null;
+      messages: string;
+    }[];
+    console.log("Raw results from database:", rawResults);
+
+    const conversations = rawResults.map((convo) => {
+      console.log("Messages before parsing:", convo.messages);
+      const parsedMessages = JSON.parse(convo.messages as string);
+      console.log("Messages after parsing:", parsedMessages);
+
+      return {
+        ...convo,
+        messages: parsedMessages.filter((m: any) => m.id !== null),
+      };
+    });
 
     return conversations;
   } catch (error) {

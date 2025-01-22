@@ -16,39 +16,6 @@ export interface TestConversation {
   parentId: string;
 }
 
-const mes: TestConversation[] = [
-  {
-    id: "1",
-    name: "convo1",
-    parentId: "",
-  },
-  {
-    id: "2",
-    name: "convo2",
-    parentId: "1",
-  },
-  {
-    id: "3",
-    name: "convo3",
-    parentId: "",
-  },
-  {
-    id: "4",
-    name: "convo4",
-    parentId: "3",
-  },
-  {
-    id: "5",
-    name: "convo5",
-    parentId: "",
-  },
-  {
-    id: "6",
-    name: "convo6",
-    parentId: "5",
-  },
-];
-
 export default function Home() {
   const [user, setUser] = useState<User | null>(null);
   const [providers, setProviders] = useState<Provider[]>([]);
@@ -59,7 +26,6 @@ export default function Home() {
   const [selectedProvider, setSelectedProvider] = useState<string>("");
   const [currentProvider, setCurrentProvider] = useState<Provider | null>(null);
   const [error, setError] = useState<string | null>(null);
-  // const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
@@ -90,6 +56,7 @@ export default function Home() {
   const loadConversations = async () => {
     try {
       const convos = await window.electron.getConversations();
+
       setConversations(convos);
       // set the first convo as the active one if the active conversation id isn't set
       if (convos.length > 0 && !activeConversationId) {
@@ -109,7 +76,7 @@ export default function Home() {
   const activeConversation = conversations.find(
     (c) => c.id == activeConversationId
   );
-  const messages = activeConversation.messages ?? [];
+  const messages = activeConversation?.messages ?? [];
 
   const handleProviderSelect = (providerId: string) => {
     setSelectedProvider(providerId);
