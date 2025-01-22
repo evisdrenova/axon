@@ -1,5 +1,5 @@
 import { contextBridge, ipcRenderer } from "electron";
-import { ServerConfig, Provider, Message, User } from "./types";
+import { ServerConfig, Provider, Message, User, Conversation } from "./types";
 
 contextBridge.exposeInMainWorld("electron", {
   // user methods
@@ -61,13 +61,23 @@ contextBridge.exposeInMainWorld("electron", {
   getConversations: () => {
     return ipcRenderer.invoke("get-conversations");
   },
-  createConversation: () => {
-    return ipcRenderer.invoke("create-conversation");
+  createConversation: (convo: Partial<Conversation>) => {
+    return ipcRenderer.invoke("create-conversation", convo);
   },
   deleteConversation: (id: number) => {
     return ipcRenderer.invoke("delete-converaation", id);
   },
 
+  // message methods
+  saveMessage: (message: Message) => {
+    return ipcRenderer.invoke("save-message", message);
+  },
+  updateConversationTitle: (convoId: number, newTitle: string) => {
+    return ipcRenderer.invoke("update-conversation-title", convoId, newTitle);
+  },
+  getConversationMessages: (convoId: number) => {
+    return ipcRenderer.invoke("get-conversation-messages", convoId);
+  },
   //chat methods
   chat: (data: Message[]) => {
     return ipcRenderer.invoke("chat", data);

@@ -375,20 +375,55 @@ ipcMain.handle("stop-server", async (_, id: number) => {
   return mcp.closeClient(server);
 });
 
-ipcMain.handle("chat", async (_, data: Message[]) => {
-  if (!providers.getCurrentProvider()) {
-    throw new Error("No provider selected");
+// get conversations with their messages
+ipcMain.handle("get-conversations", () => {
+  try {
+    const stmt = db.prepare(`
+      SELECT 
+        c.id, 
+        c.providerId, 
+        c.title, 
+        c.createdAt, 
+        c.parent_conversation_id,
+        json_group_array(
+          json_object(
+            'id', m.id,
+            'conversationId', m.conversationId,
+            'role', m.role,
+            'content', m.content,
+            'createdAt', m.createdAt
+          )
+        ) as messages
+      FROM conversations c
+      LEFT JOIN messages m ON c.id = m.conversationId
+      GROUP BY c.id
+    `);
+
+    const conversations = stmt.all().map((convo: Conversation) => ({
+      ...convo,
+      messages: convo.messages.filter((m) => m.id !== null),
+    }));
+
+    return conversations;
+  } catch (error) {
+    console.log("unable to get conversations", error);
+    throw error;
   }
-  return providers.processQuery(data);
 });
 
-ipcMain.handle("create-conversation", (_, convo: Conversation) => {
+ipcMain.handle("create-conversation", (_, convo: Partial<Conversation>) => {
   try {
     const stmt = db.prepare(`
     INSERT into conversations (providerId, title, parent_conversation_id ) VALUES(?,?,?)
     `);
-    return stmt.run(convo.providerId, convo.title, convo.parent_conversation_id)
-      .lastInsertRowid;
+
+    const result = stmt.run(
+      convo.providerId,
+      convo.title,
+      convo.parent_conversation_id || null
+    );
+
+    return result.lastInsertRowid;
   } catch (error) {
     console.log("unable to create new conversation");
     throw error;
@@ -404,37 +439,100 @@ ipcMain.handle("delete-conversation", (_, convoId: number) => {
       throw new Error(`No conversation found with id ${convoId}`);
     }
 
-    // Delete from database
-    const deleteStmt = db.prepare("DELETE FROM conversations WHERE id = ?");
-    const result = deleteStmt.run(convoId);
+    db.transaction(() => {
+      const deleteMessages = db.prepare(
+        "DELETE FROM messages WHERE conversationId = ?"
+      );
+      deleteMessages.run(convoId);
 
-    if (result.changes === 0) {
-      throw new Error(`Failed to delete convo from database`);
-    }
+      const deleteConvo = db.prepare("DELETE FROM conversations WHERE id = ?");
+      const result = deleteConvo.run(convoId);
 
-    return result;
+      if (result.changes === 0) {
+        throw new Error(`Failed to delete conversation from database`);
+      }
+    })();
+
+    return { success: true };
   } catch (error) {
-    console.log("unable to delete conversation");
+    console.log("unable to delete conversation", error);
     throw error;
   }
 });
 
-ipcMain.handle("get-conversations", () => {
+ipcMain.handle("save-message", (_, message: Message) => {
   try {
     const stmt = db.prepare(`
-    SELECT id, 
-    providerId, 
-    title, 
-    createAt, 
-    parent_conversation_id
-    FROM conversations
+      INSERT INTO messages (
+        conversationId,
+        role,
+        content
+      ) VALUES (?, ?, ?)
     `);
 
-    return stmt.all();
+    const result = stmt.run(
+      message.conversationId,
+      message.role,
+      message.content
+    );
+
+    return result.lastInsertRowid;
   } catch (error) {
-    console.log("unable to get conversations");
+    console.log("unable to save message", error);
     throw error;
   }
+});
+
+ipcMain.handle(
+  "update-conversation-title",
+  (_, convoId: number, newTitle: string) => {
+    try {
+      const stmt = db.prepare(`
+      UPDATE conversations 
+      SET title = ?
+      WHERE id = ?
+    `);
+
+      const result = stmt.run(newTitle, convoId);
+
+      if (result.changes === 0) {
+        throw new Error(`No conversation found with id ${convoId}`);
+      }
+
+      return { success: true };
+    } catch (error) {
+      console.log("unable to update conversation title", error);
+      throw error;
+    }
+  }
+);
+
+ipcMain.handle("get-conversation-messages", (_, conversationId: number) => {
+  try {
+    const stmt = db.prepare(`
+      SELECT 
+        id,
+        conversationId,
+        role,
+        content,
+        createdAt
+      FROM messages
+      WHERE conversationId = ?
+      ORDER BY createdAt ASC
+    `);
+
+    return stmt.all(conversationId);
+  } catch (error) {
+    console.log("unable to get conversation messages", error);
+    throw error;
+  }
+});
+
+ipcMain.handle("chat", async (_, data: Message[]) => {
+  if (!providers.getCurrentProvider()) {
+    throw new Error("No provider selected");
+  }
+  return providers.processQuery(data);
 });
 
 // called when Electron has initialized and is ready to create browser windows.

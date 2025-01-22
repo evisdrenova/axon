@@ -25,9 +25,12 @@ export interface IElectronAPI {
   stopServer: (serverId: number) => Promise<void>;
   //conversation methods
   getConversations: () => Promise<Conversation[]>;
-  createConversation: () => Promise<number>;
+  createConversation: (convo: Partial<Conversation>) => Promise<number>;
   deleteConversation: (id: number) => Promise<void>;
-  // chat methods
+  // message methods
+  saveMessage: (message: Message) => Promise<void>;
+  updateConversationTitle: (convoId: number, newTitle: string) => Promise<void>;
+  getConversationMessages: (convoId: number) => Promise<Message[]>;
   chat: (data: Message[]) => Promise<string>;
   minimizeWindow: () => void;
   maximizeWindow: () => void;
