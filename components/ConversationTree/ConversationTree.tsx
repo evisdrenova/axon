@@ -39,7 +39,7 @@ export default function ConversationTree(props: Props) {
       </div>
       <ul>
         {nodes.map((node) => (
-          <ConversationTreeItem node={node} key={node.name} animated />
+          <ConversationTreeItem node={node} key={node.name} />
         ))}
       </ul>
     </div>

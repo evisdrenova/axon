@@ -220,8 +220,8 @@ export default function Home() {
     <div className="flex flex-col h-full">
       <ResizablePanelGroup direction="vertical">
         <ResizablePanel defaultSize={70} minSize={10}>
-          <div className="flex flex-row gap-2 w-full h-full">
-            <div className="w-1/4 border-r border-r-gray-300 h-full">
+          <ResizablePanelGroup direction="horizontal">
+            <ResizablePanel defaultSize={20} minSize={10} maxSize={60}>
               <ConversationTree
                 conversations={conversations}
                 activeConversationId={activeConversationId}
@@ -230,17 +230,18 @@ export default function Home() {
                 onSelectConversation={handleSelectConversation}
                 onDeleteConversation={handleDeleteConversation}
                 onUpdateTitle={handleUpdateConversationTitle}
-              />
-            </div>
-            <div className="flex-1 overflow-auto  relative py-6 w-3/4 ">
+              />{" "}
+            </ResizablePanel>
+            <ResizableHandle withHandle />
+            <ResizablePanel defaultSize={80} minSize={10}>
               <ChatScrollArea
                 messages={messages}
                 isLoading={isLoading}
                 provider={currentProvider}
                 user={user?.name ?? ""}
               />
-            </div>
-          </div>
+            </ResizablePanel>
+          </ResizablePanelGroup>
         </ResizablePanel>
         <ResizableHandle withHandle />
         <ResizablePanel minSize={30} defaultSize={30}>

@@ -10,53 +10,45 @@ type Node = {
 
 interface Props {
   node: Node;
-  animated?: boolean;
 }
 
 export default function ConversationTreeItem(props: Props) {
-  const { node, animated } = props;
+  const { node } = props;
 
   let [isOpen, setIsOpen] = useState(false);
 
-  const ChevronIcon = () =>
-    animated ? (
+  const ChevronIcon = () => {
+    return (
       <motion.span
         animate={{ rotate: isOpen ? 90 : 0 }}
         transition={{ type: "spring", bounce: 0, duration: 0.4 }}
-        className="flex"
+        style={{ display: "flex" }}
       >
         <ChevronRight className="size-4 text-gray-500" />
       </motion.span>
-    ) : (
-      <ChevronRight
-        className={`size-4 text-gray-500 ${isOpen ? "rotate-90" : ""}`}
-      />
     );
+  };
 
   const ChildrenList = () => {
     const children = node.nodes?.map((node) => (
-      <ConversationTreeItem node={node} key={node.name} animated={animated} />
+      <ConversationTreeItem node={node} key={node.name} />
     ));
-
-    if (animated) {
-      return (
-        <AnimatePresence>
-          {isOpen && (
-            <motion.ul
-              initial={{ height: 0 }}
-              animate={{ height: "auto" }}
-              exit={{ height: 0 }}
-              transition={{ type: "spring", bounce: 0, duration: 0.4 }}
-              className="pl-6 overflow-hidden flex flex-col justify-end"
-            >
-              {children}
-            </motion.ul>
-          )}
-        </AnimatePresence>
-      );
-    }
-
-    return isOpen && <ul className="pl-6">{children}</ul>;
+    return (
+      <AnimatePresence>
+        {isOpen && (
+          <motion.ul
+            key="child-list"
+            initial={{ height: 0 }}
+            animate={{ height: "auto" }}
+            exit={{ height: 0 }}
+            transition={{ type: "spring", bounce: 0, duration: 0.4 }}
+            className="pl-6 overflow-hidden flex flex-col justify-end"
+          >
+            {children}
+          </motion.ul>
+        )}
+      </AnimatePresence>
+    );
   };
 
   return (
@@ -72,7 +64,7 @@ export default function ConversationTreeItem(props: Props) {
           <MessageSquare
             className={cn(
               node.nodes.length === 0 ? "ml-[22px]" : "",
-              `size-4 text-sky-500 fill-sky-500 `
+              `size-4 text-gray-600 `
             )}
           />
         ) : (
@@ -80,7 +72,6 @@ export default function ConversationTreeItem(props: Props) {
         )}
         {node.name}
       </span>
-
       <ChildrenList />
     </li>
   );

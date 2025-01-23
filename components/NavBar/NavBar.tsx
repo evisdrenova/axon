@@ -17,8 +17,8 @@ export default function NavBar(props: Props) {
   const location = useLocation();
 
   return (
-    <div className="fixed bottom-6 left-1/2 -translate-x-1/2">
-      <div className="bg-background inline-flex w-fit justify-center border border-gray-300 p-2 text-gray-900 rounded-xl">
+    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 ">
+      <div className="bg-background inline-flex w-fit justify-center border border-gray-300 p-2 text-gray-900 rounded-xl shadow-lg">
         <nav className="flex flex-row gap-1">
           {navItems.map(({ path, icon, label }) => (
             <Link
