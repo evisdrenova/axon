@@ -9,6 +9,22 @@ import {
   ResizablePanelGroup,
 } from "../../components/ui/resizable";
 import ConversationTree from "../../components/ConversationTree/ConversationTree";
+import { ChevronDown, Pencil, Trash } from "lucide-react";
+import { Button } from "../../components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuPortal,
+  DropdownMenuSeparator,
+  DropdownMenuShortcut,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuTrigger,
+} from "../../components/ui/dropdown-menu";
 
 export interface TestConversation {
   id: string;
@@ -234,6 +250,11 @@ export default function Home() {
             </ResizablePanel>
             <ResizableHandle withHandle />
             <ResizablePanel defaultSize={80} minSize={10}>
+              <ChatTitle
+                onUpdateTitle={handleUpdateConversationTitle}
+                onDeleteConversation={handleDeleteConversation}
+                title={"Title"}
+              />
               <ChatScrollArea
                 messages={messages}
                 isLoading={isLoading}
@@ -265,6 +286,37 @@ export default function Home() {
           {error && <p className="text-destructive text-sm mt-2">{error}</p>}
         </ResizablePanel>
       </ResizablePanelGroup>
+    </div>
+  );
+}
+
+interface ChatTitleProps {
+  title: string;
+  onUpdateTitle: (convoId: number, newTitle: string) => void;
+  onDeleteConversation: (convoId: number) => void;
+}
+
+function ChatTitle(props: ChatTitleProps) {
+  const { title, onUpdateTitle, onDeleteConversation } = props;
+  return (
+    <div className="flex justify-center py-2 border-b border-b-gray-300 w-full">
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost">
+            {title} <ChevronDown />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent className="bg-background">
+          <DropdownMenuItem onClick={() => onDeleteConversation}>
+            <Trash className="w-4 h-4 text-xs" /> Delete Conversation
+            <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => onUpdateTitle}>
+            <Pencil className="w-4 h-4 text-xs" /> Rename Conversation
+            <DropdownMenuShortcut>⌘+T</DropdownMenuShortcut>
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
     </div>
   );
 }
