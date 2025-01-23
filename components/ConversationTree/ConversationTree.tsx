@@ -13,12 +13,12 @@ interface Props {
   onUpdateTitle: (convoId: number, newTitle: string) => void;
 }
 
-type Node = {
+export interface Node {
   id: number;
   parentId?: number;
   name: string;
   nodes?: Node[];
-};
+}
 
 export default function ConversationTree(props: Props) {
   const {
@@ -39,7 +39,11 @@ export default function ConversationTree(props: Props) {
       </div>
       <ul>
         {nodes.map((node) => (
-          <ConversationTreeItem node={node} key={node.name} />
+          <ConversationTreeItem
+            node={node}
+            key={node.name}
+            onSelectConversation={onSelectConversation}
+          />
         ))}
       </ul>
     </div>

@@ -2,18 +2,16 @@ import { useState } from "react";
 import { ChevronRight, Folder, File, MessageSquare } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { cn } from "../../src/lib/utils";
-
-type Node = {
-  name: string;
-  nodes?: Node[];
-};
+import { Button } from "../../components/ui/button";
+import { Node } from "./ConversationTree";
 
 interface Props {
   node: Node;
+  onSelectConversation: (conversationId: number) => void;
 }
 
 export default function ConversationTreeItem(props: Props) {
-  const { node } = props;
+  const { node, onSelectConversation } = props;
 
   let [isOpen, setIsOpen] = useState(false);
 
@@ -31,7 +29,11 @@ export default function ConversationTreeItem(props: Props) {
 
   const ChildrenList = () => {
     const children = node.nodes?.map((node) => (
-      <ConversationTreeItem node={node} key={node.name} />
+      <ConversationTreeItem
+        node={node}
+        key={node.name}
+        onSelectConversation={onSelectConversation}
+      />
     ));
     return (
       <AnimatePresence>
@@ -70,7 +72,9 @@ export default function ConversationTreeItem(props: Props) {
         ) : (
           <File className="ml-[22px] size-6 text-gray-900" />
         )}
-        {node.name}
+        <Button variant="ghost" onClick={() => onSelectConversation(node.id)}>
+          {node.name}
+        </Button>
       </span>
       <ChildrenList />
     </li>

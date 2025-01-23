@@ -14,15 +14,8 @@ import { Button } from "../../components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuGroup,
   DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuPortal,
-  DropdownMenuSeparator,
   DropdownMenuShortcut,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "../../components/ui/dropdown-menu";
 import { Input } from "../../components/ui/input";
@@ -73,7 +66,7 @@ export default function Home() {
   const loadConversations = async () => {
     try {
       const convos = await window.electron.getConversations();
-
+      console.log("convos", convos);
       setConversations(convos);
       // set the first convo as the active one if the active conversation id isn't set
       if (convos.length > 0 && !activeConversationId) {
@@ -90,7 +83,7 @@ export default function Home() {
     loadConversations();
   }, []);
 
-  const activeConversation = conversations.find(
+  const activeConversation = conversations?.find(
     (c) => c.id == activeConversationId
   );
   const messages = activeConversation?.messages ?? [];
@@ -233,6 +226,8 @@ export default function Home() {
     }
   };
 
+  console.log("active conversation id", activeConversationId);
+
   return (
     <div className="flex flex-col h-full">
       <ResizablePanelGroup direction="vertical">
@@ -247,7 +242,7 @@ export default function Home() {
                 onSelectConversation={handleSelectConversation}
                 onDeleteConversation={handleDeleteConversation}
                 onUpdateTitle={handleUpdateConversationTitle}
-              />{" "}
+              />
             </ResizablePanel>
             <ResizableHandle withHandle />
             <ResizablePanel defaultSize={80} minSize={10}>
@@ -255,10 +250,16 @@ export default function Home() {
                 id={activeConversationId}
                 onUpdateTitle={handleUpdateConversationTitle}
                 onDeleteConversation={handleDeleteConversation}
-                title={"Title"}
+                title={
+                  conversations?.find((item) => item.id == activeConversationId)
+                    ?.title
+                }
               />
               <ChatScrollArea
-                messages={messages}
+                messages={
+                  conversations?.find((item) => item.id == activeConversationId)
+                    ?.messages
+                }
                 isLoading={isLoading}
                 provider={currentProvider}
                 user={user?.name ?? ""}
@@ -338,7 +339,7 @@ function ChatTitle(props: ChatTitleProps) {
   };
 
   return (
-    <div className="flex justify-center py-2 border-b border-b-gray-300 w-full">
+    <div className="flex justify-center py-1 border-b border-b-gray-300 w-full">
       {isEditing ? (
         <Input
           ref={inputRef}
