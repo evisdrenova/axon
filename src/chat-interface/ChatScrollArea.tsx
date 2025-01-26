@@ -80,7 +80,7 @@ export default function ChatScrollArea(props: Props) {
           <div
             key={index}
             className={cn(
-              message.role === "user" ? "justify-end" : "justify-start",
+              message.role === "user" ? "justify-end" : "justify-start w-[60%]",
               `flex`
             )}
           >
@@ -91,7 +91,11 @@ export default function ChatScrollArea(props: Props) {
                   `flex px-2 `
                 )}
               >
-                {renderMessageMetadata(message.role, provider, user)}
+                <RenderMessageMetadata
+                  message={message}
+                  provider={provider}
+                  user={user}
+                />
               </div>
               <div
                 className={cn(
@@ -202,18 +206,60 @@ function renderMarkdown(content: string, role: string) {
   );
 }
 
-function renderMessageMetadata(
-  role: string,
-  provider: Provider,
-  user: string
-): React.JSX.Element {
-  if (role == "user") {
-    return <div className="text-xs">{user}</div>;
+interface MessageMetadataProps {
+  message: Message;
+  provider: Provider;
+  user: string;
+}
+
+function RenderMessageMetadata(props: MessageMetadataProps) {
+  const { message, provider, user } = props;
+  if (message.role == "user") {
+    return (
+      <div className="text-xs flex flex-row gap-1">
+        <div> {user}</div>
+        <div>@</div>
+        <NiceDate date={message.createdAt} />
+      </div>
+    );
   } else {
     return (
       <div className="flex flex-row items-center gap-1 text-xs">
-        <div>{toTitleCase(provider?.type ?? "")}</div>
+        <div>{toTitleCase(provider?.type ?? "")}</div> @
+        <NiceDate date={message.createdAt} />
       </div>
     );
   }
 }
+
+interface NiceDateProps {
+  date: string;
+}
+
+function formatDateTime(dateString: string): string {
+  // Replace space with 'T' to make it ISO-like
+  // -> "2025-01-20T05:10:09"
+  const isoString = dateString.replace(" ", "T");
+  const date = new Date(isoString);
+
+  // Format as "January 20, 2025 at 5:10 AM"
+  // Adjust locale/format options as desired
+  return date.toLocaleString("en-US", {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  });
+}
+
+export const NiceDate: React.FC<NiceDateProps> = ({ date }) => {
+  const prettyDate = formatDateTime(date);
+
+  return (
+    <time dateTime={date} className="text-xs text-gray-800">
+      {prettyDate}
+    </time>
+  );
+};
