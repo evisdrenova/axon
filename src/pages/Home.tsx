@@ -157,7 +157,10 @@ export default function Home() {
     }
   };
 
-  const handleBranchConversation = async (conversationId: number) => {
+  const handleBranchConversation = async (
+    conversationId: number,
+    messageId: number
+  ) => {
     if (!currentProvider) return;
 
     const sourceConversation = conversations.find(
@@ -178,10 +181,17 @@ export default function Home() {
         branchedConversation
       );
 
+      const sourceMessage = sourceConversation.messages.filter(
+        (item) => item.id == messageId
+      );
+
+      //TODO: figur eout why the new conversation message isn't showing up in the next branched conversation
+
       const newConversation: Conversation = {
         title: title,
         providerId: currentProvider.id,
         parent_conversation_id: sourceConversation.id,
+        messages: sourceMessage,
       };
 
       setActiveConversationId(newConvoId);
@@ -194,6 +204,8 @@ export default function Home() {
     }
   };
 
+  // TODO: for new conversations, we shoudl summarize the existing converation and then upload the to the new convo and make it avialable for the user to see the summary
+
   const handleSelectConversation = (conversationId: number) => {
     setActiveConversationId(conversationId);
   };
@@ -202,7 +214,6 @@ export default function Home() {
     try {
       await window.electron.deleteConversation(conversationId);
       await loadConversations();
-
       if (activeConversationId === conversationId) {
         const remainingConvos = conversations.filter(
           (c) => c.id !== conversationId

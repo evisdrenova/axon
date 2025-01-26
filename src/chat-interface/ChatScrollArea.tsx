@@ -15,7 +15,7 @@ interface Props {
   provider: Provider;
   user: string;
   activeConversationId: number;
-  onBranchConversation: (conversationId: number) => void;
+  onBranchConversation: (conversationId: number, messageId: number) => void;
 }
 
 export default function ChatScrollArea(props: Props) {
@@ -63,7 +63,7 @@ export default function ChatScrollArea(props: Props) {
                   user={user}
                 />
               </div>
-              <div className="flex flex-row items-center gap-1">
+              <div className="flex flex-row gap-1">
                 <div
                   className={cn(
                     message.role === "user"
@@ -88,7 +88,9 @@ export default function ChatScrollArea(props: Props) {
                     </Button>
                     <Button
                       variant="ghost"
-                      onClick={() => onBranchConversation(activeConversationId)}
+                      onClick={() =>
+                        onBranchConversation(activeConversationId, message.id)
+                      }
                     >
                       <Split size="2" className="rotate-90" />
                     </Button>

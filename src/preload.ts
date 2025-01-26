@@ -65,7 +65,7 @@ contextBridge.exposeInMainWorld("electron", {
     return ipcRenderer.invoke("create-conversation", convo);
   },
   deleteConversation: (id: number) => {
-    return ipcRenderer.invoke("delete-converaation", id);
+    return ipcRenderer.invoke("delete-conversation", id);
   },
 
   // message methods
