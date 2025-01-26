@@ -73,9 +73,6 @@ const mes: Message[] = [
 
 export default function ChatScrollArea(props: Props) {
   const { messages, isLoading, provider, user } = props;
-
-  console.log("messages", messages);
-
   return (
     <ScrollArea className="h-full w-full">
       <div className="space-y-4 px-4">

@@ -1,11 +1,9 @@
-import { c } from "node_modules/vite/dist/node/types.d-aGj9QkWt";
 import { Conversation } from "../../src/types";
 import { Button } from "../ui/button";
 import ConversationTreeItem from "./ConversationTreeItem";
-
+import { useState, useMemo } from "react";
 interface Props {
   conversations: Conversation[];
-  activeConversationId: number | null;
   onNewConversation: (parentId?: string) => void;
   onBranchConversation: (conversationId: number) => void;
   onSelectConversation: (conversationId: number) => void;
@@ -22,12 +20,23 @@ export interface Node {
 export default function ConversationTree(props: Props) {
   const {
     conversations,
-    activeConversationId,
     onNewConversation,
     onBranchConversation,
     onSelectConversation,
   } = props;
-  const nodes = convertConversationsToNodes(conversations);
+  // tracks which nodes are open in the convo tree
+  const [openNodes, setOpenNodes] = useState<Record<number, boolean>>({});
+
+  const toggleNodeOpen = (id: number) => {
+    setOpenNodes((prev) => ({ ...prev, [id]: !prev[id] }));
+  };
+
+  const nodes = useMemo(
+    () => convertConversationsToNodes(conversations),
+    [conversations]
+  );
+
+  console.log("nodes", nodes);
   return (
     <div className="p-4 h-[600px] w-[400px] overflow-y-auto flex flex-col gap-4">
       <div>
@@ -39,7 +48,11 @@ export default function ConversationTree(props: Props) {
         {nodes.map((node) => (
           <ConversationTreeItem
             node={node}
-            key={node.name}
+            key={node.id}
+            isOpen={!!openNodes[node.id]}
+            openNodes={openNodes}
+            toggleNodeOpen={toggleNodeOpen}
+            onToggleOpen={() => toggleNodeOpen(node.id)}
             onSelectConversation={onSelectConversation}
           />
         ))}

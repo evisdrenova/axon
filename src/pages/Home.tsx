@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { Conversation, Message, Provider, User } from "../types";
 import ChatScrollArea from "../chat-interface/ChatScrollArea";
 import ChatInput from "../../components/ChatInterface/ChatInput";
@@ -9,17 +9,7 @@ import {
   ResizablePanelGroup,
 } from "../../components/ui/resizable";
 import ConversationTree from "../../components/ConversationTree/ConversationTree";
-import { ChevronDown, Pencil, Trash } from "lucide-react";
-import { Button } from "../../components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuShortcut,
-  DropdownMenuTrigger,
-} from "../../components/ui/dropdown-menu";
-import { Input } from "../../components/ui/input";
-
+import ChatTitle from "../../components/ChatInterface/ChatTitle";
 export interface TestConversation {
   id: string;
   name: string;
@@ -66,7 +56,6 @@ export default function Home() {
   const loadConversations = async () => {
     try {
       const convos = await window.electron.getConversations();
-      console.log("convos", convos);
       setConversations(convos);
       if (convos.length > 0 && !activeConversationId) {
         setActiveConversationId(convos[0].id);
@@ -225,8 +214,6 @@ export default function Home() {
     }
   };
 
-  console.log("active conversation id", activeConversationId);
-
   return (
     <div className="flex flex-col h-full">
       <ResizablePanelGroup direction="vertical">
@@ -235,7 +222,6 @@ export default function Home() {
             <ResizablePanel defaultSize={20} minSize={10} maxSize={60}>
               <ConversationTree
                 conversations={conversations}
-                activeConversationId={activeConversationId}
                 onNewConversation={onNewConversation}
                 onBranchConversation={handleBranchConversation}
                 onSelectConversation={handleSelectConversation}
@@ -287,87 +273,6 @@ export default function Home() {
           {error && <p className="text-destructive text-sm mt-2">{error}</p>}
         </ResizablePanel>
       </ResizablePanelGroup>
-    </div>
-  );
-}
-
-interface ChatTitleProps {
-  id: number;
-  title: string;
-  onUpdateTitle: (convoId: number, newTitle: string) => void;
-  onDeleteConversation: (convoId: number) => void;
-}
-
-function ChatTitle(props: ChatTitleProps) {
-  const { id, title, onUpdateTitle, onDeleteConversation } = props;
-  const [isEditing, setIsEditing] = useState(false);
-  const [editedTitle, setEditedTitle] = useState(title);
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    if (isEditing && inputRef.current) {
-      inputRef.current.focus();
-      inputRef.current.select();
-    }
-  }, [isEditing]);
-
-  const handleStartEditing = () => {
-    setEditedTitle(title);
-    setIsEditing(true);
-  };
-
-  const handleSave = () => {
-    if (editedTitle.trim() && editedTitle !== title) {
-      onUpdateTitle(id, editedTitle.trim());
-    }
-    setIsEditing(false);
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") {
-      handleSave();
-    } else if (e.key === "Escape") {
-      setEditedTitle(title);
-      setIsEditing(false);
-    }
-  };
-
-  const handleBlur = () => {
-    handleSave();
-  };
-
-  return (
-    <div className="flex justify-center py-1 border-b border-b-gray-300 w-full">
-      {isEditing ? (
-        <Input
-          ref={inputRef}
-          value={editedTitle}
-          onChange={(e) => setEditedTitle(e.target.value)}
-          onKeyDown={handleKeyDown}
-          onBlur={handleBlur}
-          className="max-w-[200px]"
-        />
-      ) : (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost">
-              {title} <ChevronDown className="ml-2 h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent className="bg-background">
-            <DropdownMenuItem onClick={() => onDeleteConversation(id)}>
-              <Trash className="mr-2 h-4 w-4" />
-              <span>Delete Conversation</span>
-              <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={handleStartEditing}>
-              <Pencil className="mr-2 h-4 w-4" />
-              <span>Rename Conversation</span>
-              <DropdownMenuShortcut>⌘T</DropdownMenuShortcut>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      )}
     </div>
   );
 }
