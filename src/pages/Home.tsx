@@ -165,9 +165,11 @@ export default function Home() {
     );
     if (!sourceConversation) return;
 
+    const title = `${sourceConversation.title} (Branch)`;
+
     try {
       const branchedConversation: Partial<Conversation> = {
-        title: `${sourceConversation.title} (Branch)`,
+        title: title,
         providerId: currentProvider.id,
         parent_conversation_id: sourceConversation.id,
       };
@@ -175,6 +177,16 @@ export default function Home() {
       const newConvoId = await window.electron.createConversation(
         branchedConversation
       );
+
+      const newConversation: Conversation = {
+        title: title,
+        providerId: currentProvider.id,
+        parent_conversation_id: sourceConversation.id,
+      };
+
+      setActiveConversationId(newConvoId);
+
+      setConversations((prev) => [newConversation, ...prev]);
       await loadConversations();
       setActiveConversationId(newConvoId);
     } catch (err) {
@@ -233,7 +245,6 @@ export default function Home() {
                 id={activeConversationId}
                 onUpdateTitle={handleUpdateConversationTitle}
                 onDeleteConversation={handleDeleteConversation}
-                // onBranchConversation={handleBranchConversation}
                 title={
                   conversations?.find((item) => item.id == activeConversationId)
                     ?.title
@@ -244,6 +255,7 @@ export default function Home() {
                   conversations?.find((item) => item.id == activeConversationId)
                     ?.messages
                 }
+                activeConversationId={activeConversationId}
                 isLoading={isLoading}
                 provider={currentProvider}
                 user={user?.name ?? ""}

@@ -14,11 +14,19 @@ interface Props {
   isLoading: boolean;
   provider: Provider;
   user: string;
+  activeConversationId: number;
   onBranchConversation: (conversationId: number) => void;
 }
 
 export default function ChatScrollArea(props: Props) {
-  const { messages, isLoading, provider, user, onBranchConversation } = props;
+  const {
+    messages,
+    isLoading,
+    provider,
+    user,
+    onBranchConversation,
+    activeConversationId,
+  } = props;
   const [copied, setCopied] = useState<boolean>(false);
 
   const copyToClipBoard = async (
@@ -66,28 +74,26 @@ export default function ChatScrollArea(props: Props) {
                 >
                   <RenderMessageContent message={message} />
                 </div>
-                <div className="w-[100px]">
-                  {message.role == "assistant" && (
-                    <div className="flex flex-col gap-2">
-                      <Button
-                        variant="ghost"
-                        onClick={() => copyToClipBoard(message.content)}
-                      >
-                        {copied ? (
-                          <Check className="text-green-500" />
-                        ) : (
-                          <Copy size="2" />
-                        )}
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        onClick={() => onBranchConversation}
-                      >
-                        <Split size="2" className="rotate-90" />
-                      </Button>
-                    </div>
-                  )}
-                </div>
+                {message.role == "assistant" && (
+                  <div className="flex flex-col gap-2">
+                    <Button
+                      variant="ghost"
+                      onClick={() => copyToClipBoard(message.content)}
+                    >
+                      {copied ? (
+                        <Check className="text-green-500" />
+                      ) : (
+                        <Copy size="2" />
+                      )}
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      onClick={() => onBranchConversation(activeConversationId)}
+                    >
+                      <Split size="2" className="rotate-90" />
+                    </Button>
+                  </div>
+                )}
               </div>
             </div>
           </div>

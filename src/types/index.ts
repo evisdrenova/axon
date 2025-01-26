@@ -88,7 +88,7 @@ export interface Conversation {
   providerId: number;
   title: string;
   parent_conversation_id: number;
-  createdAt: string;
+  createdAt?: string;
   messages?: Message[];
 }
 
