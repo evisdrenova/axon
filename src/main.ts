@@ -96,7 +96,7 @@ const createWindow = async () => {
   await mcp.createClients();
   // Create the browser window.
   mainWindow = new BrowserWindow({
-    width: 1000,
+    width: 1200,
     height: 900,
     frame: false,
     webPreferences: {

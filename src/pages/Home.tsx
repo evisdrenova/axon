@@ -68,7 +68,6 @@ export default function Home() {
       const convos = await window.electron.getConversations();
       console.log("convos", convos);
       setConversations(convos);
-      // set the first convo as the active one if the active conversation id isn't set
       if (convos.length > 0 && !activeConversationId) {
         setActiveConversationId(convos[0].id);
       }
@@ -241,7 +240,6 @@ export default function Home() {
                 onBranchConversation={handleBranchConversation}
                 onSelectConversation={handleSelectConversation}
                 onDeleteConversation={handleDeleteConversation}
-                onUpdateTitle={handleUpdateConversationTitle}
               />
             </ResizablePanel>
             <ResizableHandle withHandle />

@@ -46,7 +46,10 @@ export default function ConversationTreeItem(props: Props) {
             transition={{ type: "spring", bounce: 0, duration: 0.4 }}
             className="pl-6 overflow-hidden flex flex-col justify-end"
           >
-            {children}
+            <div className="flex flex-row items-stretch w-full min-h-full">
+              <div className="w-[1px] bg-gray-300 self-stretch" />
+              <div className="flex-1 pl-2">{children}</div>
+            </div>
           </motion.ul>
         )}
       </AnimatePresence>
@@ -55,13 +58,13 @@ export default function ConversationTreeItem(props: Props) {
 
   return (
     <li key={node.name}>
-      <span className="flex items-center gap-1.5 py-1">
+      <span className="flex items-center ">
         {node.nodes && node.nodes.length > 0 && (
-          <button onClick={() => setIsOpen(!isOpen)} className="p-1 -m-1">
+          <button onClick={() => setIsOpen(!isOpen)}>
             <ChevronIcon />
           </button>
         )}
-
+        {/* 
         {node.nodes ? (
           <MessageSquare
             className={cn(
@@ -70,11 +73,18 @@ export default function ConversationTreeItem(props: Props) {
             )}
           />
         ) : (
-          <File className="ml-[22px] size-6 text-gray-900" />
-        )}
-        <Button variant="ghost" onClick={() => onSelectConversation(node.id)}>
-          {node.name}
-        </Button>
+          <File className="ml-[22px] size-4 text-gray-900" />
+        )} */}
+        <div className={cn(node.nodes.length == 0 ? "pl-4" : "pl-0")}>
+          <Button
+            variant="ghost"
+            className="text-xs gap-0 px-1"
+            size="sm"
+            onClick={() => onSelectConversation(node.id)}
+          >
+            {node.name}
+          </Button>
+        </div>
       </span>
       <ChildrenList />
     </li>

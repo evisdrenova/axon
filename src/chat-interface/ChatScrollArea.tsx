@@ -75,10 +75,11 @@ export default function ChatScrollArea(props: Props) {
   const { messages, isLoading, provider, user } = props;
 
   console.log("messages", messages);
+
   return (
     <ScrollArea className="h-full w-full">
       <div className="space-y-4 px-4">
-        {mes.map((message, index) => (
+        {messages?.map((message, index) => (
           <div
             key={index}
             className={cn(

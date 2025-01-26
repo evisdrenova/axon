@@ -10,7 +10,6 @@ interface Props {
   onBranchConversation: (conversationId: number) => void;
   onSelectConversation: (conversationId: number) => void;
   onDeleteConversation: (convoId: number) => void;
-  onUpdateTitle: (convoId: number, newTitle: string) => void;
 }
 
 export interface Node {
@@ -27,7 +26,6 @@ export default function ConversationTree(props: Props) {
     onNewConversation,
     onBranchConversation,
     onSelectConversation,
-    onUpdateTitle,
   } = props;
   const nodes = convertConversationsToNodes(conversations);
   return (
