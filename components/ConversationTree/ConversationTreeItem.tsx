@@ -10,6 +10,7 @@ interface Props {
   toggleNodeOpen: (id: number) => void;
   openNodes: Record<number, boolean>;
   onSelectConversation: (conversationId: number) => void;
+  onBranchConversation: (conversationId: number) => void;
 }
 
 export default function ConversationTreeItem(props: Props) {
@@ -20,6 +21,7 @@ export default function ConversationTreeItem(props: Props) {
     onToggleOpen,
     openNodes,
     toggleNodeOpen,
+    onBranchConversation,
   } = props;
 
   const hasChildren = node.nodes && node.nodes.length > 0;
@@ -28,6 +30,7 @@ export default function ConversationTreeItem(props: Props) {
     <div className="flex flex-col">
       <div className="flex items-center">
         {hasChildren && (
+          // render chevron button if there are children
           <button
             onClick={onToggleOpen}
             className="flex items-center justify-center"
@@ -40,10 +43,10 @@ export default function ConversationTreeItem(props: Props) {
             />
           </button>
         )}
-        <div className={cn(hasChildren ? "pl-0" : "pl-4")}>
+        <div className={cn(hasChildren ? "pl-0" : "pl-4", "w-full")}>
           <Button
             variant="ghost"
-            className="text-xs gap-0 px-1"
+            className="text-xs gap-0 px-1 w-full flex justify-start"
             size="sm"
             onClick={() => onSelectConversation(node.id)}
           >
@@ -65,6 +68,7 @@ export default function ConversationTreeItem(props: Props) {
                 toggleNodeOpen={toggleNodeOpen}
                 onToggleOpen={() => toggleNodeOpen(childNode.id)}
                 onSelectConversation={onSelectConversation}
+                onBranchConversation={onBranchConversation}
               />
             ))}
           </div>

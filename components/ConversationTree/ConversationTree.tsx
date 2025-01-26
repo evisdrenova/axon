@@ -36,9 +36,8 @@ export default function ConversationTree(props: Props) {
     [conversations]
   );
 
-  console.log("nodes", nodes);
   return (
-    <div className="p-4 h-[600px] w-[400px] overflow-y-auto flex flex-col gap-4">
+    <div className="p-4 overflow-y-auto flex flex-col gap-4 h-full">
       <div>
         <Button variant="default" onClick={() => onNewConversation()}>
           + New Conversation
@@ -54,6 +53,7 @@ export default function ConversationTree(props: Props) {
             toggleNodeOpen={toggleNodeOpen}
             onToggleOpen={() => toggleNodeOpen(node.id)}
             onSelectConversation={onSelectConversation}
+            onBranchConversation={onBranchConversation}
           />
         ))}
       </ul>

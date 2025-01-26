@@ -232,8 +232,19 @@ function RenderMessageMetadata(props: MessageMetadataProps) {
   }
 }
 
-interface NiceDateProps {
+interface DateProps {
   date: string;
+}
+
+function NiceDate(props: DateProps) {
+  const { date } = props;
+  const prettyDate = formatDateTime(date);
+
+  return (
+    <time dateTime={date} className="text-xs text-gray-800">
+      {prettyDate}
+    </time>
+  );
 }
 
 function formatDateTime(dateString: string): string {
@@ -253,13 +264,3 @@ function formatDateTime(dateString: string): string {
     hour12: true,
   });
 }
-
-export const NiceDate: React.FC<NiceDateProps> = ({ date }) => {
-  const prettyDate = formatDateTime(date);
-
-  return (
-    <time dateTime={date} className="text-xs text-gray-800">
-      {prettyDate}
-    </time>
-  );
-};
