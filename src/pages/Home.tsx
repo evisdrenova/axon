@@ -223,7 +223,6 @@ export default function Home() {
               <ConversationTree
                 conversations={conversations}
                 onNewConversation={onNewConversation}
-                onBranchConversation={handleBranchConversation}
                 onSelectConversation={handleSelectConversation}
                 onDeleteConversation={handleDeleteConversation}
               />
@@ -234,6 +233,7 @@ export default function Home() {
                 id={activeConversationId}
                 onUpdateTitle={handleUpdateConversationTitle}
                 onDeleteConversation={handleDeleteConversation}
+                // onBranchConversation={handleBranchConversation}
                 title={
                   conversations?.find((item) => item.id == activeConversationId)
                     ?.title
@@ -247,6 +247,7 @@ export default function Home() {
                 isLoading={isLoading}
                 provider={currentProvider}
                 user={user?.name ?? ""}
+                onBranchConversation={handleBranchConversation}
               />
             </ResizablePanel>
           </ResizablePanelGroup>

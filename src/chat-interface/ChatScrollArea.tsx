@@ -1,78 +1,36 @@
-import Anthropic from "@anthropic-ai/sdk";
 import ReactMarkdown from "react-markdown";
 import { FilterThinkingContent } from "./utils";
 import { cn, toTitleCase } from "../lib/utils";
 import { ScrollArea } from "../../components/ui/scroll-area";
 import { Message, Provider } from "../types";
 import remarkGfm from "remark-gfm";
-import React from "react";
+import { Check, Copy, Split } from "lucide-react";
+import { Button } from "../../components/ui/button";
+import { useState } from "react";
+import Anthropic from "@anthropic-ai/sdk";
 
 interface Props {
   messages: Message[];
   isLoading: boolean;
   provider: Provider;
   user: string;
+  onBranchConversation: (conversationId: number) => void;
 }
 
-const mes: Message[] = [
-  {
-    role: "user",
-    content: "can you pull the latest neosync investor deck?",
-  },
-  {
-    role: "assistant",
-    content:
-      '<thinking>\nTo retrieve the latest neosync investor deck file, the most relevant tool would be filesystem__search_files. It allows searching for files by name pattern within the allowed directories.\n\nThe required parameters for filesystem__search_files are:\n- path: This can likely be inferred as one of the allowed directories, since an investor deck is usually stored in a known location. \n- pattern: We can infer this should contain "neosync" and "investor deck" to find the right file.\n\nThe excludePatterns parameter is optional, so we can omit it.\n\nTo determine the best path to search, we should first call filesystem__list_allowed_directories to see which directories are available on this system. Then we can pick the most likely location for an investor deck.\n</thinking>\nHere is the latest Neosync investor deck from the downloads directory:\n\n[Neosync-InvestorDeck-July2023.pdf](/Users/evisdrenova/downloads/Neosync-InvestorDeck-July2023.pdf)',
-  },
-  {
-    role: "user",
-    content: "can you pull the latest neosync investor deck?",
-  },
-  {
-    role: "assistant",
-    content:
-      '<thinking>\nTo retrieve the latest neosync investor deck file, the most relevant tool would be filesystem__search_files. It allows searching for files by name pattern within the allowed directories.\n\nThe required parameters for filesystem__search_files are:\n- path: This can likely be inferred as one of the allowed directories, since an investor deck is usually stored in a known location. \n- pattern: We can infer this should contain "neosync" and "investor deck" to find the right file.\n\nThe excludePatterns parameter is optional, so we can omit it.\n\nTo determine the best path to search, we should first call filesystem__list_allowed_directories to see which directories are available on this system. Then we can pick the most likely location for an investor deck.\n</thinking>\nHere is the latest Neosync investor deck from the downloads directory:\n\n[Neosync-InvestorDeck-July2023.pdf](/Users/evisdrenova/downloads/Neosync-InvestorDeck-July2023.pdf)',
-  },
-  {
-    role: "user",
-    content: "can you pull the latest neosync investor deck?",
-  },
-  {
-    role: "assistant",
-    content:
-      '<thinking>\nTo retrieve the latest neosync investor deck file, the most relevant tool would be filesystem__search_files. It allows searching for files by name pattern within the allowed directories.\n\nThe required parameters for filesystem__search_files are:\n- path: This can likely be inferred as one of the allowed directories, since an investor deck is usually stored in a known location. \n- pattern: We can infer this should contain "neosync" and "investor deck" to find the right file.\n\nThe excludePatterns parameter is optional, so we can omit it.\n\nTo determine the best path to search, we should first call filesystem__list_allowed_directories to see which directories are available on this system. Then we can pick the most likely location for an investor deck.\n</thinking>\nHere is the latest Neosync investor deck from the downloads directory:\n\n[Neosync-InvestorDeck-July2023.pdf](/Users/evisdrenova/downloads/Neosync-InvestorDeck-July2023.pdf)',
-  },
-  {
-    role: "user",
-    content: "can you pull the latest neosync investor deck?",
-  },
-  {
-    role: "assistant",
-    content:
-      '<thinking>\nTo retrieve the latest neosync investor deck file, the most relevant tool would be filesystem__search_files. It allows searching for files by name pattern within the allowed directories.\n\nThe required parameters for filesystem__search_files are:\n- path: This can likely be inferred as one of the allowed directories, since an investor deck is usually stored in a known location. \n- pattern: We can infer this should contain "neosync" and "investor deck" to find the right file.\n\nThe excludePatterns parameter is optional, so we can omit it.\n\nTo determine the best path to search, we should first call filesystem__list_allowed_directories to see which directories are available on this system. Then we can pick the most likely location for an investor deck.\n</thinking>\nHere is the latest Neosync investor deck from the downloads directory:\n\n[Neosync-InvestorDeck-July2023.pdf](/Users/evisdrenova/downloads/Neosync-InvestorDeck-July2023.pdf)',
-  },
-  {
-    role: "user",
-    content: "can you pull the latest neosync investor deck?",
-  },
-  {
-    role: "assistant",
-    content:
-      '<thinking>\nTo retrieve the latest neosync investor deck file, the most relevant tool would be filesystem__search_files. It allows searching for files by name pattern within the allowed directories.\n\nThe required parameters for filesystem__search_files are:\n- path: This can likely be inferred as one of the allowed directories, since an investor deck is usually stored in a known location. \n- pattern: We can infer this should contain "neosync" and "investor deck" to find the right file.\n\nThe excludePatterns parameter is optional, so we can omit it.\n\nTo determine the best path to search, we should first call filesystem__list_allowed_directories to see which directories are available on this system. Then we can pick the most likely location for an investor deck.\n</thinking>\nHere is the latest Neosync investor deck from the downloads directory:\n\n[Neosync-InvestorDeck-July2023.pdf](/Users/evisdrenova/downloads/Neosync-InvestorDeck-July2023.pdf)',
-  },
-  {
-    role: "user",
-    content: "can you pull the latest neosync investor deck?",
-  },
-  {
-    role: "assistant",
-    content:
-      '<thinking>\nTo retrieve the latest neosync investor deck file, the most relevant tool would be filesystem__search_files. It allows searching for files by name pattern within the allowed directories.\n\nThe required parameters for filesystem__search_files are:\n- path: This can likely be inferred as one of the allowed directories, since an investor deck is usually stored in a known location. \n- pattern: We can infer this should contain "neosync" and "investor deck" to find the right file.\n\nThe excludePatterns parameter is optional, so we can omit it.\n\nTo determine the best path to search, we should first call filesystem__list_allowed_directories to see which directories are available on this system. Then we can pick the most likely location for an investor deck.\n</thinking>\nHere is the latest Neosync investor deck from the downloads directory:\n\n[Neosync-InvestorDeck-July2023.pdf](/Users/evisdrenova/downloads/Neosync-InvestorDeck-July2023.pdf)',
-  },
-];
-
 export default function ChatScrollArea(props: Props) {
-  const { messages, isLoading, provider, user } = props;
+  const { messages, isLoading, provider, user, onBranchConversation } = props;
+  const [copied, setCopied] = useState<boolean>(false);
+
+  const copyToClipBoard = async (
+    content: string | Anthropic.ContentBlock[]
+  ) => {
+    if (typeof content === "string") {
+      await navigator.clipboard.writeText(content);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
   return (
     <ScrollArea className="h-full w-full">
       <div className="space-y-4 px-4">
@@ -97,15 +55,39 @@ export default function ChatScrollArea(props: Props) {
                   user={user}
                 />
               </div>
-              <div
-                className={cn(
-                  message.role === "user"
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-muted",
-                  `rounded-lg px-4 py-2`
-                )}
-              >
-                {renderMessageContent(message)}
+              <div className="flex flex-row items-center gap-1">
+                <div
+                  className={cn(
+                    message.role === "user"
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-muted",
+                    `rounded-lg px-4 py-2`
+                  )}
+                >
+                  <RenderMessageContent message={message} />
+                </div>
+                <div className="w-[100px]">
+                  {message.role == "assistant" && (
+                    <div className="flex flex-col gap-2">
+                      <Button
+                        variant="ghost"
+                        onClick={() => copyToClipBoard(message.content)}
+                      >
+                        {copied ? (
+                          <Check className="text-green-500" />
+                        ) : (
+                          <Copy size="2" />
+                        )}
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        onClick={() => onBranchConversation}
+                      >
+                        <Split size="2" className="rotate-90" />
+                      </Button>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>
@@ -121,20 +103,19 @@ export default function ChatScrollArea(props: Props) {
     </ScrollArea>
   );
 }
+interface MessageContentProps {
+  message: Message;
+}
 
-export function renderMessageContent(message: {
-  content: string | Anthropic.ContentBlock[];
-  role: string;
-}) {
-  const content = message.content;
-  const role = message.role;
+export function RenderMessageContent(props: MessageContentProps) {
+  const { message } = props;
 
-  if (typeof content === "string") {
-    return renderMarkdown(content, role);
-  } else if (Array.isArray(content)) {
-    return content.map((block) => {
+  if (typeof message.content === "string") {
+    return renderMarkdown(message.content, message.role);
+  } else if (Array.isArray(message.content)) {
+    return message.content.map((block) => {
       if (block.type === "text") {
-        return renderMarkdown(block.text || "", role);
+        return renderMarkdown(block.text || "", message.role);
       }
       return null;
     });

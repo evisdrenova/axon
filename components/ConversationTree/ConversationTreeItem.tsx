@@ -10,7 +10,6 @@ interface Props {
   toggleNodeOpen: (id: number) => void;
   openNodes: Record<number, boolean>;
   onSelectConversation: (conversationId: number) => void;
-  onBranchConversation: (conversationId: number) => void;
 }
 
 export default function ConversationTreeItem(props: Props) {
@@ -21,7 +20,6 @@ export default function ConversationTreeItem(props: Props) {
     onToggleOpen,
     openNodes,
     toggleNodeOpen,
-    onBranchConversation,
   } = props;
 
   const hasChildren = node.nodes && node.nodes.length > 0;
@@ -68,7 +66,6 @@ export default function ConversationTreeItem(props: Props) {
                 toggleNodeOpen={toggleNodeOpen}
                 onToggleOpen={() => toggleNodeOpen(childNode.id)}
                 onSelectConversation={onSelectConversation}
-                onBranchConversation={onBranchConversation}
               />
             ))}
           </div>

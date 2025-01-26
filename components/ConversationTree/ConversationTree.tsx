@@ -5,7 +5,6 @@ import { useState, useMemo } from "react";
 interface Props {
   conversations: Conversation[];
   onNewConversation: (parentId?: string) => void;
-  onBranchConversation: (conversationId: number) => void;
   onSelectConversation: (conversationId: number) => void;
   onDeleteConversation: (convoId: number) => void;
 }
@@ -18,12 +17,7 @@ export interface Node {
 }
 
 export default function ConversationTree(props: Props) {
-  const {
-    conversations,
-    onNewConversation,
-    onBranchConversation,
-    onSelectConversation,
-  } = props;
+  const { conversations, onNewConversation, onSelectConversation } = props;
   // tracks which nodes are open in the convo tree
   const [openNodes, setOpenNodes] = useState<Record<number, boolean>>({});
 
@@ -53,7 +47,6 @@ export default function ConversationTree(props: Props) {
             toggleNodeOpen={toggleNodeOpen}
             onToggleOpen={() => toggleNodeOpen(node.id)}
             onSelectConversation={onSelectConversation}
-            onBranchConversation={onBranchConversation}
           />
         ))}
       </ul>
