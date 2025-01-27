@@ -168,9 +168,16 @@ export default function Home() {
     );
     if (!sourceConversation) return;
 
+    const timestamp = new Date().toLocaleString("en-US", {
+      hour: "numeric",
+      minute: "numeric",
+      second: "numeric",
+      hour12: true,
+    });
+
     try {
       const branchedConversation: Partial<Conversation> = {
-        title: `${sourceConversation.title} (Branch)`,
+        title: `${sourceConversation.title} (Branch ${timestamp})`,
         providerId: currentProvider.id,
         parent_conversation_id: sourceConversation.id,
       };
