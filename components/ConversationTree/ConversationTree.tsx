@@ -1,12 +1,13 @@
 import { Conversation } from "../../src/types";
 import { Button } from "../ui/button";
 import ConversationTreeItem from "./ConversationTreeItem";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 interface Props {
   conversations: Conversation[];
   onNewConversation: (parentId?: string) => void;
   onSelectConversation: (conversationId: number) => void;
   onDeleteConversation: (convoId: number) => void;
+  activeConversationId: number;
 }
 
 export interface Node {
@@ -17,18 +18,48 @@ export interface Node {
 }
 
 export default function ConversationTree(props: Props) {
-  const { conversations, onNewConversation, onSelectConversation } = props;
+  const {
+    conversations,
+    onNewConversation,
+    onSelectConversation,
+    activeConversationId,
+  } = props;
   // tracks which nodes are open in the convo tree
   const [openNodes, setOpenNodes] = useState<Record<number, boolean>>({});
-
-  const toggleNodeOpen = (id: number) => {
-    setOpenNodes((prev) => ({ ...prev, [id]: !prev[id] }));
-  };
 
   const nodes = useMemo(
     () => convertConversationsToNodes(conversations),
     [conversations]
   );
+
+  useEffect(() => {
+    if (!activeConversationId) return;
+
+    const expandParents = (nodes: Node[]): void => {
+      for (const node of nodes) {
+        if (node.id === activeConversationId) {
+          return;
+        }
+        if (node.nodes) {
+          const hasActiveChild = node.nodes.some(
+            (child) =>
+              child.id === activeConversationId ||
+              hasActiveDescendant(child, activeConversationId)
+          );
+          if (hasActiveChild) {
+            setOpenNodes((prev) => ({ ...prev, [node.id]: true }));
+          }
+          expandParents(node.nodes);
+        }
+      }
+    };
+
+    expandParents(nodes);
+  }, [activeConversationId, nodes]);
+
+  const toggleNodeOpen = (id: number) => {
+    setOpenNodes((prev) => ({ ...prev, [id]: !prev[id] }));
+  };
 
   return (
     <div className="p-4 overflow-y-auto flex flex-col gap-4 h-full">
@@ -47,6 +78,7 @@ export default function ConversationTree(props: Props) {
             toggleNodeOpen={toggleNodeOpen}
             onToggleOpen={() => toggleNodeOpen(node.id)}
             onSelectConversation={onSelectConversation}
+            activeConversationId={activeConversationId}
           />
         ))}
       </ul>
@@ -90,4 +122,11 @@ function findNodeById(nodes: Node[], id: number): Node | undefined {
     }
   }
   return undefined;
+}
+
+function hasActiveDescendant(node: Node, activeId: number): boolean {
+  if (node.id === activeId) return true;
+  return (
+    node.nodes?.some((child) => hasActiveDescendant(child, activeId)) || false
+  );
 }

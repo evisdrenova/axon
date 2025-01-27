@@ -41,7 +41,7 @@ export default function ChatScrollArea(props: Props) {
 
   return (
     <ScrollArea className="h-full w-full">
-      <div className="space-y-4 px-4">
+      <div className="space-y-4 p-4">
         {messages?.map((message, index) => (
           <div
             key={index}
@@ -81,9 +81,9 @@ export default function ChatScrollArea(props: Props) {
                       onClick={() => copyToClipBoard(message.content)}
                     >
                       {copied ? (
-                        <Check className="text-green-500" />
+                        <Check className="text-green-500 w-2 h-2" />
                       ) : (
-                        <Copy size="2" />
+                        <Copy />
                       )}
                     </Button>
                     <Button
@@ -92,7 +92,7 @@ export default function ChatScrollArea(props: Props) {
                         onBranchConversation(activeConversationId, message.id)
                       }
                     >
-                      <Split size="2" className="rotate-90" />
+                      <Split className="rotate-90" />
                     </Button>
                   </div>
                 )}

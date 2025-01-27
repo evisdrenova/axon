@@ -260,6 +260,7 @@ export default function Home() {
                 onNewConversation={onNewConversation}
                 onSelectConversation={handleSelectConversation}
                 onDeleteConversation={handleDeleteConversation}
+                activeConversationId={activeConversationId}
               />
             </ResizablePanel>
             <ResizableHandle withHandle />
