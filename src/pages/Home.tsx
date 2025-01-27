@@ -198,6 +198,9 @@ export default function Home() {
 
         await window.electron.saveMessage(newMessage);
 
+        // TODO: for new conversations, we shoudl summarize the existing converation and then upload the to the new convo and make it avialable for the user to see the summary
+        // then render it as a drawer that the user can expand to see the message history and the summary that was generated
+
         const newConversation: Conversation = {
           id: newConvoId,
           title: branchedConversation.title,
@@ -215,8 +218,6 @@ export default function Home() {
       setError("Failed to create branched conversation");
     }
   };
-
-  // TODO: for new conversations, we shoudl summarize the existing converation and then upload the to the new convo and make it avialable for the user to see the summary
 
   const handleSelectConversation = (conversationId: number) => {
     setActiveConversationId(conversationId);
