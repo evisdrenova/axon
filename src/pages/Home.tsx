@@ -168,11 +168,9 @@ export default function Home() {
     );
     if (!sourceConversation) return;
 
-    const title = `${sourceConversation.title} (Branch)`;
-
     try {
       const branchedConversation: Partial<Conversation> = {
-        title: title,
+        title: `${sourceConversation.title} (Branch)`,
         providerId: currentProvider.id,
         parent_conversation_id: sourceConversation.id,
       };
@@ -180,23 +178,30 @@ export default function Home() {
       const newConvoId = await window.electron.createConversation(
         branchedConversation
       );
-
-      const sourceMessage = sourceConversation.messages.filter(
-        (item) => item.id == messageId
+      const sourceMessage = sourceConversation.messages.find(
+        (m) => m.id === messageId
       );
 
-      //TODO: figur eout why the new conversation message isn't showing up in the next branched conversation
+      if (sourceMessage) {
+        const newMessage = {
+          role: sourceMessage.role,
+          content: sourceMessage.content,
+          conversationId: newConvoId,
+        };
 
-      const newConversation: Conversation = {
-        title: title,
-        providerId: currentProvider.id,
-        parent_conversation_id: sourceConversation.id,
-        messages: sourceMessage,
-      };
+        await window.electron.saveMessage(newMessage);
 
-      setActiveConversationId(newConvoId);
+        const newConversation: Conversation = {
+          id: newConvoId,
+          title: branchedConversation.title,
+          providerId: currentProvider.id,
+          parent_conversation_id: sourceConversation.id,
+          messages: [newMessage],
+        };
 
-      setConversations((prev) => [newConversation, ...prev]);
+        setConversations((prev) => [newConversation, ...prev]);
+      }
+
       await loadConversations();
       setActiveConversationId(newConvoId);
     } catch (err) {
