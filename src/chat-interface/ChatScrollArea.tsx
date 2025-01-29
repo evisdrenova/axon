@@ -8,6 +8,7 @@ import { Check, Copy, Split } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { useState } from "react";
 import Anthropic from "@anthropic-ai/sdk";
+import Spinner from "../../components/ui/Spinner";
 
 interface Props {
   messages: Message[];
@@ -16,6 +17,7 @@ interface Props {
   user: string;
   activeConversationId: number;
   onBranchConversation: (conversationId: number, messageId: number) => void;
+  isBranchLoading: boolean;
 }
 
 export default function ChatScrollArea(props: Props) {
@@ -26,6 +28,7 @@ export default function ChatScrollArea(props: Props) {
     user,
     onBranchConversation,
     activeConversationId,
+    isBranchLoading,
   } = props;
   const [copied, setCopied] = useState<boolean>(false);
 
@@ -94,7 +97,11 @@ export default function ChatScrollArea(props: Props) {
                         onBranchConversation(activeConversationId, message.id)
                       }
                     >
-                      <Split className="rotate-90" />
+                      {isBranchLoading ? (
+                        <Spinner />
+                      ) : (
+                        <Split className="rotate-90" />
+                      )}
                     </Button>
                   </div>
                 )}

@@ -28,6 +28,7 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [inputValue, setInputValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isBranchLoading, setIsBranchLoading] = useState<boolean>(false);
 
   const loadProviders = async () => {
     try {
@@ -189,43 +190,35 @@ export default function Home() {
         (m) => m.id === messageId
       );
 
-      // TODO: clean up the summary message and in the ChatScrollArea update the extractSummary so we can render it correctly
       if (sourceMessage) {
-        // const newMessage = {
-        //   role: sourceMessage.role,
-        //   content: sourceMessage.content,
-        //   conversationId: newConvoId,
-        // };
-
-        let summary = "";
-
         console.log("source", sourceConversation.messages);
         // attempts to summarize the context in order to reduce the context window length
-        try {
-          summary = await window.electron.summarizeContext(
-            sourceConversation.messages
-          );
+        setIsBranchLoading(true);
+        const summary = await window.electron.summarizeContext(
+          sourceConversation.messages
+        );
 
-          console.log("summary", summary);
-        } catch (error) {
-          setError("Failed to delete conversation");
-        }
+        const messages: Message[] = [
+          {
+            role: "assistant",
+            content: summary,
+            conversationId: newConvoId,
+          },
+          {
+            role: sourceMessage.role,
+            content: sourceMessage.content,
+            conversationId: newConvoId,
+          },
+        ];
 
-        const newMessage = {
-          role: sourceMessage.role,
-          content: summary,
-          conversationId: newConvoId,
-        };
-
-        // this should be a
-        await window.electron.saveMessage(newMessage);
+        await window.electron.saveMessages(messages);
 
         const newConversation: Conversation = {
           id: newConvoId,
           title: branchedConversation.title,
           providerId: currentProvider.id,
           parent_conversation_id: sourceConversation.id,
-          messages: [newMessage],
+          messages: messages,
         };
 
         setConversations((prev) => [newConversation, ...prev]);
@@ -233,6 +226,8 @@ export default function Home() {
 
       await loadConversations();
       setActiveConversationId(newConvoId);
+      // This should only show the loading spinner in the chatscroll area for the message that we're trying to branch
+      setIsBranchLoading(false);
     } catch (err) {
       setError("Failed to create branched conversation");
     }
@@ -304,6 +299,7 @@ export default function Home() {
                 provider={currentProvider}
                 user={user?.name ?? ""}
                 onBranchConversation={handleBranchConversation}
+                isBranchLoading={isBranchLoading}
               />
             </ResizablePanel>
           </ResizablePanelGroup>
