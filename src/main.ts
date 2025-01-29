@@ -64,8 +64,8 @@ const initializeDatabase = () => {
       title TEXT,
       parent_conversation_id INTEGER,
       createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (providerId) REFERENCES providers(id)
-      FOREIGN KEY (parent_conversation_id) REFERENCES conversations(id)
+      FOREIGN KEY (providerId) REFERENCES providers(id) ON DELETE CASCADE
+      FOREIGN KEY (parent_conversation_id) REFERENCES conversations(id) ON DELETE CASCADE
 );`);
 
   db.exec(`
@@ -75,7 +75,7 @@ const initializeDatabase = () => {
     role TEXT,       -- "user" | "assistant" | "system"
     content TEXT,
     createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (conversationId) REFERENCES conversations(id)
+    FOREIGN KEY (conversationId) REFERENCES conversations(id) ON DELETE CASCADE
 );`);
 
   db.exec(`
@@ -549,6 +549,13 @@ ipcMain.handle("chat", async (_, data: Message[]) => {
     throw new Error("No provider selected");
   }
   return providers.processQuery(data);
+});
+
+ipcMain.handle("summarize-context", async (_, data: Message[]) => {
+  if (!providers.getCurrentProvider()) {
+    throw new Error("No provider selected");
+  }
+  return providers.summarizeContext(data);
 });
 
 // called when Electron has initialized and is ready to create browser windows.

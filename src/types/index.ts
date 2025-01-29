@@ -32,6 +32,7 @@ export interface IElectronAPI {
   updateConversationTitle: (convoId: number, newTitle: string) => Promise<void>;
   getConversationMessages: (convoId: number) => Promise<Message[]>;
   chat: (data: Message[]) => Promise<string>;
+  summarizeContext: (data: Message[]) => Promise<string>;
   minimizeWindow: () => void;
   maximizeWindow: () => void;
   closeWindow: () => void;
@@ -90,6 +91,7 @@ export interface Conversation {
   parent_conversation_id: number;
   createdAt?: string;
   messages?: Message[];
+  summary?: string;
 }
 
 export interface PromptTemplateArguments {

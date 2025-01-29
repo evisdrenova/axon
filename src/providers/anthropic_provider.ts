@@ -4,10 +4,11 @@ import MCP from "src/mcp/mcp";
 export default class AnthropicHandler {
   constructor(private readonly mcp: MCP) {}
 
-  public async handleQuery(
+  public async makeToolCall(
     providerClient: ProviderClient,
     messages: Message[],
-    currentProvider: Provider
+    currentProvider: Provider,
+    systemPrompt?: string
   ) {
     const finalText: string[] = [];
 
@@ -19,7 +20,8 @@ export default class AnthropicHandler {
         providerClient,
         messages,
         currentProvider,
-        availableTools
+        availableTools,
+        systemPrompt
       );
 
       // the llm may respond with 2+ message, for example a text message that explains what it wants to do and then a tool_use message that tells you what tools to call, so this iterates over both of those
@@ -63,15 +65,16 @@ export default class AnthropicHandler {
     }
   }
 
-  private async callAnthropic(
+  public async callAnthropic(
     provider: ProviderClient,
     messages: Message[],
     currentProvider: Provider,
-    tools?: Anthropic.Tool[]
+    tools?: Anthropic.Tool[],
+    systemPrompt?: string
   ) {
     if (provider.type !== "anthropic") {
       throw new Error(
-        `Unsupported provider type. Expecint 'anthopric', got: ${provider.type}`
+        `Unsupported provider type. Expecting 'anthropic', got: ${provider.type}`
       );
     }
     try {
@@ -81,12 +84,7 @@ export default class AnthropicHandler {
         max_tokens: 1024,
         tools: tools,
         messages: [...convertedMessages],
-        system: `You are an intelligent computer assistant that has access to tools that you should use directly when appropriate. Please always follow these rules:
-          
-          1. Instead of describing how you would use the tools, you should actually use them to help the user. 
-          2. Always return properly formatted markdown.
-          3. Only return the output that the user requested without any explanation or example output. Don't return your thought process or what is in between two <thinking> tags, just return the final answer that the user is asking for. 
-          4. Always format lists as markdown tables with column headers.`,
+        system: this.handleSystemPrompt(systemPrompt),
       });
     } catch (e) {
       throw new Error(`Error calling the anthropic API, got: ${e}`);
@@ -159,6 +157,19 @@ export default class AnthropicHandler {
     } catch (error) {
       console.error(`Error executing tool ${toolName}:`, error);
       throw error;
+    }
+  }
+
+  private handleSystemPrompt(systemPrompt?: string): string {
+    if (systemPrompt) {
+      return systemPrompt;
+    } else {
+      return `You are an intelligent computer assistant that has access to tools that you should use directly when appropriate. Please always follow these rules:
+          
+          1. Instead of describing how you would use the tools, you should actually use them to help the user. 
+          2. Always return properly formatted markdown.
+          3. Only return the output that the user requested without any explanation or example output. Don't return your thought process or what is in between two <thinking> tags, just return the final answer that the user is asking for. 
+          4. Always format lists as markdown tables with column headers.`;
     }
   }
 }

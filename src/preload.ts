@@ -83,6 +83,10 @@ contextBridge.exposeInMainWorld("electron", {
     return ipcRenderer.invoke("chat", data);
   },
 
+  summarizeContext: (data: Message[]) => {
+    return ipcRenderer.invoke("summarize-context", data);
+  },
+
   // window methods
   // send() is for one-way communication, invoke() returns a promise
   minimizeWindow: () => ipcRenderer.send("window-minimize"),

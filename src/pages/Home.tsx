@@ -190,16 +190,33 @@ export default function Home() {
       );
 
       if (sourceMessage) {
+        // const newMessage = {
+        //   role: sourceMessage.role,
+        //   content: sourceMessage.content,
+        //   conversationId: newConvoId,
+        // };
+
+        let summary = "";
+
+        console.log("source", sourceConversation.messages);
+        // attempts to summarize the context in order to reduce the context window length
+        try {
+          summary = await window.electron.summarizeContext(
+            sourceConversation.messages
+          );
+
+          console.log("summary", summary);
+        } catch (error) {
+          setError("Failed to delete conversation");
+        }
+
         const newMessage = {
           role: sourceMessage.role,
-          content: sourceMessage.content,
+          content: summary,
           conversationId: newConvoId,
         };
 
         await window.electron.saveMessage(newMessage);
-
-        // TODO: for new conversations, we shoudl summarize the existing converation and then upload the to the new convo and make it avialable for the user to see the summary
-        // then render it as a drawer that the user can expand to see the message history and the summary that was generated
 
         const newConversation: Conversation = {
           id: newConvoId,

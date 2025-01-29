@@ -71,11 +71,44 @@ export default class Providers {
 
     switch (this.currentProvider.type) {
       case "anthropic":
-        return this.anthropicHandler.handleQuery(
+        return this.anthropicHandler.makeToolCall(
           providerClient,
           messages,
           this.currentProvider
         );
+      default:
+        throw new Error("Unable to determine the provider");
+    }
+  }
+
+  public async summarizeContext(messages: Message[]): Promise<string> {
+    if (!this.currentProvider) {
+      throw new Error("No provider selected");
+    }
+
+    const providerClient = await this.getProviderInstance(this.currentProvider);
+
+    const systemPrompt = `I want you to summarize the conversation provided in the messages and return it back in one paragraph. Your summary should capture the most important aspects of the conversation such that if the summary were given to another LLM, it would understand the background and context of the conversation and be able to continue it with the user. 
+
+    The summary that you output should always be shorter than the messages that you are summarizing. Keep the length of the summary to less than 4 sentences.
+`;
+
+    switch (this.currentProvider.type) {
+      case "anthropic":
+        const res = await this.anthropicHandler.callAnthropic(
+          providerClient,
+          messages,
+          this.currentProvider,
+          undefined,
+          systemPrompt
+        );
+
+        const content = res.content[0];
+        if (content.type === "text") {
+          return content.text;
+        } else {
+          throw new Error("Unexpected response type from Anthropic API");
+        }
       default:
         throw new Error("Unable to determine the provider");
     }

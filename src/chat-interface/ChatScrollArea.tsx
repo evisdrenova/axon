@@ -236,14 +236,12 @@ function NiceDate(props: DateProps) {
   );
 }
 
-function formatDateTime(dateString: string): string {
-  // Replace space with 'T' to make it ISO-like
-  // -> "2025-01-20T05:10:09"
+function formatDateTime(dateString?: string): string {
+  if (!dateString) return "";
+
   const isoString = dateString.replace(" ", "T");
   const date = new Date(isoString);
 
-  // Format as "January 20, 2025 at 5:10 AM"
-  // Adjust locale/format options as desired
   return date.toLocaleString("en-US", {
     month: "long",
     day: "numeric",
