@@ -499,6 +499,29 @@ ipcMain.handle("save-message", (_, message: Message) => {
   }
 });
 
+ipcMain.handle("save-messages", (_, messages: Message[]) => {
+  try {
+    const stmt = db.prepare(`
+      INSERT INTO messages (
+        conversationId,
+        role,
+        content
+      ) VALUES (?, ?, ?)
+    `);
+
+    const results = db.transaction((messages: Message[]) => {
+      return messages.map((message) =>
+        stmt.run(message.conversationId, message.role, message.content)
+      );
+    })(messages);
+
+    return results.map((result) => result.lastInsertRowid);
+  } catch (error) {
+    console.log("unable to save messages", error);
+    throw error;
+  }
+});
+
 ipcMain.handle(
   "update-conversation-title",
   (_, convoId: number, newTitle: string) => {

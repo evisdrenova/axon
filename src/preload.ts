@@ -72,6 +72,9 @@ contextBridge.exposeInMainWorld("electron", {
   saveMessage: (message: Message) => {
     return ipcRenderer.invoke("save-message", message);
   },
+  saveMessages: (message: Message[]) => {
+    return ipcRenderer.invoke("save-messages", message);
+  },
   updateConversationTitle: (convoId: number, newTitle: string) => {
     return ipcRenderer.invoke("update-conversation-title", convoId, newTitle);
   },

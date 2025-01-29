@@ -189,6 +189,7 @@ export default function Home() {
         (m) => m.id === messageId
       );
 
+      // TODO: clean up the summary message and in the ChatScrollArea update the extractSummary so we can render it correctly
       if (sourceMessage) {
         // const newMessage = {
         //   role: sourceMessage.role,
@@ -216,6 +217,7 @@ export default function Home() {
           conversationId: newConvoId,
         };
 
+        // this should be a
         await window.electron.saveMessage(newMessage);
 
         const newConversation: Conversation = {

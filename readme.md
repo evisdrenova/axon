@@ -16,3 +16,4 @@ A desktop app that allows you to talk to different models, register MCP servers 
 9. error messages not flowing through to front-end
 10. filesystem is case senesitive
 11. support token counts - show progress bar of context length
+12. add in breadcrumbs in the title to show lineage of convo

@@ -90,7 +90,9 @@ export default class Providers {
 
     const systemPrompt = `I want you to summarize the conversation provided in the messages and return it back in one paragraph. Your summary should capture the most important aspects of the conversation such that if the summary were given to another LLM, it would understand the background and context of the conversation and be able to continue it with the user. 
 
-    The summary that you output should always be shorter than the messages that you are summarizing. Keep the length of the summary to less than 4 sentences.
+    The summary output must follow these rules:
+    1. It must be wrapped in <summary></summary> tags
+    2. The output should always be shorter than the messages that you are summarizing. Keep the length of the summary to less than 4 sentences.
 `;
 
     switch (this.currentProvider.type) {

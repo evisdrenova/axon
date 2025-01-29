@@ -39,6 +39,8 @@ export default function ChatScrollArea(props: Props) {
     }
   };
 
+  // const summary = extractSummary(messages)
+
   return (
     <ScrollArea className="h-full w-full">
       <div className="space-y-4 p-4">
@@ -251,3 +253,16 @@ function formatDateTime(dateString?: string): string {
     hour12: true,
   });
 }
+
+// function extractSummary(messages:Message[]){
+//   const summaryRegex = /<summary>.*?<\/summary>/s;
+
+//   for (const message of messages) {
+//     for (const content of message.content) {
+//       if (content.type === 'text' && summaryRegex.test(content.text)) {
+//         return message;
+//       }
+//     }
+//   }
+//   return null;
+// }
