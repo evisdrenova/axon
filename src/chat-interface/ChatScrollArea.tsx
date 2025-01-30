@@ -191,22 +191,11 @@ function renderMarkdown(content: string, role: string) {
           const match = /language-(\w+)/.exec(className || "");
           const language = match ? match[1] : "";
           const code = String(children).replace(/\n$/, "");
-          // return (
-          //   <code
-          //     className={cn(
-          //       "text-xs font-mono block border border-gray-300 rounded-lg bg-gray-700 text-gray-100 p-2",
-          //       language ? `language-${language}` : ""
-          //     )}
-          //     {...props}
-          //   >
-          //     {children}
-          //   </code>
-          // );
 
           if (!language) {
             return (
               <code
-                className="px-1.5 py-0.5 text-sm font-mono bg-gray-700 text-gray-100 rounded"
+                className="px-1.5 py-0.5 font-mono bg-gray-700 text-gray-100 rounded text-xs"
                 {...props}
               >
                 {children}
@@ -214,7 +203,7 @@ function renderMarkdown(content: string, role: string) {
             );
           }
           return (
-            <div className="relative group">
+            <div className="relative group my-2 text-xs">
               {/* Language badge */}
               <div className="absolute right-2 top-2 px-2 py-1 text-xs font-medium text-gray-400 bg-gray-800 rounded">
                 {language}
@@ -237,7 +226,7 @@ function renderMarkdown(content: string, role: string) {
                 }) => (
                   <pre
                     className={cn(
-                      "p-4 overflow-x-auto font-mono text-sm bg-[#1E1E1E] rounded-lg",
+                      "p-4 overflow-x-auto font-mono  bg-[#1E1E1E] rounded-lg",
                       className
                     )}
                     style={style}
