@@ -6,7 +6,7 @@ import { Message, Provider } from "../types";
 import remarkGfm from "remark-gfm";
 import { Check, Copy, Split } from "lucide-react";
 import { Button } from "../../components/ui/button";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import Anthropic from "@anthropic-ai/sdk";
 import Spinner from "../../components/ui/Spinner";
 
@@ -31,6 +31,12 @@ export default function ChatScrollArea(props: Props) {
     isBranchLoading,
   } = props;
   const [copied, setCopied] = useState<boolean>(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [messages]);
 
   const copyToClipBoard = async (
     content: string | Anthropic.ContentBlock[]
@@ -42,38 +48,28 @@ export default function ChatScrollArea(props: Props) {
     }
   };
 
-  // const summary = extractSummary(messages)
-
-  console.log("messages", messages);
-
   const sortedMessages = messages?.sort((a, b) => {
     const timeDiff =
       new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
-
-    if (timeDiff !== 0) {
-      return timeDiff; // Sort by timestamp first (oldest messages first)
-    }
-
-    // If timestamps are equal, prioritize 'user' over 'assistant'
-    return a.role === "user" ? -1 : 1;
+    return timeDiff !== 0 ? timeDiff : a.role === "user" ? -1 : 1;
   });
 
   return (
     <ScrollArea className="h-full w-full text-xs">
-      <div className="space-y-4 p-4 w-full">
+      <div className="flex flex-col space-y-4 p-4 min-h-full">
         {sortedMessages?.map((message) => (
           <div
             key={message?.id}
             className={cn(
-              message.role === "user" ? "justify-end" : "justify-start ",
-              `flex `
+              "flex w-full",
+              message.role === "user" ? "justify-end" : "justify-start"
             )}
           >
-            <div className="flex flex-col max-w-[50%]">
+            <div className="flex flex-col max-w-[80%]">
               <div
                 className={cn(
-                  message.role === "user" ? "justify-end" : "justify-start",
-                  `flex px-2 `
+                  "flex px-2",
+                  message.role === "user" ? "justify-end" : "justify-start"
                 )}
               >
                 <RenderMessageMetadata
@@ -85,28 +81,30 @@ export default function ChatScrollArea(props: Props) {
               <div className="flex flex-row gap-1">
                 <div
                   className={cn(
+                    "rounded-lg px-4 py-2",
                     message.role === "user"
                       ? "bg-primary text-primary-foreground"
-                      : "bg-muted",
-                    `rounded-lg px-4 py-2`
+                      : "bg-muted"
                   )}
                 >
                   <RenderMessageContent message={message} />
                 </div>
-                {message.role == "assistant" && (
+                {message.role === "assistant" && (
                   <div className="flex flex-col gap-2">
                     <Button
                       variant="ghost"
+                      size="sm"
                       onClick={() => copyToClipBoard(message.content)}
                     >
                       {copied ? (
-                        <Check className="text-green-500 w-2 h-2" />
+                        <Check className="text-green-500 h-4 w-4" />
                       ) : (
-                        <Copy />
+                        <Copy className="h-4 w-4" />
                       )}
                     </Button>
                     <Button
                       variant="ghost"
+                      size="sm"
                       onClick={() =>
                         onBranchConversation(activeConversationId, message.id)
                       }
@@ -114,7 +112,7 @@ export default function ChatScrollArea(props: Props) {
                       {isBranchLoading ? (
                         <Spinner />
                       ) : (
-                        <Split className="rotate-90" />
+                        <Split className="rotate-90 h-4 w-4" />
                       )}
                     </Button>
                   </div>
@@ -130,6 +128,7 @@ export default function ChatScrollArea(props: Props) {
             </div>
           </div>
         )}
+        <div ref={scrollRef} /> {/* Scroll anchor */}
       </div>
     </ScrollArea>
   );
@@ -281,6 +280,19 @@ function formatDateTime(dateString?: string): string {
 //   for (const message of messages) {
 //     for (const content of message.content) {
 //       if (content.type === 'text' && summaryRegex.test(content.text)) {
+//         return message;
+//       }
+//     }
+//   }
+//   return null;
+// }
+
+// function extractCOde(messages:Message[]){
+//   const codeRegex = /<code>.*?<\/code>/s;
+
+//   for (const message of messages) {
+//     for (const content of message.content) {
+//       if (content.type === 'text' && codeRegex.test(content.text)) {
 //         return message;
 //       }
 //     }
