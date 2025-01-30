@@ -44,18 +44,32 @@ export default function ChatScrollArea(props: Props) {
 
   // const summary = extractSummary(messages)
 
+  console.log("messages", messages);
+
+  const sortedMessages = messages?.sort((a, b) => {
+    const timeDiff =
+      new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+
+    if (timeDiff !== 0) {
+      return timeDiff; // Sort by timestamp first (oldest messages first)
+    }
+
+    // If timestamps are equal, prioritize 'user' over 'assistant'
+    return a.role === "user" ? -1 : 1;
+  });
+
   return (
-    <ScrollArea className="h-full w-full">
-      <div className="space-y-4 p-4">
-        {messages?.map((message, index) => (
+    <ScrollArea className="h-full w-full text-xs">
+      <div className="space-y-4 p-4 w-full">
+        {sortedMessages?.map((message) => (
           <div
-            key={index}
+            key={message?.id}
             className={cn(
-              message.role === "user" ? "justify-end" : "justify-start w-[60%]",
-              `flex`
+              message.role === "user" ? "justify-end" : "justify-start ",
+              `flex `
             )}
           >
-            <div className="flex flex-col">
+            <div className="flex flex-col max-w-[50%]">
               <div
                 className={cn(
                   message.role === "user" ? "justify-end" : "justify-start",

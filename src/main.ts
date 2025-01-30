@@ -375,7 +375,6 @@ ipcMain.handle("stop-server", async (_, id: number) => {
   return mcp.closeClient(server);
 });
 
-// get conversations with their messages
 ipcMain.handle("get-conversations", () => {
   try {
     const stmt = db.prepare(`
@@ -407,12 +406,9 @@ ipcMain.handle("get-conversations", () => {
       parent_conversation_id: number | null;
       messages: string;
     }[];
-    console.log("Raw results from database:", rawResults);
 
     const conversations = rawResults.map((convo) => {
-      console.log("Messages before parsing:", convo.messages);
       const parsedMessages = JSON.parse(convo.messages as string);
-      console.log("Messages after parsing:", parsedMessages);
 
       return {
         ...convo,

@@ -305,7 +305,7 @@ export default function Home() {
           </ResizablePanelGroup>
         </ResizablePanel>
         <ResizableHandle withHandle />
-        <ResizablePanel minSize={30} defaultSize={30}>
+        <ResizablePanel minSize={10} defaultSize={30}>
           <div className="flex flex-col gap-2 h-full overflow-auto px-40">
             <div>
               <ModelSelect
