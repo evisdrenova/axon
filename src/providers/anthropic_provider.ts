@@ -167,8 +167,7 @@ export default class AnthropicHandler {
           1. Instead of describing how you would use the tools, you should actually use them to help the user. 
           2. Always return properly formatted markdown.
           3. Only return the output that the user requested without any explanation or example output. Don't return your thought process or what is in between two <thinking> tags, just return the final answer that the user is asking for. 
-          4. Always format lists as markdown tables with column headers.
-          5. If you are returning any code examples, they should always be wrapped in <code> tags.`;
+          4. Always format lists as markdown tables with column headers.`;
     }
   }
 }

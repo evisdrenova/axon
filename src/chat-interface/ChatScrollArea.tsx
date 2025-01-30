@@ -53,6 +53,10 @@ export default function ChatScrollArea(props: Props) {
 
   console.log("messages", messages);
 
+  const code = extractCode(messages);
+
+  console.log("code", code);
+
   const sortedMessages = messages?.sort((a, b) => {
     const timeDiff =
       new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
@@ -186,6 +190,45 @@ function renderMarkdown(content: string, role: string) {
             </li>
           );
         },
+        // continue
+        code: ({ node, inline, className, children, ...props }) => {
+          const match = /language-(\w+)/.exec(className || "");
+          const language = match ? match[1] : "";
+
+          if (inline) {
+            // Inline code
+            return (
+              <code
+                className="bg-gray-100 text-gray-800 px-1 py-0.5 rounded text-sm font-mono"
+                {...props}
+              >
+                {children}
+              </code>
+            );
+          }
+
+          // Code block
+          return (
+            <div className="relative">
+              {language && (
+                <div className="absolute top-0 right-0 bg-gray-700 text-gray-200 px-2 py-1 text-xs rounded-bl">
+                  {language}
+                </div>
+              )}
+              <pre className="bg-gray-100 p-4 rounded-lg overflow-x-auto">
+                <code
+                  className={cn(
+                    "text-sm font-mono block",
+                    language ? `language-${language}` : ""
+                  )}
+                  {...props}
+                >
+                  {children}
+                </code>
+              </pre>
+            </div>
+          );
+        },
         strong: ({ children }) => (
           <span className="text-gray-600 ">{children}</span>
         ),
@@ -297,15 +340,35 @@ function formatDateTime(dateString?: string): string {
 //   return null;
 // }
 
-// function extractCOde(messages:Message[]){
-//   const codeRegex = /<code>.*?<\/code>/s;
+function extractCode(messages: Message[]): Message | null {
+  if (!messages || !Array.isArray(messages)) {
+    console.log("Messages is not an array or is null/undefined");
+    return null;
+  }
 
-//   for (const message of messages) {
-//     for (const content of message.content) {
-//       if (content.type === 'text' && codeRegex.test(content.text)) {
-//         return message;
-//       }
-//     }
-//   }
-//   return null;
-// }
+  const codeRegex = /<code>.*?<\/code>/s;
+
+  for (const message of messages) {
+    // Handle string content
+    if (typeof message.content === "string") {
+      if (codeRegex.test(message.content)) {
+        return message;
+      }
+      continue;
+    }
+
+    // Handle ContentBlock array
+    if (Array.isArray(message.content)) {
+      for (const content of message.content) {
+        if (
+          content.type === "text" &&
+          content.text &&
+          codeRegex.test(content.text)
+        ) {
+          return message;
+        }
+      }
+    }
+  }
+  return null;
+}

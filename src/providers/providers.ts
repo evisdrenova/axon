@@ -93,7 +93,6 @@ export default class Providers {
     The summary output must follow these rules:
     1. It must be wrapped in <summary></summary> tags
     2. The output should always be shorter than the messages that you are summarizing. Keep the length of the summary to less than 4 sentences.
-    3. If you are returning any code examples, they should always be wrapped in <code> tags.
 `;
 
     switch (this.currentProvider.type) {

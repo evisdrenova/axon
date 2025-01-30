@@ -101,6 +101,11 @@ export default function Home() {
       return;
     }
 
+    const trimmedInput = inputValue.trim();
+    setInputValue("");
+    setIsLoading(true);
+    setError(null);
+
     // Create user message
     const userMessage: Message = {
       role: "user",
@@ -108,13 +113,41 @@ export default function Home() {
       conversationId: activeConversationId,
     };
 
-    // Update messages with user input
-    // setMessages((prev) => [...prev, userMessage]);
+    // create optimistic user message
+    const tempId = generateTempId(messages);
+    const optimisticUserMessage: Message = {
+      id: Date.now(),
+      role: "user",
+      content: trimmedInput,
+      conversationId: activeConversationId,
+      createdAt: new Date().toISOString(),
+    };
+
     setInputValue("");
     setIsLoading(true);
     setError(null);
 
+    // optimistically update the chat window
+    setConversations((prevConversations) =>
+      prevConversations.map((conversation) => {
+        if (conversation.id === activeConversationId) {
+          return {
+            ...conversation,
+            messages: [...conversation.messages, optimisticUserMessage],
+          };
+        }
+        return conversation;
+      })
+    );
+
     try {
+      // actual user message
+      const userMessage: Message = {
+        role: "user",
+        content: trimmedInput,
+        conversationId: activeConversationId,
+      };
+
       await window.electron.saveMessage(userMessage);
 
       //this shouldn't include the conversationId when we send it
@@ -129,15 +162,31 @@ export default function Home() {
       await window.electron.saveMessage(assistantMessage);
 
       await loadConversations();
-
-      // append assistant response to chat log
-      // setMessages((prev) => [...prev, assistantMessage]);
     } catch (err: any) {
+      // roll back optimistic update
+      setConversations((prevConversations) =>
+        prevConversations.map((conversation) => {
+          if (conversation.id === activeConversationId) {
+            return {
+              ...conversation,
+              messages: conversation.messages.filter(
+                (msg) => msg.id !== tempId
+              ),
+            };
+          }
+          return conversation;
+        })
+      );
       setError(err.message || "Failed to get response");
     } finally {
       setIsLoading(false);
     }
   };
+
+  function generateTempId(messages: Message[]): number {
+    if (!messages.length) return 1;
+    return Math.max(...messages.map((m) => m.id ?? 0)) + 1;
+  }
 
   const onNewConversation = async () => {
     if (!currentProvider) return;
