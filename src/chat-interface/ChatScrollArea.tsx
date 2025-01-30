@@ -6,7 +6,7 @@ import { Message, Provider } from "../types";
 import remarkGfm from "remark-gfm";
 import { Check, Copy, Split } from "lucide-react";
 import { Button } from "../../components/ui/button";
-import { useState, useEffect, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import Anthropic from "@anthropic-ai/sdk";
 import Spinner from "../../components/ui/Spinner";
 
@@ -32,6 +32,7 @@ export default function ChatScrollArea(props: Props) {
   } = props;
   const [copied, setCopied] = useState<boolean>(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollIntoView({ behavior: "smooth" });
@@ -48,28 +49,39 @@ export default function ChatScrollArea(props: Props) {
     }
   };
 
+  // const summary = extractSummary(messages)
+
+  console.log("messages", messages);
+
   const sortedMessages = messages?.sort((a, b) => {
     const timeDiff =
       new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
-    return timeDiff !== 0 ? timeDiff : a.role === "user" ? -1 : 1;
+
+    // sort messages ascending
+    if (timeDiff !== 0) {
+      return timeDiff;
+    }
+
+    // If timestamps are equal, prioritize 'user' over 'assistant'
+    return a.role === "user" ? -1 : 1;
   });
 
   return (
-    <ScrollArea className="h-full w-full text-xs">
-      <div className="flex flex-col space-y-4 p-4 min-h-full">
+    <ScrollArea className="flex-1 text-xs">
+      <div className="space-y-4 p-4 w-full">
         {sortedMessages?.map((message) => (
           <div
             key={message?.id}
             className={cn(
-              "flex w-full",
-              message.role === "user" ? "justify-end" : "justify-start"
+              message.role === "user" ? "justify-end" : "justify-start ",
+              `flex `
             )}
           >
-            <div className="flex flex-col max-w-[80%]">
+            <div className="flex flex-col max-w-[60%]">
               <div
                 className={cn(
-                  "flex px-2",
-                  message.role === "user" ? "justify-end" : "justify-start"
+                  message.role === "user" ? "justify-end" : "justify-start",
+                  `flex px-2 `
                 )}
               >
                 <RenderMessageMetadata
@@ -81,30 +93,28 @@ export default function ChatScrollArea(props: Props) {
               <div className="flex flex-row gap-1">
                 <div
                   className={cn(
-                    "rounded-lg px-4 py-2",
                     message.role === "user"
                       ? "bg-primary text-primary-foreground"
-                      : "bg-muted"
+                      : "bg-muted",
+                    `rounded-lg px-4 py-2`
                   )}
                 >
                   <RenderMessageContent message={message} />
                 </div>
-                {message.role === "assistant" && (
+                {message.role == "assistant" && (
                   <div className="flex flex-col gap-2">
                     <Button
                       variant="ghost"
-                      size="sm"
                       onClick={() => copyToClipBoard(message.content)}
                     >
                       {copied ? (
-                        <Check className="text-green-500 h-4 w-4" />
+                        <Check className="text-green-500 w-2 h-2" />
                       ) : (
-                        <Copy className="h-4 w-4" />
+                        <Copy />
                       )}
                     </Button>
                     <Button
                       variant="ghost"
-                      size="sm"
                       onClick={() =>
                         onBranchConversation(activeConversationId, message.id)
                       }
@@ -112,7 +122,7 @@ export default function ChatScrollArea(props: Props) {
                       {isBranchLoading ? (
                         <Spinner />
                       ) : (
-                        <Split className="rotate-90 h-4 w-4" />
+                        <Split className="rotate-90" />
                       )}
                     </Button>
                   </div>
@@ -128,7 +138,7 @@ export default function ChatScrollArea(props: Props) {
             </div>
           </div>
         )}
-        <div ref={scrollRef} /> {/* Scroll anchor */}
+        <div ref={scrollRef} />
       </div>
     </ScrollArea>
   );

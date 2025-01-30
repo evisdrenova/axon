@@ -279,7 +279,11 @@ export default function Home() {
               />
             </ResizablePanel>
             <ResizableHandle withHandle />
-            <ResizablePanel defaultSize={80} minSize={10}>
+            <ResizablePanel
+              defaultSize={80}
+              minSize={10}
+              className="flex flex-col"
+            >
               <ChatTitle
                 id={activeConversationId}
                 onUpdateTitle={handleUpdateConversationTitle}
