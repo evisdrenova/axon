@@ -125,6 +125,9 @@ main-950: 236 23% 20%   (#282A41)
   body {
     @apply font-sans antialiased bg-background text-foreground text-sm;
   }
+  code {
+    @apply border border-gray-300 bg-gray-200;
+  }
 }
 
 .dragable {

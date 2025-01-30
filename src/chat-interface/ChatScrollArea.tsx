@@ -9,6 +9,7 @@ import { Button } from "../../components/ui/button";
 import { useState, useRef, useEffect } from "react";
 import Anthropic from "@anthropic-ai/sdk";
 import Spinner from "../../components/ui/Spinner";
+import { Highlight, themes } from "prism-react-renderer";
 
 interface Props {
   messages: Message[];
@@ -52,10 +53,6 @@ export default function ChatScrollArea(props: Props) {
   // const summary = extractSummary(messages)
 
   console.log("messages", messages);
-
-  const code = extractCode(messages);
-
-  console.log("code", code);
 
   const sortedMessages = messages?.sort((a, b) => {
     const timeDiff =
@@ -190,42 +187,73 @@ function renderMarkdown(content: string, role: string) {
             </li>
           );
         },
-        // continue
-        code: ({ node, inline, className, children, ...props }) => {
+        code: ({ node, className, children, ...props }) => {
           const match = /language-(\w+)/.exec(className || "");
           const language = match ? match[1] : "";
+          const code = String(children).replace(/\n$/, "");
+          // return (
+          //   <code
+          //     className={cn(
+          //       "text-xs font-mono block border border-gray-300 rounded-lg bg-gray-700 text-gray-100 p-2",
+          //       language ? `language-${language}` : ""
+          //     )}
+          //     {...props}
+          //   >
+          //     {children}
+          //   </code>
+          // );
 
-          if (inline) {
-            // Inline code
+          if (!language) {
             return (
               <code
-                className="bg-gray-100 text-gray-800 px-1 py-0.5 rounded text-sm font-mono"
+                className="px-1.5 py-0.5 text-sm font-mono bg-gray-700 text-gray-100 rounded"
                 {...props}
               >
                 {children}
               </code>
             );
           }
-
-          // Code block
           return (
-            <div className="relative">
-              {language && (
-                <div className="absolute top-0 right-0 bg-gray-700 text-gray-200 px-2 py-1 text-xs rounded-bl">
-                  {language}
-                </div>
-              )}
-              <pre className="bg-gray-100 p-4 rounded-lg overflow-x-auto">
-                <code
-                  className={cn(
-                    "text-sm font-mono block",
-                    language ? `language-${language}` : ""
-                  )}
-                  {...props}
-                >
-                  {children}
-                </code>
-              </pre>
+            <div className="relative group">
+              {/* Language badge */}
+              <div className="absolute right-2 top-2 px-2 py-1 text-xs font-medium text-gray-400 bg-gray-800 rounded">
+                {language}
+              </div>
+
+              <button
+                onClick={() => navigator.clipboard.writeText(code)}
+                className="absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity px-2 py-1 text-xs font-medium text-gray-400 hover:text-white bg-gray-800 rounded"
+              >
+                Copy
+              </button>
+
+              <Highlight theme={themes.vsDark} code={code} language={language}>
+                {({
+                  className,
+                  style,
+                  tokens,
+                  getLineProps,
+                  getTokenProps,
+                }) => (
+                  <pre
+                    className={cn(
+                      "p-4 overflow-x-auto font-mono text-sm bg-[#1E1E1E] rounded-lg",
+                      className
+                    )}
+                    style={style}
+                  >
+                    {tokens.map((line, i) => (
+                      <div key={i} {...getLineProps({ line })}>
+                        {/* Optional line numbers */}
+                        <span className="mr-4 text-gray-500">{i + 1}</span>
+                        {line.map((token, key) => (
+                          <span key={key} {...getTokenProps({ token })} />
+                        ))}
+                      </div>
+                    ))}
+                  </pre>
+                )}
+              </Highlight>
             </div>
           );
         },
@@ -339,36 +367,3 @@ function formatDateTime(dateString?: string): string {
 //   }
 //   return null;
 // }
-
-function extractCode(messages: Message[]): Message | null {
-  if (!messages || !Array.isArray(messages)) {
-    console.log("Messages is not an array or is null/undefined");
-    return null;
-  }
-
-  const codeRegex = /<code>.*?<\/code>/s;
-
-  for (const message of messages) {
-    // Handle string content
-    if (typeof message.content === "string") {
-      if (codeRegex.test(message.content)) {
-        return message;
-      }
-      continue;
-    }
-
-    // Handle ContentBlock array
-    if (Array.isArray(message.content)) {
-      for (const content of message.content) {
-        if (
-          content.type === "text" &&
-          content.text &&
-          codeRegex.test(content.text)
-        ) {
-          return message;
-        }
-      }
-    }
-  }
-  return null;
-}
