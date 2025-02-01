@@ -40,10 +40,6 @@ export default function ConversationTreeItem(props: Props) {
     }
   }, [isOpen, node.nodes]);
 
-  console.log("nodes", node);
-
-  console.log("active convo id", activeConversationId);
-
   return (
     <div className="flex flex-col">
       <div className="flex items-center">

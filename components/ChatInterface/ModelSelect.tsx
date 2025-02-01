@@ -31,7 +31,7 @@ export default function ModelSelect(props: Props) {
               value={provider.id?.toString() || ""}
               className="text-xs"
             >
-              {provider.name}
+              {provider.model}
             </SelectItem>
           ))}
           <Separator className="my-1" />

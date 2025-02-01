@@ -85,11 +85,29 @@ export default function Home() {
   );
   const messages = activeConversation?.messages ?? [];
 
-  const handleProviderSelect = (providerValue: string) => {
-    if (providerValue == "new-model") {
+  // TODO: this needs to be updated to store the model in the local settings
+  const handleProviderSelect = async (providerValue: string) => {
+    if (providerValue === "new-model") {
       setOpenModels(true);
+      // After the dialog closes and new model is created, reload providers and select the new one
+      try {
+        const updatedProviders = await window.electron.getProviders();
+        setProviders(updatedProviders);
+
+        // Get the most recently added provider (it will be the new one)
+        const newProvider = updatedProviders[updatedProviders.length - 1];
+        if (newProvider) {
+          setSelectedProvider(newProvider.id?.toString() || "");
+          setCurrentProvider(newProvider);
+          window.electron.selectProvider(newProvider);
+        }
+      } catch (e) {
+        console.error("Error reloading providers:");
+        setError("Failed to load updated providers");
+      }
       return;
     }
+
     // update the provider ID here after the new model has been created
     setSelectedProvider(providerValue);
     const provider = providers.find((p) => p.id?.toString() === providerValue);
