@@ -243,16 +243,17 @@ export default function Home() {
         console.log("source", sourceConversation.messages);
         // attempts to summarize the context in order to reduce the context window length
         setIsBranchLoading(true);
-        const summary = await window.electron.summarizeContext(
-          sourceConversation.messages
-        );
+        // const summary = await window.electron.summarizeContext(
+        //   sourceConversation.messages
+        // );
 
+        setIsBranchLoading(false);
         const messages: Message[] = [
-          {
-            role: "assistant",
-            content: summary,
-            conversationId: newConvoId,
-          },
+          // {
+          //   role: "assistant",
+          //   content: summary,
+          //   conversationId: newConvoId,
+          // },
           {
             role: sourceMessage.role,
             content: sourceMessage.content,

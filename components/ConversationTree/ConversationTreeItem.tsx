@@ -1,7 +1,8 @@
-import { ChevronRight, CornerDownRight } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import { cn } from "../../src/lib/utils";
 import { Button } from "../../components/ui/button";
 import { Node } from "./ConversationTree";
+import { useRef, useState, useEffect } from "react";
 
 interface Props {
   node: Node;
@@ -29,6 +30,25 @@ export default function ConversationTreeItem(props: Props) {
   const isActive = node.id == activeConversationId;
 
   const isChild = node.parentId;
+
+  const childHeightRef = useRef<HTMLDivElement>(null);
+  const [childHeight, setChildHeight] = useState<number>(0);
+
+  useEffect(() => {
+    if (childHeightRef.current) {
+      setChildHeight(childHeightRef.current.clientHeight / 1.85);
+    }
+  }, [isOpen, node.nodes]);
+
+  console.log("isChild", childHeight);
+
+  console.log("nodes", node);
+
+  console.log("has chlidren", hasChildren);
+
+  console.log("is open", isOpen);
+
+  console.log("active convo id", activeConversationId);
 
   return (
     <div className="flex flex-col">
@@ -61,21 +81,39 @@ export default function ConversationTreeItem(props: Props) {
         </div>
       </div>
       {isOpen && (
-        <div className="flex flex-row w-full min-h-full pl-5">
-          <ChildrenArrow />
-          <div className="flex-1">
-            {node.nodes?.map((childNode) => (
-              <ConversationTreeItem
-                node={childNode}
-                key={childNode.id}
-                isOpen={!!openNodes[childNode.id]}
-                openNodes={openNodes}
-                toggleNodeOpen={toggleNodeOpen}
-                onToggleOpen={() => toggleNodeOpen(childNode.id)}
-                onSelectConversation={onSelectConversation}
-                activeConversationId={activeConversationId}
-              />
-            ))}
+        <div className="flex flex-row w-full min-h-full pl-5 pt-1">
+          <div className="relative flex flex-col">
+            {node.nodes.length > 1 && (
+              <svg
+                width="21"
+                height={childHeight || 0}
+                fill="black"
+                className="absolute left-0 stroke-current"
+              >
+                <path
+                  d={`M 1 0 L 1 ${childHeight}`}
+                  stroke="#7D7D7D"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                />
+              </svg>
+            )}
+            <div className="flex flex-col gap-1" ref={childHeightRef}>
+              {node.nodes?.map((childNode) => (
+                <div className="flex flex-row gap-0 " key={childNode.id}>
+                  <ChildrenArrow />
+                  <ConversationTreeItem
+                    node={childNode}
+                    isOpen={!!openNodes[childNode.id]}
+                    openNodes={openNodes}
+                    toggleNodeOpen={toggleNodeOpen}
+                    onToggleOpen={() => toggleNodeOpen(childNode.id)}
+                    onSelectConversation={onSelectConversation}
+                    activeConversationId={activeConversationId}
+                  />
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       )}
@@ -85,18 +123,19 @@ export default function ConversationTreeItem(props: Props) {
 
 function ChildrenArrow() {
   return (
-    <div className="flex-shrink-0">
+    <div className="flex-shrink-0 bg-background">
       <svg
         xmlns="http://www.w3.org/2000/svg"
         width="21"
-        height="16"
-        viewBox="0 0 21 16"
+        height="17"
+        viewBox="0 0 21 17"
         fill="none"
       >
         <path
-          d="M1 1V11.5C1 13.8333 2.58333 15 5.75 15H20"
-          stroke="black"
-          stroke-linecap="round"
+          d="M1 1V12.25C1 14.75 2.58333 16 5.75 16H20"
+          strokeWidth="1.5"
+          stroke="#7D7D7D"
+          strokeLinecap="round"
         />
       </svg>
     </div>
