@@ -316,19 +316,19 @@ export default function Home() {
 
   return (
     <div className="flex flex-col h-full">
-      <ResizablePanelGroup direction="vertical">
+      <ResizablePanelGroup direction="horizontal">
+        <ResizablePanel defaultSize={20} minSize={10} maxSize={60}>
+          <ConversationTree
+            conversations={conversations}
+            onNewConversation={onNewConversation}
+            onSelectConversation={handleSelectConversation}
+            onDeleteConversation={handleDeleteConversation}
+            activeConversationId={activeConversationId}
+          />
+        </ResizablePanel>
+        <ResizableHandle withHandle />
         <ResizablePanel defaultSize={70} minSize={10}>
-          <ResizablePanelGroup direction="horizontal">
-            <ResizablePanel defaultSize={20} minSize={10} maxSize={60}>
-              <ConversationTree
-                conversations={conversations}
-                onNewConversation={onNewConversation}
-                onSelectConversation={handleSelectConversation}
-                onDeleteConversation={handleDeleteConversation}
-                activeConversationId={activeConversationId}
-              />
-            </ResizablePanel>
-            <ResizableHandle withHandle />
+          <ResizablePanelGroup direction="vertical">
             <ResizablePanel
               defaultSize={80}
               minSize={10}
@@ -356,28 +356,32 @@ export default function Home() {
                 isBranchLoading={isBranchLoading}
               />
             </ResizablePanel>
+            <ResizableHandle withHandle />
+            <ResizablePanel minSize={10} defaultSize={30}>
+              <div className="flex flex-col gap-2 h-full overflow-auto px-40">
+                <div>
+                  <ModelSelect
+                    handleProviderSelect={handleProviderSelect}
+                    selectedProvider={selectedProvider}
+                    providers={providers}
+                  />
+                </div>
+                <ChatInput
+                  inputValue={inputValue}
+                  setInputValue={setInputValue}
+                  currentProvider={currentProvider}
+                  isLoading={isLoading}
+                  handleSubmit={handleSubmit}
+                />
+                {error && (
+                  <p className="text-destructive text-sm mt-2">{error}</p>
+                )}
+              </div>
+              {error && (
+                <p className="text-destructive text-sm mt-2">{error}</p>
+              )}
+            </ResizablePanel>
           </ResizablePanelGroup>
-        </ResizablePanel>
-        <ResizableHandle withHandle />
-        <ResizablePanel minSize={10} defaultSize={30}>
-          <div className="flex flex-col gap-2 h-full overflow-auto px-40">
-            <div>
-              <ModelSelect
-                handleProviderSelect={handleProviderSelect}
-                selectedProvider={selectedProvider}
-                providers={providers}
-              />
-            </div>
-            <ChatInput
-              inputValue={inputValue}
-              setInputValue={setInputValue}
-              currentProvider={currentProvider}
-              isLoading={isLoading}
-              handleSubmit={handleSubmit}
-            />
-            {error && <p className="text-destructive text-sm mt-2">{error}</p>}
-          </div>
-          {error && <p className="text-destructive text-sm mt-2">{error}</p>}
         </ResizablePanel>
       </ResizablePanelGroup>
     </div>
