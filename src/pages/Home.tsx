@@ -10,15 +10,11 @@ import {
 } from "../../components/ui/resizable";
 import ConversationTree from "../../components/ConversationTree/ConversationTree";
 import ChatTitle from "../../components/ChatInterface/ChatTitle";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "../../components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "../../components/ui/dialog";
 import Models from "./Models";
+import Tools from "./Tools";
+import { Button } from "../../components/ui/button";
+import { Wrench } from "lucide-react";
 
 export interface TestConversation {
   id: string;
@@ -40,6 +36,7 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
   const [isBranchLoading, setIsBranchLoading] = useState<boolean>(false);
   const [openModels, setOpenModels] = useState<boolean>(false);
+  const [openTools, setOpenTools] = useState<boolean>(false);
 
   const loadProviders = async () => {
     try {
@@ -375,12 +372,21 @@ export default function Home() {
             <ResizableHandle withHandle />
             <ResizablePanel minSize={10} defaultSize={30}>
               <div className="flex flex-col gap-2 h-full overflow-auto px-4">
-                <div>
+                <div className="">
                   <ModelSelect
                     handleProviderSelect={handleProviderSelect}
                     selectedProvider={selectedProvider}
                     providers={providers}
                   />
+
+                  <Button
+                    variant="ghost"
+                    className="text-xs"
+                    size="sm"
+                    onClick={() => setOpenTools(true)}
+                  >
+                    <Wrench size={16} /> Tools
+                  </Button>
                 </div>
                 <ChatInput
                   inputValue={inputValue}
@@ -407,6 +413,15 @@ export default function Home() {
         <DialogTitle />
         <DialogContent className="max-w-4xl">
           <Models />
+        </DialogContent>
+      </Dialog>
+      <Dialog
+        open={openTools}
+        onOpenChange={() => setOpenTools((prev) => !prev)}
+      >
+        <DialogTitle />
+        <DialogContent className="max-w-4xl">
+          <Tools />
         </DialogContent>
       </Dialog>
     </div>

@@ -12,7 +12,7 @@ export type InstallStatus = {
   message: string;
 };
 
-export default function Servers() {
+export default function Tools() {
   const [servers, setservers] = useState<ServerConfig[] | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
