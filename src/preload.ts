@@ -1,5 +1,6 @@
 import { contextBridge, ipcRenderer } from "electron";
 import { ServerConfig, Provider, Message, User, Conversation } from "./types";
+import { SettingsValue } from "./settings/Settings";
 
 contextBridge.exposeInMainWorld("electron", {
   // user methods
@@ -9,12 +10,19 @@ contextBridge.exposeInMainWorld("electron", {
   getUser: () => {
     return ipcRenderer.invoke("get-user");
   },
+
   // settings methods
-  getSetting: (key: string) => {
-    return ipcRenderer.invoke("db-get-setting", key);
+  get: <T extends SettingsValue>(key: string) => {
+    return ipcRenderer.invoke("db-get-setting", key) as Promise<T | undefined>;
   },
-  setSetting: (key: string, value: string) => {
+  set: (key: string, value: SettingsValue) => {
     return ipcRenderer.invoke("db-set-setting", key, value);
+  },
+  getAll: () => {
+    return ipcRenderer.invoke("db-get-all-settings");
+  },
+  setMultiple: (settings: Record<string, SettingsValue>) => {
+    return ipcRenderer.invoke("db-set-multiple-settings", settings);
   },
 
   // provider methods

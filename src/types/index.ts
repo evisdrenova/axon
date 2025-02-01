@@ -1,11 +1,14 @@
 import OpenAI from "openai";
 import Anthropic from "@anthropic-ai/sdk";
+import { SettingsValue } from "src/settings/Settings";
 
 // always returns a promise since the IPC communication is async even if the underlying implementation is synchronous
 export interface IElectronAPI {
   // settings methods
-  getSetting: (key: string) => Promise<string>;
-  setSetting: (key: string, value: string) => Promise<void>;
+  get: <T extends SettingsValue>(key: string) => Promise<T | undefined>;
+  set: (key: string, value: SettingsValue) => Promise<boolean>;
+  getAll: () => Promise<Record<string, SettingsValue>>;
+  setMultiple: (settings: Record<string, SettingsValue>) => Promise<boolean>;
   // User methods
   setUser: (user: User) => Promise<void>;
   getUser: () => Promise<User>;

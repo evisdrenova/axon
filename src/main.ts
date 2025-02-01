@@ -6,6 +6,7 @@ import { ServerConfig, Provider, Message, User, Conversation } from "./types";
 import log from "electron-log/main";
 import MCP from "./mcp/mcp";
 import Providers from "./providers/providers";
+import SettingsManager, { SettingsValue } from "./settings/Settings";
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (started) {
@@ -17,6 +18,7 @@ let mcp: MCP;
 let providers: Providers;
 log.initialize();
 let mainWindow: BrowserWindow | null = null;
+let settingManager: SettingsManager;
 
 const initializeDatabase = () => {
   const dbPath = path.join(app.getPath("userData"), "database.sqlite");
@@ -94,6 +96,7 @@ const createWindow = async () => {
   await mcp.init();
   providers = new Providers(mcp);
   await mcp.createClients();
+  settingManager = new SettingsManager(db);
   // Create the browser window.
   mainWindow = new BrowserWindow({
     width: 1200,
@@ -135,17 +138,27 @@ ipcMain.on("window-close", () => {
   mainWindow.close();
 });
 
-ipcMain.handle("db-get-setting", (_, key) => {
-  const stmt = db.prepare("SELECT value FROM settings WHERE key = ?");
-  return stmt.get(key);
+ipcMain.handle("db-get-setting", async (_event, key: string) => {
+  return settingManager.get(key);
 });
 
-ipcMain.handle("db-set-setting", (_, key, value) => {
-  const stmt = db.prepare(
-    "INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)"
-  );
-  return stmt.run(key, value);
+ipcMain.handle(
+  "db-set-setting",
+  async (_event, key: string, value: SettingsValue) => {
+    return settingManager.set(key, value);
+  }
+);
+
+ipcMain.handle("db-get-all-settings", async () => {
+  return settingManager.getAll();
 });
+
+ipcMain.handle(
+  "db-set-multiple-settings",
+  async (_event, settings: Record<string, SettingsValue>) => {
+    return settingManager.setMultiple(settings);
+  }
+);
 
 ipcMain.handle("set-user", (_, user: User) => {
   const stmt = db.prepare(`
