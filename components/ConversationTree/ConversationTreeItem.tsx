@@ -36,7 +36,7 @@ export default function ConversationTreeItem(props: Props) {
 
   useEffect(() => {
     if (childHeightRef.current) {
-      setChildHeight(childHeightRef.current.clientHeight / 1.85);
+      setChildHeight(childHeightRef.current.clientHeight / 1.5);
     }
   }, [isOpen, node.nodes]);
 
