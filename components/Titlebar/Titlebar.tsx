@@ -8,10 +8,19 @@ import {
   CommandInput,
   CommandList,
 } from "../../components/ui/command";
-import { DialogTitle } from "../../components/ui/dialog";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { ThemeToggle } from "../../src/ThemeProvider";
 import { Button } from "../../components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "../../components/ui/dialog";
+import Settings from "../../src/pages/Settings";
+import { Settings2 } from "lucide-react";
 
 export default function TitleBar() {
   const handleClose = () => window.electron.closeWindow();
@@ -88,6 +97,17 @@ export default function TitleBar() {
           </p>
         </Button>
         <ThemeToggle />
+        <Dialog>
+          <DialogTrigger>
+            <Settings2
+              size={16}
+              className="text-primary hover:text-foreground"
+            />
+          </DialogTrigger>
+          <DialogContent>
+            <Settings />
+          </DialogContent>
+        </Dialog>
       </div>
       <CommandDialogComponent open={open} setOpen={setOpen} />
     </div>

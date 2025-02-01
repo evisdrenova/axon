@@ -6,7 +6,6 @@ import Tools from "./pages/Tools";
 import Home from "./pages/Home";
 import Models from "./pages/Models";
 import { ThemeProvider } from "./ThemeProvider";
-import Settings from "./pages/Settings";
 
 const App = () => (
   <BrowserRouter>
@@ -15,7 +14,6 @@ const App = () => (
         <Route path="/" element={<Home />} />
         <Route path="/tools" element={<Tools />} />
         <Route path="/models" element={<Models />} />
-        <Route path="/settings" element={<Settings />} />
       </Routes>
     </Layout>
   </BrowserRouter>

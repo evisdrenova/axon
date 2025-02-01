@@ -80,7 +80,6 @@ export default function Models() {
   return (
     <div className="p-4">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Servers</h1>
         {!showForm && (
           <Button
             onClick={() => {

@@ -40,13 +40,7 @@ export default function ConversationTreeItem(props: Props) {
     }
   }, [isOpen, node.nodes]);
 
-  console.log("isChild", childHeight);
-
   console.log("nodes", node);
-
-  console.log("has chlidren", hasChildren);
-
-  console.log("is open", isOpen);
 
   console.log("active convo id", activeConversationId);
 

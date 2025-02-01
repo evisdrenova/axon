@@ -8,7 +8,6 @@ interface Props {
 
 export default function Layout(props: Props) {
   const { children } = props;
-  const [isOpen, setIsOpen] = useState(true);
 
   return (
     <div className="flex flex-col w-full h-screen">
@@ -17,7 +16,6 @@ export default function Layout(props: Props) {
         <div className="flex-1 w-full h-full">
           <main>{children}</main>
         </div>
-        <NavBar isOpen={isOpen} setIsOpen={setIsOpen} />
       </div>
     </div>
   );

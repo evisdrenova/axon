@@ -6,7 +6,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../../components/ui/select";
-import { Box } from "lucide-react";
+import { Box, Plus } from "lucide-react";
+import { Separator } from "../../components/ui/separator";
 
 interface Props {
   handleProviderSelect: (providerId: string) => void;
@@ -25,10 +26,24 @@ export default function ModelSelect(props: Props) {
         </SelectTrigger>
         <SelectContent>
           {providers.map((provider) => (
-            <SelectItem key={provider.id} value={provider.id?.toString() || ""}>
+            <SelectItem
+              key={provider.id}
+              value={provider.id?.toString() || ""}
+              className="text-xs"
+            >
               {provider.name}
             </SelectItem>
           ))}
+          <Separator className="my-1" />
+          <SelectItem
+            value="new-model"
+            className="text-xs hover:bg-gray-100 transition-colors mt-1"
+          >
+            <span className="flex items-center gap-1.5">
+              <Plus size={12} />
+              New Model
+            </span>
+          </SelectItem>
         </SelectContent>
       </Select>
     </div>

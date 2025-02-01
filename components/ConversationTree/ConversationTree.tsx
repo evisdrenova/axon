@@ -61,11 +61,15 @@ export default function ConversationTree(props: Props) {
     setOpenNodes((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
-  console.log("nodes", nodes);
   return (
     <div className="p-4 overflow-y-auto flex flex-col gap-4 h-full">
       <div>
-        <Button variant="default" onClick={() => onNewConversation()}>
+        <Button
+          variant="default"
+          className="text-sm"
+          size="sm"
+          onClick={() => onNewConversation()}
+        >
           + New Conversation
         </Button>
       </div>

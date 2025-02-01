@@ -10,6 +10,16 @@ import {
 } from "../../components/ui/resizable";
 import ConversationTree from "../../components/ConversationTree/ConversationTree";
 import ChatTitle from "../../components/ChatInterface/ChatTitle";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "../../components/ui/dialog";
+import Models from "./Models";
+
 export interface TestConversation {
   id: string;
   name: string;
@@ -29,6 +39,7 @@ export default function Home() {
   const [inputValue, setInputValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isBranchLoading, setIsBranchLoading] = useState<boolean>(false);
+  const [openModels, setOpenModels] = useState<boolean>(false);
 
   const loadProviders = async () => {
     try {
@@ -77,9 +88,14 @@ export default function Home() {
   );
   const messages = activeConversation?.messages ?? [];
 
-  const handleProviderSelect = (providerId: string) => {
-    setSelectedProvider(providerId);
-    const provider = providers.find((p) => p.id?.toString() === providerId);
+  const handleProviderSelect = (providerValue: string) => {
+    if (providerValue == "new-model") {
+      setOpenModels(true);
+      return;
+    }
+    // update the provider ID here after the new model has been created
+    setSelectedProvider(providerValue);
+    const provider = providers.find((p) => p.id?.toString() === providerValue);
     try {
       window.electron.selectProvider(provider);
       setCurrentProvider(provider || null);
@@ -358,7 +374,7 @@ export default function Home() {
             </ResizablePanel>
             <ResizableHandle withHandle />
             <ResizablePanel minSize={10} defaultSize={30}>
-              <div className="flex flex-col gap-2 h-full overflow-auto px-40">
+              <div className="flex flex-col gap-2 h-full overflow-auto px-4">
                 <div>
                   <ModelSelect
                     handleProviderSelect={handleProviderSelect}
@@ -384,6 +400,15 @@ export default function Home() {
           </ResizablePanelGroup>
         </ResizablePanel>
       </ResizablePanelGroup>
+      <Dialog
+        open={openModels}
+        onOpenChange={() => setOpenModels((prev) => !prev)}
+      >
+        <DialogTitle />
+        <DialogContent className="max-w-4xl">
+          <Models />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
