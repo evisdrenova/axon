@@ -61,6 +61,7 @@ export default function ConversationTree(props: Props) {
     setOpenNodes((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
+  console.log("nodes", nodes);
   return (
     <div className="p-4 overflow-y-auto flex flex-col gap-4 h-full">
       <div>
@@ -68,7 +69,7 @@ export default function ConversationTree(props: Props) {
           + New Conversation
         </Button>
       </div>
-      <ul>
+      <div className="flex flex-col gap-1">
         {nodes.map((node) => (
           <ConversationTreeItem
             node={node}
@@ -81,7 +82,7 @@ export default function ConversationTree(props: Props) {
             activeConversationId={activeConversationId}
           />
         ))}
-      </ul>
+      </div>
     </div>
   );
 }

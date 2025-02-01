@@ -1,4 +1,4 @@
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, CornerDownRight } from "lucide-react";
 import { cn } from "../../src/lib/utils";
 import { Button } from "../../components/ui/button";
 import { Node } from "./ConversationTree";
@@ -28,6 +28,8 @@ export default function ConversationTreeItem(props: Props) {
 
   const isActive = node.id == activeConversationId;
 
+  const isChild = node.parentId;
+
   return (
     <div className="flex flex-col">
       <div className="flex items-center">
@@ -44,7 +46,7 @@ export default function ConversationTreeItem(props: Props) {
             />
           </button>
         )}
-        <div className={cn(hasChildren ? "pl-0" : "pl-4", "w-full")}>
+        <div className={cn(hasChildren || isChild ? "pl-0" : "pl-4", "w-full")}>
           <Button
             variant="ghost"
             className={cn(
@@ -58,11 +60,10 @@ export default function ConversationTreeItem(props: Props) {
           </Button>
         </div>
       </div>
-
-      {hasChildren && isOpen && (
-        <div className="flex flex-row w-full min-h-full pl-3">
-          <div className="w-[1px] bg-gray-300" />
-          <div className="flex-1 pl-2">
+      {isOpen && (
+        <div className="flex flex-row w-full min-h-full pl-5">
+          <ChildrenArrow />
+          <div className="flex-1">
             {node.nodes?.map((childNode) => (
               <ConversationTreeItem
                 node={childNode}
@@ -78,6 +79,26 @@ export default function ConversationTreeItem(props: Props) {
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+function ChildrenArrow() {
+  return (
+    <div className="flex-shrink-0">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="21"
+        height="16"
+        viewBox="0 0 21 16"
+        fill="none"
+      >
+        <path
+          d="M1 1V11.5C1 13.8333 2.58333 15 5.75 15H20"
+          stroke="black"
+          stroke-linecap="round"
+        />
+      </svg>
     </div>
   );
 }
