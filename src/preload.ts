@@ -12,16 +12,16 @@ contextBridge.exposeInMainWorld("electron", {
   },
 
   // settings methods
-  get: <T extends SettingsValue>(key: string) => {
+  getSettings: <T extends SettingsValue>(key: string) => {
     return ipcRenderer.invoke("db-get-setting", key) as Promise<T | undefined>;
   },
-  set: (key: string, value: SettingsValue) => {
+  setSettings: (key: string, value: SettingsValue) => {
     return ipcRenderer.invoke("db-set-setting", key, value);
   },
-  getAll: () => {
+  getAllSettings: () => {
     return ipcRenderer.invoke("db-get-all-settings");
   },
-  setMultiple: (settings: Record<string, SettingsValue>) => {
+  setMultipleSettings: (settings: Record<string, SettingsValue>) => {
     return ipcRenderer.invoke("db-set-multiple-settings", settings);
   },
 

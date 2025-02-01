@@ -22,6 +22,13 @@ export interface TestConversation {
   parentId: string;
 }
 
+const SETTINGS = {
+  ACTIVE_CONVERSATION: "activeConversation",
+  SELECTED_PROVIDER: "selectedProvider",
+} as const;
+
+// TODO: finish testing the in-memory setters and getters for the settings
+
 export default function Home() {
   const [user, setUser] = useState<User | null>(null);
   const [providers, setProviders] = useState<Provider[]>([]);
@@ -42,11 +49,35 @@ export default function Home() {
     try {
       const providers = await window.electron.getProviders();
       setProviders(providers);
+
+      // Load the previously selected provider from settings
+      const savedProviderId = await window.electron.getSettings<string>(
+        SETTINGS.SELECTED_PROVIDER
+      );
+
+      if (savedProviderId) {
+        const savedProvider = providers.find(
+          (p) => p.id?.toString() === savedProviderId
+        );
+        if (savedProvider) {
+          setSelectedProvider(savedProviderId);
+          setCurrentProvider(savedProvider);
+          window.electron.selectProvider(savedProvider);
+          return;
+        }
+      }
+
+      // Fall back to default provider if no saved provider or saved provider not found
       if (providers.length > 0) {
         const defaultProvider = providers[0];
         setSelectedProvider(defaultProvider.id?.toString() || "");
         setCurrentProvider(defaultProvider);
         window.electron.selectProvider(defaultProvider);
+        // Save the default selection
+        await window.electron.setSettings(
+          SETTINGS.SELECTED_PROVIDER,
+          defaultProvider.id?.toString()
+        );
       }
     } catch (err) {
       setError("Failed to load providers");
@@ -66,8 +97,25 @@ export default function Home() {
     try {
       const convos = await window.electron.getConversations();
       setConversations(convos);
-      if (convos.length > 0 && !activeConversationId) {
+
+      // Load the previously active conversation from settings
+      const savedConversationId = await window.electron.getSettings<number>(
+        SETTINGS.ACTIVE_CONVERSATION
+      );
+
+      if (
+        savedConversationId &&
+        convos.some((c) => c.id === savedConversationId)
+      ) {
+        setActiveConversationId(savedConversationId);
+      } else if (convos.length > 0) {
+        // Fall back to first conversation if saved one not found
         setActiveConversationId(convos[0].id);
+        // Save the default selection
+        await window.electron.setSettings(
+          SETTINGS.ACTIVE_CONVERSATION,
+          convos[0].id
+        );
       }
     } catch (err) {
       console.error("Error loading conversations:", err);
@@ -85,35 +133,43 @@ export default function Home() {
   );
   const messages = activeConversation?.messages ?? [];
 
-  // TODO: this needs to be updated to store the model in the local settings
   const handleProviderSelect = async (providerValue: string) => {
     if (providerValue === "new-model") {
       setOpenModels(true);
-      // After the dialog closes and new model is created, reload providers and select the new one
       try {
         const updatedProviders = await window.electron.getProviders();
         setProviders(updatedProviders);
 
-        // Get the most recently added provider (it will be the new one)
         const newProvider = updatedProviders[updatedProviders.length - 1];
         if (newProvider) {
           setSelectedProvider(newProvider.id?.toString() || "");
           setCurrentProvider(newProvider);
           window.electron.selectProvider(newProvider);
+          // Save the new selection
+          await window.electron.setSettings(
+            SETTINGS.SELECTED_PROVIDER,
+            newProvider.id?.toString()
+          );
         }
       } catch (e) {
-        console.error("Error reloading providers:");
+        console.error("Error reloading providers:", e);
         setError("Failed to load updated providers");
       }
       return;
     }
 
-    // update the provider ID here after the new model has been created
     setSelectedProvider(providerValue);
     const provider = providers.find((p) => p.id?.toString() === providerValue);
     try {
       window.electron.selectProvider(provider);
       setCurrentProvider(provider || null);
+      // Save the selection
+      if (provider?.id) {
+        await window.electron.setSettings(
+          SETTINGS.SELECTED_PROVIDER,
+          provider.id.toString()
+        );
+      }
     } catch (e) {
       console.log("there was an error setting the provider", e);
       setError(null);
@@ -314,19 +370,39 @@ export default function Home() {
     }
   };
 
-  const handleSelectConversation = (conversationId: number) => {
+  const handleSelectConversation = async (conversationId: number) => {
     setActiveConversationId(conversationId);
+    try {
+      await window.electron.setSettings(
+        SETTINGS.ACTIVE_CONVERSATION,
+        conversationId
+      );
+    } catch (err) {
+      console.error("Error saving active conversation:", err);
+    }
   };
-
   const handleDeleteConversation = async (conversationId: number) => {
     try {
       await window.electron.deleteConversation(conversationId);
       await loadConversations();
+
+      // If we're deleting the active conversation
       if (activeConversationId === conversationId) {
         const remainingConvos = conversations.filter(
           (c) => c.id !== conversationId
         );
-        setActiveConversationId(remainingConvos[0]?.id || null);
+        const newActiveId = remainingConvos[0]?.id || null;
+        setActiveConversationId(newActiveId);
+
+        if (newActiveId) {
+          await window.electron.setSettings(
+            SETTINGS.ACTIVE_CONVERSATION,
+            newActiveId
+          );
+        } else {
+          // If no conversations left, remove the setting
+          await window.electron.setSettings(SETTINGS.ACTIVE_CONVERSATION, null);
+        }
       }
     } catch (err) {
       setError("Failed to delete conversation");
@@ -430,7 +506,7 @@ export default function Home() {
       >
         <DialogTitle />
         <DialogContent className="max-w-4xl">
-          <Models />
+          <Models loadProviders={loadProviders} />
         </DialogContent>
       </Dialog>
       <Dialog

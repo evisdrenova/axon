@@ -5,10 +5,12 @@ import { SettingsValue } from "src/settings/Settings";
 // always returns a promise since the IPC communication is async even if the underlying implementation is synchronous
 export interface IElectronAPI {
   // settings methods
-  get: <T extends SettingsValue>(key: string) => Promise<T | undefined>;
-  set: (key: string, value: SettingsValue) => Promise<boolean>;
-  getAll: () => Promise<Record<string, SettingsValue>>;
-  setMultiple: (settings: Record<string, SettingsValue>) => Promise<boolean>;
+  getSettings: <T extends SettingsValue>(key: string) => Promise<T | undefined>;
+  setSettings: (key: string, value: SettingsValue) => Promise<boolean>;
+  getAllSettings: () => Promise<Record<string, SettingsValue>>;
+  setMultipleSettings: (
+    settings: Record<string, SettingsValue>
+  ) => Promise<boolean>;
   // User methods
   setUser: (user: User) => Promise<void>;
   getUser: () => Promise<User>;

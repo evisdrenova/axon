@@ -22,21 +22,17 @@ import ModelTable from "../../components/Tables/ModelTable";
 import ButtonText from "../../src/lib/ButtonText";
 import Spinner from "../../src/lib/Spinner";
 
-export default function Models() {
+interface Props {
+  loadProviders: () => void;
+}
+
+export default function Models(props: Props) {
+  const { loadProviders } = props;
   const [providers, setProviders] = useState<Provider[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [editingProvider, setEditingProvider] = useState<Provider | null>(null);
-
-  const loadProviders = async () => {
-    try {
-      const providers = await window.electron.getProviders();
-      setProviders(providers);
-    } catch (err) {
-      setError("Failed to load providers");
-    }
-  };
 
   useEffect(() => {
     loadProviders();
