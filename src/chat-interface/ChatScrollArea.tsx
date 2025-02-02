@@ -69,7 +69,7 @@ export default function ChatScrollArea(props: Props) {
   });
 
   return (
-    <ScrollArea className="flex-1 text-xs">
+    <ScrollArea className="flex-1 text-xs bg-muted">
       <div className="space-y-4 p-4 w-full">
         {sortedMessages?.map((message) => (
           <div
@@ -344,7 +344,7 @@ function NiceDate(props: DateProps) {
   const prettyDate = formatDateTime(date);
 
   return (
-    <time dateTime={date} className="text-gray-800">
+    <time dateTime={date} className="text-muted">
       {prettyDate}
     </time>
   );

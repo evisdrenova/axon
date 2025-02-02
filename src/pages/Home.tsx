@@ -446,17 +446,8 @@ export default function Home() {
             <ResizablePanel
               defaultSize={80}
               minSize={10}
-              className="flex flex-col"
+              className="flex flex-col "
             >
-              <ChatTitle
-                id={activeConversationId}
-                onUpdateTitle={handleUpdateConversationTitle}
-                onDeleteConversation={handleDeleteConversation}
-                title={
-                  conversations?.find((item) => item.id == activeConversationId)
-                    ?.title
-                }
-              />
               <ChatScrollArea
                 messages={
                   conversations?.find((item) => item.id == activeConversationId)

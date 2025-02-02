@@ -66,11 +66,11 @@ export default function ConversationTree(props: Props) {
       <div>
         <Button
           variant="default"
-          className="text-sm"
+          className="text-xs"
           size="sm"
           onClick={() => onNewConversation()}
         >
-          + New Conversation
+          + Start New Conversation
         </Button>
       </div>
       <div className="flex flex-col gap-1">

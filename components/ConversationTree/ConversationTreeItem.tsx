@@ -26,20 +26,45 @@ export default function ConversationTreeItem(props: Props) {
   } = props;
 
   const hasChildren = node.nodes && node.nodes.length > 0;
-
   const isActive = node.id == activeConversationId;
-
   const isChild = node.parentId;
 
   const childHeightRef = useRef<HTMLDivElement>(null);
   const [childHeight, setChildHeight] = useState<number>(0);
 
   useEffect(() => {
-    if (childHeightRef.current) {
-      setChildHeight(childHeightRef.current.clientHeight / 1.5);
-    }
-  }, [isOpen, node.nodes]);
+    const updateHeight = () => {
+      if (childHeightRef.current && isOpen) {
+        // If there's only one child, keep the SVG height fixed
+        if (node.nodes.length === 1) {
+          console.log("only one");
+          setChildHeight(0); // Height matching the ChildrenArrow SVG
+        } else {
+          // For multiple children, calculate dynamic height
+          console.log("not just one");
+          const totalHeight =
+            childHeightRef.current.getBoundingClientRect().height;
+          const extraHeight = 16;
+          setChildHeight((totalHeight + extraHeight) / 1.5);
+        }
+      } else {
+        setChildHeight(0);
+      }
+    };
 
+    updateHeight();
+
+    const resizeObserver = new ResizeObserver(updateHeight);
+    if (childHeightRef.current) {
+      resizeObserver.observe(childHeightRef.current);
+    }
+
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, [isOpen, node.nodes, openNodes]);
+
+  console.log("childrHeight", childHeight);
   return (
     <div className="flex flex-col">
       <div className="flex items-center">
@@ -60,8 +85,8 @@ export default function ConversationTreeItem(props: Props) {
           <Button
             variant="ghost"
             className={cn(
-              "text-xs gap-0 px-1 w-full flex justify-start",
-              isActive && "bg-gray-200"
+              "text-xs gap-0 px-1 w-full flex justify-start py-0 h-8",
+              isActive && "bg-primary"
             )}
             size="sm"
             onClick={() => onSelectConversation(node.id)}
@@ -71,14 +96,15 @@ export default function ConversationTreeItem(props: Props) {
         </div>
       </div>
       {isOpen && (
-        <div className="flex flex-row w-full min-h-full pl-5 pt-1">
+        <div className="flex flex-row w-full min-h-full pl-5">
           <div className="relative flex flex-col">
             {node.nodes.length > 1 && (
               <svg
                 width="21"
-                height={childHeight || 0}
-                fill="black"
+                height={childHeight}
+                fill="none"
                 className="absolute left-0 stroke-current"
+                style={{ top: "-8px" }} // Adjust this value to align with the first child's connection
               >
                 <path
                   d={`M 1 0 L 1 ${childHeight}`}
@@ -90,7 +116,7 @@ export default function ConversationTreeItem(props: Props) {
             )}
             <div className="flex flex-col gap-1" ref={childHeightRef}>
               {node.nodes?.map((childNode) => (
-                <div className="flex flex-row gap-0 " key={childNode.id}>
+                <div className="flex flex-row gap-0" key={childNode.id}>
                   <ChildrenArrow />
                   <ConversationTreeItem
                     node={childNode}

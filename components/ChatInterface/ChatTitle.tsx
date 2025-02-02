@@ -56,7 +56,7 @@ export default function ChatTitle(props: ChatTitleProps) {
   };
 
   return (
-    <div className="flex justify-center py-1 border-b border-b-gray-300 w-full">
+    <div className="flex justify-center border-b border-border w-full">
       {isEditing ? (
         <Input
           ref={inputRef}
@@ -69,11 +69,11 @@ export default function ChatTitle(props: ChatTitleProps) {
       ) : (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost">
+            <Button variant="ghost" className="text-xs">
               {title} <ChevronDown className="ml-2 h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent className="bg-background">
+          <DropdownMenuContent>
             <DropdownMenuItem onClick={() => onDeleteConversation(id)}>
               <Trash className="mr-2 h-4 w-4" />
               <span>Delete Conversation</span>
