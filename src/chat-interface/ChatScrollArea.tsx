@@ -298,15 +298,12 @@ function RenderMessageMetadata(props: MessageMetadataProps) {
   if (message.role == "user") {
     return (
       <div className="text-xs flex flex-row gap-1">
-        <div> {user}</div>
-        <div>@</div>
         <NiceDate date={message.createdAt} />
       </div>
     );
   } else {
     return (
       <div className="flex flex-row items-center gap-1 text-xs">
-        <div>{toTitleCase(provider?.type ?? "")}</div> @
         <NiceDate date={message.createdAt} />
       </div>
     );
@@ -343,16 +340,3 @@ function formatDateTime(dateString?: string): string {
     hour12: true,
   });
 }
-
-// function extractSummary(messages:Message[]){
-//   const summaryRegex = /<summary>.*?<\/summary>/s;
-
-//   for (const message of messages) {
-//     for (const content of message.content) {
-//       if (content.type === 'text' && summaryRegex.test(content.text)) {
-//         return message;
-//       }
-//     }
-//   }
-//   return null;
-// }

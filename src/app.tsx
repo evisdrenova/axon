@@ -2,9 +2,7 @@ import { createRoot } from "react-dom/client";
 import "./styles/index.css";
 import Layout from "./layout";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Tools from "./pages/Tools";
 import Home from "./pages/Home";
-import Models from "./pages/Models";
 import { ThemeProvider } from "./ThemeProvider";
 
 const App = () => (
@@ -12,8 +10,6 @@ const App = () => (
     <Layout>
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/tools" element={<Tools />} />
-        <Route path="/models" element={<Models />} />
       </Routes>
     </Layout>
   </BrowserRouter>

@@ -531,6 +531,17 @@ ipcMain.handle("save-messages", (_, messages: Message[]) => {
   }
 });
 
+ipcMain.handle("delete-message", (_, messageId: number) => {
+  try {
+    const stmt = db.prepare(`
+  DELETE from messages where id = ?`);
+
+    return stmt.run(messageId);
+  } catch (error) {
+    console.log("unable to delete message", error);
+  }
+});
+
 ipcMain.handle(
   "update-conversation-title",
   (_, convoId: number, newTitle: string) => {

@@ -15,12 +15,7 @@ import Models from "./Models";
 import Tools from "./Tools";
 import { Button } from "../../components/ui/button";
 import { Wrench } from "lucide-react";
-
-export interface TestConversation {
-  id: string;
-  name: string;
-  parentId: string;
-}
+import { toast } from "sonner";
 
 const SETTINGS = {
   ACTIVE_CONVERSATION: "activeConversation",
@@ -185,19 +180,14 @@ export default function Home() {
     }
 
     const trimmedInput = inputValue.trim();
-    setInputValue("");
-    setIsLoading(true);
-    setError(null);
 
-    // Create user message
-    const userMessage: Message = {
-      role: "user",
-      content: inputValue.trim(),
-      conversationId: activeConversationId,
-    };
+    setIsLoading(true);
+    setInputValue("");
+    setError(null);
 
     // create optimistic user message
     const tempId = generateTempId(messages);
+
     const optimisticUserMessage: Message = {
       id: Date.now(),
       role: "user",
@@ -205,10 +195,6 @@ export default function Home() {
       conversationId: activeConversationId,
       createdAt: new Date().toISOString(),
     };
-
-    setInputValue("");
-    setIsLoading(true);
-    setError(null);
 
     // optimistically update the chat window
     setConversations((prevConversations) =>
@@ -224,17 +210,33 @@ export default function Home() {
     );
 
     try {
-      // actual user message
       const userMessage: Message = {
         role: "user",
         content: trimmedInput,
         conversationId: activeConversationId,
       };
 
-      await window.electron.saveMessage(userMessage);
+      // Save user message
+      try {
+        await window.electron.saveMessage(userMessage);
+      } catch (err) {
+        // If we can't save the user message, we fail early
+        throw new Error("Failed to save user message");
+      }
 
-      //this shouldn't include the conversationId when we send it
-      const response = await window.electron.chat([...messages, userMessage]);
+      // Get chat response
+      let response;
+      try {
+        response = await window.electron.chat([...messages, userMessage]);
+      } catch (err) {
+        // If chat fails, we should delete the saved user message
+        try {
+          await window.electron.deleteMessage(userMessage.id!);
+        } catch (cleanupErr) {
+          console.error("Failed to cleanup user message:", cleanupErr);
+        }
+        throw err; // Re-throw the original error
+      }
 
       const assistantMessage: Message = {
         role: "assistant",
@@ -242,11 +244,25 @@ export default function Home() {
         conversationId: activeConversationId,
       };
 
-      await window.electron.saveMessage(assistantMessage);
+      // Save assistant message
+      try {
+        await window.electron.saveMessage(assistantMessage);
+      } catch (err) {
+        // If we can't save the assistant message, cleanup the user message
+        try {
+          await window.electron.deleteMessage(userMessage.id!);
+        } catch (cleanupErr) {
+          console.error(
+            "Failed to cleanup after assistant message error:",
+            cleanupErr
+          );
+        }
+        throw new Error("Failed to save assistant response");
+      }
 
       await loadConversations();
     } catch (err: any) {
-      // roll back optimistic update
+      // Roll back optimistic update
       setConversations((prevConversations) =>
         prevConversations.map((conversation) => {
           if (conversation.id === activeConversationId) {
@@ -261,6 +277,7 @@ export default function Home() {
         })
       );
       setError(err.message || "Failed to get response");
+      toast.error(err.message || "Failed to get response");
     } finally {
       setIsLoading(false);
     }
@@ -287,6 +304,7 @@ export default function Home() {
       setActiveConversationId(newConvoId);
     } catch (err) {
       setError("Failed to create new conversation");
+      toast.error("Failed to create new conversation");
     }
   };
 
@@ -475,7 +493,7 @@ export default function Home() {
                     size="sm"
                     onClick={() => setOpenTools(true)}
                   >
-                    <Wrench size={16} /> Tools
+                    <Wrench size={16} /> {}Tools
                   </Button>
                 </div>
                 <ChatInput
@@ -485,13 +503,7 @@ export default function Home() {
                   isLoading={isLoading}
                   handleSubmit={handleSubmit}
                 />
-                {error && (
-                  <p className="text-destructive text-sm mt-2">{error}</p>
-                )}
               </div>
-              {error && (
-                <p className="text-destructive text-sm mt-2">{error}</p>
-              )}
             </ResizablePanel>
           </ResizablePanelGroup>
         </ResizablePanel>
