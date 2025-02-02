@@ -324,19 +324,26 @@ function NiceDate(props: DateProps) {
     </time>
   );
 }
-
 function formatDateTime(dateString?: string): string {
   if (!dateString) return "";
 
-  const isoString = dateString.replace(" ", "T");
-  const date = new Date(isoString);
+  try {
+    // Treat the SQLite timestamp as UTC
+    const isoString = dateString.replace(" ", "T") + "Z";
 
-  return date.toLocaleString("en-US", {
-    month: "long",
-    day: "numeric",
-    year: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
-    hour12: true,
-  });
+    // Creating a Date object from UTC string will automatically convert to local time
+    const date = new Date(isoString);
+
+    return date.toLocaleString("en-US", {
+      month: "long",
+      day: "numeric",
+      year: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    });
+  } catch (error) {
+    console.error("Error formatting date:", error);
+    return dateString;
+  }
 }
