@@ -473,7 +473,7 @@ export default function Home() {
             <ResizableHandle withHandle />
             <ResizablePanel minSize={10} defaultSize={30}>
               <div className="flex flex-col gap-2 h-full overflow-auto px-4">
-                <div className="">
+                <div className="pt-2 space-x-2">
                   <ModelSelect
                     handleProviderSelect={handleProviderSelect}
                     selectedProvider={selectedProvider}

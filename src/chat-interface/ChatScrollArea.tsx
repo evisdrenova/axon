@@ -86,11 +86,7 @@ export default function ChatScrollArea(props: Props) {
                   `flex px-2 `
                 )}
               >
-                <RenderMessageMetadata
-                  message={message}
-                  provider={provider}
-                  user={user}
-                />
+                <RenderMessageMetadata message={message} />
               </div>
               <div
                 className={cn(
@@ -328,25 +324,15 @@ function renderMarkdown(content: string, role: string) {
 
 interface MessageMetadataProps {
   message: Message;
-  provider: Provider;
-  user: string;
 }
 
 function RenderMessageMetadata(props: MessageMetadataProps) {
-  const { message, provider, user } = props;
-  if (message.role == "user") {
-    return (
-      <div className="text-xs flex flex-row gap-1">
-        <NiceDate date={message.createdAt} />
-      </div>
-    );
-  } else {
-    return (
-      <div className="flex flex-row items-center gap-1 text-xs">
-        <NiceDate date={message.createdAt} />
-      </div>
-    );
-  }
+  const { message } = props;
+  return (
+    <div className="flex flex-row items-center gap-1 text-[10px]">
+      <NiceDate date={message.createdAt} />
+    </div>
+  );
 }
 
 interface DateProps {
@@ -358,11 +344,12 @@ function NiceDate(props: DateProps) {
   const prettyDate = formatDateTime(date);
 
   return (
-    <time dateTime={date} className="text-xs text-gray-800">
+    <time dateTime={date} className="text-gray-800">
       {prettyDate}
     </time>
   );
 }
+
 function formatDateTime(dateString?: string): string {
   if (!dateString) return "";
 

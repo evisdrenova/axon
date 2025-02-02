@@ -18,10 +18,10 @@ export default function ModelSelect(props: Props) {
   const { handleProviderSelect, selectedProvider, providers } = props;
 
   return (
-    <div className="inline-flex flex-row items-center">
+    <div className="inline-flex flex-row items-center hover:bg-accent hover:text-accent-foreground rounded-md py-0 px-1">
       <Box size={16} />
       <Select onValueChange={handleProviderSelect} value={selectedProvider}>
-        <SelectTrigger className="border-0 shadow-none text-xs ring-0 focus:outline-none focus:ring-0 gap-2">
+        <SelectTrigger className="border-0 shadow-none text-xs ring-0 focus:outline-none focus:ring-0 gap-2 h-8">
           <SelectValue placeholder="Select a model" />
         </SelectTrigger>
         <SelectContent>
