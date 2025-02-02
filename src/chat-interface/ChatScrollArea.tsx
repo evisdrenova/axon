@@ -92,11 +92,16 @@ export default function ChatScrollArea(props: Props) {
                   user={user}
                 />
               </div>
-              <div className="flex flex-row gap-1">
+              <div
+                className={cn(
+                  message.role == "user" ? "justify-end" : "justify-start",
+                  "flex flex-row gap-1"
+                )}
+              >
                 <div
                   className={cn(
                     message.role === "user"
-                      ? "bg-primary text-primary-foreground"
+                      ? "bg-primary text-primary-foreground justify-end"
                       : "bg-muted",
                     `rounded-lg px-4 py-2`
                   )}
