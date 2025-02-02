@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Provider } from "../types";
-import { Box, Pencil, Trash } from "lucide-react";
+import { Box } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -21,6 +21,7 @@ import { Alert, AlertDescription } from "../../components/ui/alert";
 import ModelTable from "../../components/Tables/ModelTable";
 import ButtonText from "../../src/lib/ButtonText";
 import Spinner from "../../src/lib/Spinner";
+import { toast } from "sonner";
 
 interface Props {
   loadProviders: () => void;
@@ -31,7 +32,6 @@ export default function Models(props: Props) {
   const [providers, setProviders] = useState<Provider[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
   const [editingProvider, setEditingProvider] = useState<Provider | null>(null);
 
   useEffect(() => {
@@ -55,8 +55,8 @@ export default function Models(props: Props) {
     try {
       await window.electron.deleteProvider(pId);
       setProviders(providers.filter((provider) => provider.id !== pId));
-    } catch (error) {
-      setError("Failed to delete provider");
+    } catch (err) {
+      toast.error("Failed to delete provider", err);
     } finally {
       setIsDeleting(false);
     }
@@ -70,7 +70,6 @@ export default function Models(props: Props) {
   const handleCloseForm = () => {
     setShowForm(false);
     setEditingProvider(null);
-    setError(null);
   };
 
   return (
@@ -137,7 +136,6 @@ const PROVIDER_TYPES = [
 
 function ModelForm(props: ProviderProps) {
   const { onSave, onCancel, initialData, isDeleting, handleDelete } = props;
-  const [error, setError] = useState<string | null>(null);
 
   const [formData, setFormData] = useState<Provider>(() => {
     if (initialData) {
@@ -179,7 +177,7 @@ function ModelForm(props: ProviderProps) {
       onSave();
       onCancel();
     } catch (err) {
-      setError(
+      toast.error(
         initialData ? "Failed to update provider" : "Failed to create provider"
       );
     }
@@ -191,12 +189,6 @@ function ModelForm(props: ProviderProps) {
         <CardTitle>{initialData ? "Edit Provider" : "New Provider"}</CardTitle>
       </CardHeader>
       <CardContent>
-        {error && (
-          <Alert variant="destructive" className="mb-4">
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        )}
-
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="flex justify-end ">
             {initialData && ( // Only show delete button when editing

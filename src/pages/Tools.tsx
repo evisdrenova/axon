@@ -6,6 +6,7 @@ import ServerTable from "../../components/Tables/ServerTable";
 import { Wrench } from "lucide-react";
 import ButtonText from "../../src/lib/ButtonText";
 import Spinner from "../../src/lib/Spinner";
+import { toast } from "sonner";
 
 export type InstallStatus = {
   stage: "saving" | "installing" | "starting" | "complete" | "error";
@@ -48,8 +49,8 @@ export default function Tools() {
     try {
       await window.electron.deleteServer(pId);
       setservers(servers!.filter((server) => server.id !== pId));
-    } catch (error) {
-      console.error("Error deleting server:", error);
+    } catch (err) {
+      toast.error("Error deleting server:", err);
     } finally {
       setIsDeleting(false);
     }
@@ -80,8 +81,9 @@ export default function Tools() {
           server.id === serverId ? { ...server, enabled: checked } : server
         )
       );
-    } catch (error) {
+    } catch (err) {
       await loadServers();
+      toast.error("Error deleting server:", err);
     }
   };
   return (
@@ -209,11 +211,12 @@ function ServerForm(props: ServerProps) {
         onSave();
         onCancel();
       }, 1000);
-    } catch (error) {
+    } catch (err) {
       setStatus({
         stage: "error",
-        message: `Error: ${error.message}`,
+        message: `Error: ${err.message}`,
       });
+      toast.error("Error: ${err.message}");
     }
   };
 

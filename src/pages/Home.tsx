@@ -31,7 +31,6 @@ export default function Home() {
   >(null);
   const [selectedProvider, setSelectedProvider] = useState<string>("");
   const [currentProvider, setCurrentProvider] = useState<Provider | null>(null);
-  const [error, setError] = useState<string | null>(null);
   const [inputValue, setInputValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isBranchLoading, setIsBranchLoading] = useState<boolean>(false);
@@ -71,7 +70,7 @@ export default function Home() {
         );
       }
     } catch (err) {
-      setError("Failed to load providers");
+      toast.error("Failed to load providers", err);
     }
   };
 
@@ -80,7 +79,7 @@ export default function Home() {
       const user = await window.electron.getUser();
       setUser(user);
     } catch (err) {
-      console.error("Error loading user:", err);
+      toast.error("Error loading user:", err);
     }
   };
 
@@ -109,7 +108,7 @@ export default function Home() {
         );
       }
     } catch (err) {
-      console.error("Error loading conversations:", err);
+      toast.error("Error loading conversations:", err);
     }
   };
 
@@ -142,9 +141,8 @@ export default function Home() {
             newProvider.id?.toString()
           );
         }
-      } catch (e) {
-        console.error("Error reloading providers:", e);
-        setError("Failed to load updated providers");
+      } catch (err) {
+        toast.error("Failed to load updated providers", err);
       }
       return;
     }
@@ -161,9 +159,8 @@ export default function Home() {
           provider.id.toString()
         );
       }
-    } catch (e) {
-      console.log("there was an error setting the provider", e);
-      setError(null);
+    } catch (err) {
+      toast.error("there was an error setting the provider", err);
     }
   };
 
@@ -183,7 +180,6 @@ export default function Home() {
 
     setIsLoading(true);
     setInputValue("");
-    setError(null);
 
     // create optimistic user message
     const tempId = generateTempId(messages);
@@ -220,8 +216,7 @@ export default function Home() {
       try {
         await window.electron.saveMessage(userMessage);
       } catch (err) {
-        // If we can't save the user message, we fail early
-        throw new Error("Failed to save user message");
+        toast.error("there was an error setting the provider", err);
       }
 
       // Get chat response
@@ -233,9 +228,9 @@ export default function Home() {
         try {
           await window.electron.deleteMessage(userMessage.id!);
         } catch (cleanupErr) {
-          console.error("Failed to cleanup user message:", cleanupErr);
+          toast.error("Failed to cleanup user message:", cleanupErr);
         }
-        throw err; // Re-throw the original error
+        toast.error("Failed to cleanup user message:", err);
       }
 
       const assistantMessage: Message = {
@@ -252,16 +247,16 @@ export default function Home() {
         try {
           await window.electron.deleteMessage(userMessage.id!);
         } catch (cleanupErr) {
-          console.error(
+          toast.error(
             "Failed to cleanup after assistant message error:",
             cleanupErr
           );
         }
-        throw new Error("Failed to save assistant response");
+        toast.error("Failed to save assistant response");
       }
 
       await loadConversations();
-    } catch (err: any) {
+    } catch (err) {
       // Roll back optimistic update
       setConversations((prevConversations) =>
         prevConversations.map((conversation) => {
@@ -276,7 +271,6 @@ export default function Home() {
           return conversation;
         })
       );
-      setError(err.message || "Failed to get response");
       toast.error(err.message || "Failed to get response");
     } finally {
       setIsLoading(false);
@@ -303,7 +297,6 @@ export default function Home() {
       await loadConversations();
       setActiveConversationId(newConvoId);
     } catch (err) {
-      setError("Failed to create new conversation");
       toast.error("Failed to create new conversation");
     }
   };
@@ -380,7 +373,7 @@ export default function Home() {
       // This should only show the loading spinner in the chatscroll area for the message that we're trying to branch
       setIsBranchLoading(false);
     } catch (err) {
-      setError("Failed to create branched conversation");
+      toast.error("Failed to create branched conversation", err);
     }
   };
 
@@ -392,7 +385,7 @@ export default function Home() {
         conversationId
       );
     } catch (err) {
-      console.error("Error saving active conversation:", err);
+      toast.error("Error saving active conversation:", err);
     }
   };
   const handleDeleteConversation = async (conversationId: number) => {
@@ -419,7 +412,7 @@ export default function Home() {
         }
       }
     } catch (err) {
-      setError("Failed to delete conversation");
+      toast.error("Failed to delete conversation", err);
     }
   };
 
@@ -431,7 +424,7 @@ export default function Home() {
       await window.electron.updateConversationTitle(conversationId, newTitle);
       await loadConversations();
     } catch (err) {
-      setError("Failed to update conversation title");
+      toast.error("Failed to update conversation title", err);
     }
   };
 
