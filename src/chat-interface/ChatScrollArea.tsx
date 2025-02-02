@@ -225,7 +225,7 @@ function renderMarkdown(content: string, role: string) {
           if (!language) {
             return (
               <code
-                className="px-1.5 py-0.5 font-mono bg-gray-700 text-gray-100 rounded text-xs"
+                className="px-1.5 py-0.5 font-mono bg-gray-700 text-gray-100 rounded text-[10px]"
                 {...props}
               >
                 {children}
@@ -233,9 +233,9 @@ function renderMarkdown(content: string, role: string) {
             );
           }
           return (
-            <div className="relative group my-2 text-xs">
+            <div className="relative group my-2">
               {/* Language badge */}
-              <div className="absolute right-2 top-2 px-2 py-1 text-xs font-medium text-gray-400 bg-gray-800 rounded">
+              <div className="absolute right-2 top-2 px-2 py-1 font-medium text-gray-400 bg-gray-800 rounded">
                 {language}
               </div>
 
@@ -256,7 +256,7 @@ function renderMarkdown(content: string, role: string) {
                 }) => (
                   <pre
                     className={cn(
-                      "p-4 overflow-x-auto font-mono  bg-[#1E1E1E] rounded-lg",
+                      "p-4 overflow-x-auto font-mono bg-[#1E1E1E] rounded-lg text-[12px]",
                       className
                     )}
                     style={style}
@@ -266,7 +266,11 @@ function renderMarkdown(content: string, role: string) {
                         {/* Optional line numbers */}
                         <span className="mr-4 text-gray-500">{i + 1}</span>
                         {line.map((token, key) => (
-                          <span key={key} {...getTokenProps({ token })} />
+                          <span
+                            className="t"
+                            key={key}
+                            {...getTokenProps({ token })}
+                          />
                         ))}
                       </div>
                     ))}

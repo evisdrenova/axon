@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain } from "electron";
+import { app, BrowserWindow, ipcMain, Menu, MenuItem } from "electron";
 import path from "path";
 import started from "electron-squirrel-startup";
 import Database from "better-sqlite3";
@@ -120,6 +120,18 @@ const createWindow = async () => {
 
   // Open the DevTools.
   mainWindow.webContents.openDevTools();
+  mainWindow.webContents.on("context-menu", (event, params) => {
+    const menu = new Menu();
+    menu.append(
+      new MenuItem({
+        label: "Inspect Element",
+        click: () => {
+          mainWindow.webContents.inspectElement(params.x, params.y);
+        },
+      })
+    );
+    menu.popup();
+  });
 };
 
 ipcMain.on("window-minimize", () => {
