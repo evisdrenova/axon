@@ -27,8 +27,6 @@ const SETTINGS = {
   SELECTED_PROVIDER: "selectedProvider",
 } as const;
 
-// TODO: finish testing the in-memory setters and getters for the settings
-
 export default function Home() {
   const [user, setUser] = useState<User | null>(null);
   const [providers, setProviders] = useState<Provider[]>([]);
@@ -51,16 +49,14 @@ export default function Home() {
       setProviders(providers);
 
       // Load the previously selected provider from settings
-      const savedProviderId = await window.electron.getSettings<string>(
+      const savedProviderId = await window.electron.getSettings<number>(
         SETTINGS.SELECTED_PROVIDER
       );
 
       if (savedProviderId) {
-        const savedProvider = providers.find(
-          (p) => p.id?.toString() === savedProviderId
-        );
+        const savedProvider = providers.find((p) => p.id === savedProviderId);
         if (savedProvider) {
-          setSelectedProvider(savedProviderId);
+          setSelectedProvider(savedProviderId.toString());
           setCurrentProvider(savedProvider);
           window.electron.selectProvider(savedProvider);
           return;
@@ -161,7 +157,7 @@ export default function Home() {
     setSelectedProvider(providerValue);
     const provider = providers.find((p) => p.id?.toString() === providerValue);
     try {
-      window.electron.selectProvider(provider);
+      await window.electron.selectProvider(provider);
       setCurrentProvider(provider || null);
       // Save the selection
       if (provider?.id) {

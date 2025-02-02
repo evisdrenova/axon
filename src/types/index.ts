@@ -1,6 +1,6 @@
 import OpenAI from "openai";
 import Anthropic from "@anthropic-ai/sdk";
-import { SettingsValue } from "src/settings/Settings";
+import { SettingsValue } from "../../src/settings/Settings";
 
 // always returns a promise since the IPC communication is async even if the underlying implementation is synchronous
 export interface IElectronAPI {
