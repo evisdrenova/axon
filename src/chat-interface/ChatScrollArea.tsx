@@ -10,6 +10,7 @@ import { useState, useRef, useEffect } from "react";
 import Anthropic from "@anthropic-ai/sdk";
 import Spinner from "../../components/ui/Spinner";
 import { Highlight, themes } from "prism-react-renderer";
+import { toast } from "sonner";
 
 interface Props {
   messages: Message[];
@@ -102,40 +103,23 @@ export default function ChatScrollArea(props: Props) {
                 >
                   <RenderMessageContent message={message} />
                 </div>
-                {message.role == "assistant" && (
-                  <div className="flex flex-col gap-2">
-                    <Button
-                      variant="ghost"
-                      onClick={() => copyToClipBoard(message.content)}
-                    >
-                      {copied ? (
-                        <Check className="text-green-500 w-2 h-2" />
-                      ) : (
-                        <Copy />
-                      )}
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      onClick={() =>
-                        onBranchConversation(activeConversationId, message.id)
-                      }
-                    >
-                      {isBranchLoading ? (
-                        <Spinner />
-                      ) : (
-                        <Split className="rotate-90" />
-                      )}
-                    </Button>
-                  </div>
-                )}
+                <AssistantMessageActions
+                  message={message}
+                  copied={copied}
+                  onBranchConversation={onBranchConversation}
+                  activeConversationId={activeConversationId}
+                  copyToClipBoard={copyToClipBoard}
+                  isBranchLoading={isBranchLoading}
+                />
               </div>
             </div>
           </div>
         ))}
         {isLoading && (
           <div className="flex justify-start">
-            <div className="bg-muted rounded-lg px-4 py-2">
-              <div className="animate-pulse">Analyzing...</div>
+            <div className="flex flex-row items-center gap-2 bg-muted rounded-lg px-4 py-2">
+              <div className="animate-pulse">Generating Response...</div>
+              <Spinner />
             </div>
           </div>
         )}
@@ -144,6 +128,52 @@ export default function ChatScrollArea(props: Props) {
     </ScrollArea>
   );
 }
+
+interface AssistantMessageActionsProps {
+  message: Message;
+  copied: boolean;
+  onBranchConversation: (conversationId: number, messageId: number) => void;
+  activeConversationId: number;
+  copyToClipBoard: (
+    content: string | Anthropic.ContentBlock[]
+  ) => Promise<void>;
+  isBranchLoading: boolean;
+}
+
+function AssistantMessageActions(props: AssistantMessageActionsProps) {
+  const {
+    message,
+    copied,
+    onBranchConversation,
+    activeConversationId,
+    copyToClipBoard,
+    isBranchLoading,
+  } = props;
+
+  return (
+    <div>
+      {message.role == "assistant" && (
+        <div className="flex flex-col gap-2">
+          <Button
+            variant="ghost"
+            onClick={() => copyToClipBoard(message.content)}
+          >
+            {copied ? <Check className="text-green-500 w-2 h-2" /> : <Copy />}
+          </Button>
+          <Button
+            variant="ghost"
+            onClick={() =>
+              onBranchConversation(activeConversationId, message.id)
+            }
+          >
+            {isBranchLoading ? <Spinner /> : <Split className="rotate-90" />}
+          </Button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 interface MessageContentProps {
   message: Message;
 }
@@ -328,10 +358,10 @@ function formatDateTime(dateString?: string): string {
   if (!dateString) return "";
 
   try {
-    // Treat the SQLite timestamp as UTC
+    // treat the SQLite timestamp as UTC
     const isoString = dateString.replace(" ", "T") + "Z";
 
-    // Creating a Date object from UTC string will automatically convert to local time
+    // automatically convert to local time
     const date = new Date(isoString);
 
     return date.toLocaleString("en-US", {
@@ -343,7 +373,7 @@ function formatDateTime(dateString?: string): string {
       hour12: true,
     });
   } catch (error) {
-    console.error("Error formatting date:", error);
+    toast.error("Error formatting date:", error);
     return dateString;
   }
 }
