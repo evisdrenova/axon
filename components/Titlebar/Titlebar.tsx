@@ -45,7 +45,7 @@ export default function TitleBar() {
   };
 
   return (
-    <div className="h-8 border-b border-border  bg-background flex justify-between items-center select-none dragable px-3">
+    <div className="h-8 bg-background flex justify-between items-center select-none dragable px-3">
       <WindowAction
         handleClose={handleClose}
         handleMinimize={handleMinimize}

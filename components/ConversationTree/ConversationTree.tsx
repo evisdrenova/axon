@@ -62,7 +62,7 @@ export default function ConversationTree(props: Props) {
   };
 
   return (
-    <div className="p-4 overflow-y-auto flex flex-col gap-4 h-full">
+    <div className="p-4 overflow-y-auto flex flex-col gap-4">
       <div>
         <Button
           variant="default"

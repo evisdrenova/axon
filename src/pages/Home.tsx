@@ -431,7 +431,12 @@ export default function Home() {
   return (
     <div className="flex flex-col h-full">
       <ResizablePanelGroup direction="horizontal">
-        <ResizablePanel defaultSize={20} minSize={10} maxSize={60}>
+        <ResizablePanel
+          defaultSize={20}
+          minSize={10}
+          maxSize={60}
+          className="border border-border ml-1 my-1 rounded-lg"
+        >
           <ConversationTree
             conversations={conversations}
             onNewConversation={onNewConversation}
@@ -446,7 +451,7 @@ export default function Home() {
             <ResizablePanel
               defaultSize={80}
               minSize={10}
-              className="flex flex-col "
+              className="flex flex-col border border-border rounded-lg mx-1 mt-1"
             >
               <ChatScrollArea
                 messages={
@@ -463,30 +468,34 @@ export default function Home() {
             </ResizablePanel>
             <ResizableHandle withHandle />
             <ResizablePanel minSize={10} defaultSize={30}>
-              <div className="flex flex-col gap-2 h-full overflow-auto px-4">
-                <div className="pt-2 space-x-2">
-                  <ModelSelect
-                    handleProviderSelect={handleProviderSelect}
-                    selectedProvider={selectedProvider}
-                    providers={providers}
-                  />
+              <div className="flex flex-col h-full">
+                <div className="flex flex-col flex-1 bg-muted border border-border rounded-lg mx-1 my-1">
+                  <div className="pt-2 px-4 space-x-2">
+                    <ModelSelect
+                      handleProviderSelect={handleProviderSelect}
+                      selectedProvider={selectedProvider}
+                      providers={providers}
+                    />
 
-                  <Button
-                    variant="ghost"
-                    className="text-xs"
-                    size="sm"
-                    onClick={() => setOpenTools(true)}
-                  >
-                    <Wrench size={16} /> {}Tools
-                  </Button>
+                    <Button
+                      variant="ghost"
+                      className="text-xs"
+                      size="sm"
+                      onClick={() => setOpenTools(true)}
+                    >
+                      <Wrench size={16} /> Tools
+                    </Button>
+                  </div>
+                  <div className="flex flex-col flex-1 justify-end px-4 pb-4 mt-2">
+                    <ChatInput
+                      inputValue={inputValue}
+                      setInputValue={setInputValue}
+                      currentProvider={currentProvider}
+                      isLoading={isLoading}
+                      handleSubmit={handleSubmit}
+                    />
+                  </div>
                 </div>
-                <ChatInput
-                  inputValue={inputValue}
-                  setInputValue={setInputValue}
-                  currentProvider={currentProvider}
-                  isLoading={isLoading}
-                  handleSubmit={handleSubmit}
-                />
               </div>
             </ResizablePanel>
           </ResizablePanelGroup>
