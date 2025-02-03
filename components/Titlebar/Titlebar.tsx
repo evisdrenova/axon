@@ -73,7 +73,7 @@ export default function TitleBar() {
           <DialogTrigger>
             <Settings2
               size={16}
-              className="text-primary hover:text-foreground"
+              className="text-primary-foreground/60 hover:text-primary-foreground"
             />
           </DialogTrigger>
           <DialogContent>
