@@ -97,9 +97,9 @@ export default function ChatScrollArea(props: Props) {
                 <div
                   className={cn(
                     message.role === "user"
-                      ? "bg-primary text-primary-foreground justify-end"
-                      : "bg-muted",
-                    `rounded-lg px-4 py-2`
+                      ? "bg-background justify-end"
+                      : "bg-primary",
+                    `rounded-lg px-4 py-2 text-primary-foreground  border border-border`
                   )}
                 >
                   <RenderMessageContent message={message} />
@@ -202,11 +202,7 @@ function renderMarkdown(content: string, role: string) {
       className="prose max-w-none"
       remarkPlugins={[remarkGfm]}
       components={{
-        p: ({ children }: { children: any }) => (
-          <p className={cn(role == "user" ? "text-gray-100" : "text-gray-900")}>
-            {children}
-          </p>
-        ),
+        p: ({ children }: { children: any }) => <p>{children}</p>,
         ul: ({ children }) => <ul>{children}</ul>,
         li: ({ children }: { children: any }) => {
           return (
@@ -257,7 +253,7 @@ function renderMarkdown(content: string, role: string) {
                 }) => (
                   <pre
                     className={cn(
-                      "p-4 overflow-x-auto font-mono bg-[#1E1E1E] rounded-lg text-[12px]",
+                      "p-4 overflow-x-auto font-mono bg-gray-700 rounded-lg text-[12px]",
                       className
                     )}
                     style={style}
@@ -329,7 +325,7 @@ interface MessageMetadataProps {
 function RenderMessageMetadata(props: MessageMetadataProps) {
   const { message } = props;
   return (
-    <div className="flex flex-row items-center gap-1 text-[10px]">
+    <div className="flex flex-row items-center gap-1 text-[10px] text-primary-foreground">
       <NiceDate date={message.createdAt} />
     </div>
   );
@@ -343,11 +339,7 @@ function NiceDate(props: DateProps) {
   const { date } = props;
   const prettyDate = formatDateTime(date);
 
-  return (
-    <time dateTime={date} className="text-muted">
-      {prettyDate}
-    </time>
-  );
+  return <time dateTime={date}>{prettyDate}</time>;
 }
 
 function formatDateTime(dateString?: string): string {
