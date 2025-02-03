@@ -35,17 +35,18 @@ export default function ConversationTreeItem(props: Props) {
   useEffect(() => {
     const updateHeight = () => {
       if (childHeightRef.current && isOpen) {
-        // If there's only one child, keep the SVG height fixed
         if (node.nodes.length === 1) {
-          console.log("only one");
-          setChildHeight(0); // Height matching the ChildrenArrow SVG
+          setChildHeight(0);
         } else {
-          // For multiple children, calculate dynamic height
-          console.log("not just one");
-          const totalHeight =
-            childHeightRef.current.getBoundingClientRect().height;
-          const extraHeight = 16;
-          setChildHeight((totalHeight + extraHeight) / 1.5);
+          // Get the distance between first and last child
+          const firstChild = childHeightRef.current.firstChild as HTMLElement;
+          const lastChild = childHeightRef.current.lastChild as HTMLElement;
+          if (firstChild && lastChild) {
+            const distance =
+              lastChild.getBoundingClientRect().top -
+              firstChild.getBoundingClientRect().top;
+            setChildHeight(distance + 14); // Add half the height of the final node
+          }
         }
       } else {
         setChildHeight(0);
@@ -99,25 +100,20 @@ export default function ConversationTreeItem(props: Props) {
         <div className="flex flex-row w-full min-h-full pl-5">
           <div className="relative flex flex-col">
             {node.nodes.length > 1 && (
-              <svg
-                width="21"
-                height={childHeight}
-                fill="none"
-                className="absolute left-0 stroke-current"
-                style={{ top: "-8px" }} // Adjust this value to align with the first child's connection
-              >
-                <path
-                  d={`M 1 0 L 1 ${childHeight}`}
-                  stroke="#7D7D7D"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                />
-              </svg>
+              <div
+                className="absolute left-0 w-[2px] bg-primary/90"
+                style={{ height: `${childHeight}px` }}
+              />
             )}
             <div className="flex flex-col gap-1" ref={childHeightRef}>
               {node.nodes?.map((childNode) => (
                 <div className="flex flex-row gap-0" key={childNode.id}>
-                  <ChildrenArrow />
+                  <div className="flex flex-row gap-0 h-8">
+                    {childNode.nodes.length == 0 && (
+                      <div className="bg-primary/90 h-1/2 w-[2px]" />
+                    )}
+                    <div className="bg-primary/90 w-4 h-[2px] mt-[14px]" />
+                  </div>
                   <ConversationTreeItem
                     node={childNode}
                     isOpen={!!openNodes[childNode.id]}
@@ -133,27 +129,6 @@ export default function ConversationTreeItem(props: Props) {
           </div>
         </div>
       )}
-    </div>
-  );
-}
-
-function ChildrenArrow() {
-  return (
-    <div className="flex-shrink-0 bg-background">
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="21"
-        height="17"
-        viewBox="0 0 21 17"
-        fill="none"
-      >
-        <path
-          d="M1 1V12.25C1 14.75 2.58333 16 5.75 16H20"
-          strokeWidth="1.5"
-          stroke="#7D7D7D"
-          strokeLinecap="round"
-        />
-      </svg>
     </div>
   );
 }
