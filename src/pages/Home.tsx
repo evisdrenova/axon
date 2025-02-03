@@ -16,6 +16,7 @@ import Tools from "./Tools";
 import { Button } from "../../components/ui/button";
 import { Wrench } from "lucide-react";
 import { toast } from "sonner";
+import TitleBar from "../../components/Titlebar/Titlebar";
 
 const SETTINGS = {
   ACTIVE_CONVERSATION: "activeConversation",
@@ -430,12 +431,19 @@ export default function Home() {
 
   return (
     <div className="flex flex-col h-full">
+      <TitleBar
+        activeConversation={conversations.find(
+          (c) => c.id == activeConversationId
+        )}
+        onDeleteConversation={handleDeleteConversation}
+        onUpdateTitle={handleUpdateConversationTitle}
+      />
       <ResizablePanelGroup direction="horizontal">
         <ResizablePanel
           defaultSize={20}
           minSize={10}
           maxSize={60}
-          className="border border-border ml-1 my-1 rounded-lg"
+          className="border border-border ml-1 mb-1 rounded-lg"
         >
           <ConversationTree
             conversations={conversations}
@@ -451,7 +459,7 @@ export default function Home() {
             <ResizablePanel
               defaultSize={80}
               minSize={10}
-              className="flex flex-col border border-border rounded-lg mx-1 mt-1"
+              className="flex flex-col border border-border rounded-lg mx-1"
             >
               <ChatScrollArea
                 messages={

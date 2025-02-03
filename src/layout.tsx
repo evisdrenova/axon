@@ -10,14 +10,9 @@ export default function Layout(props: Props) {
   const { children } = props;
 
   return (
-    <div className="flex flex-col w-full h-screen">
-      <TitleBar />
-      <div className="flex flex-col w-full h-screen">
-        <div className="flex-1 w-full h-full">
-          <main>{children}</main>
-          <Toaster richColors closeButton />
-        </div>
-      </div>
+    <div className="flex flex-col h-screen">
+      <main className="flex-1">{children}</main>
+      <Toaster richColors closeButton />
     </div>
   );
 }

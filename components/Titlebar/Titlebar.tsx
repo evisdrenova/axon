@@ -19,8 +19,17 @@ import {
 } from "../../components/ui/dialog";
 import Settings from "../../src/pages/Settings";
 import { Settings2 } from "lucide-react";
+import ChatTitle from "../../components/ChatInterface/ChatTitle";
+import { Conversation } from "../../src/types";
 
-export default function TitleBar() {
+interface Props {
+  activeConversation: Conversation;
+  onUpdateTitle: (convoId: number, newTitle: string) => void;
+  onDeleteConversation: (convoId: number) => void;
+}
+
+export default function TitleBar(props: Props) {
+  const { activeConversation, onUpdateTitle, onDeleteConversation } = props;
   const handleClose = () => window.electron.closeWindow();
   const handleMinimize = () => window.electron.minimizeWindow();
   const handleMaximize = () => window.electron.maximizeWindow();
@@ -51,8 +60,13 @@ export default function TitleBar() {
         handleMinimize={handleMinimize}
         handleMaximize={handleMaximize}
       />
-      <div className="absolute left-1/2 transform -translate-x-1/2 text-foreground text-xs font-semibold">
-        Axon
+      <div className="no-drag">
+        <ChatTitle
+          title={activeConversation?.title}
+          id={activeConversation?.id}
+          onDeleteConversation={onDeleteConversation}
+          onUpdateTitle={onUpdateTitle}
+        />
       </div>
       <div className="flex flex-row items-center rounded-lg no-drag ">
         <Button

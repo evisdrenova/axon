@@ -65,7 +65,6 @@ export default function ConversationTreeItem(props: Props) {
     };
   }, [isOpen, node.nodes, openNodes]);
 
-  console.log("childrHeight", childHeight);
   return (
     <div className="flex flex-col">
       <div className="flex items-center">
