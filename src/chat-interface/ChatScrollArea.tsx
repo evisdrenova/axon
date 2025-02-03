@@ -157,12 +157,14 @@ function AssistantMessageActions(props: AssistantMessageActionsProps) {
         <div className="flex flex-col gap-2">
           <Button
             variant="ghost"
+            size="sm"
             onClick={() => copyToClipBoard(message.content)}
           >
             {copied ? <Check className="text-green-500 w-2 h-2" /> : <Copy />}
           </Button>
           <Button
             variant="ghost"
+            size="sm"
             onClick={() =>
               onBranchConversation(activeConversationId, message.id)
             }

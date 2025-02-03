@@ -97,7 +97,7 @@ export default function ConversationTreeItem(props: Props) {
         </div>
       </div>
       {isOpen && (
-        <div className="flex flex-row w-full min-h-full pl-5">
+        <div className="flex flex-row w-full min-h-full pl-5 pt-1">
           <div className="relative flex flex-col">
             {node.nodes.length > 1 && (
               <div
