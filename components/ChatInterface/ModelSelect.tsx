@@ -18,13 +18,13 @@ export default function ModelSelect(props: Props) {
   const { handleProviderSelect, selectedProvider, providers } = props;
 
   return (
-    <div className="inline-flex flex-row items-center hover:bg-accent hover:text-accent-foreground rounded-md py-0 px-1">
+    <div className="inline-flex flex-row items-center text-primary-foreground hover:bg-primary/90 rounded-md py-0 px-1">
       <Box size={16} />
       <Select onValueChange={handleProviderSelect} value={selectedProvider}>
         <SelectTrigger className="border-0 shadow-none text-xs ring-0 focus:outline-none focus:ring-0 gap-2 h-8">
           <SelectValue placeholder="Select a model" />
         </SelectTrigger>
-        <SelectContent>
+        <SelectContent position="popper" side="top" align="start">
           {providers.map((provider) => (
             <SelectItem
               key={provider.id}
@@ -37,7 +37,7 @@ export default function ModelSelect(props: Props) {
           <Separator className="my-1" />
           <SelectItem
             value="new-model"
-            className="text-xs hover:bg-gray-100 transition-colors mt-1"
+            className="text-xs transition-colors mt-1"
           >
             <span className="flex items-center gap-1.5">
               <Plus size={12} />

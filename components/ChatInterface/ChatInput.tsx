@@ -29,7 +29,7 @@ export default function ChatInput(props: Props) {
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
           placeholder="What are you working on?"
-          className="placeholder:text-gray-900/50 placeholder:text-xs flex-1 w-full resize-none p-3 text-xs border-0 focus:ring-0 focus-visible:ring-0 shadow-none mb-20 "
+          className="placeholder:text-primary-foreground/40 placeholder:text-xs text-primary-foreground flex-1 w-full resize-none p-3 text-xs border-0 focus:ring-0 focus-visible:ring-0 shadow-none "
           onKeyDown={(e) => {
             if (e.key === "Enter" && !e.shiftKey) {
               e.preventDefault();
@@ -42,7 +42,7 @@ export default function ChatInput(props: Props) {
             onClick={handleSubmit}
             size="sm"
             disabled={!inputValue || !currentProvider || isLoading}
-            className="rounded-lg p-2 transition-colors bg-main-900 text-main-50"
+            className="rounded-lg p-2 "
           >
             <ArrowUp className="w-4 h-4" />
           </Button>

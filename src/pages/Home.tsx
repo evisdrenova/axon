@@ -467,7 +467,7 @@ export default function Home() {
               />
             </ResizablePanel>
             <ResizableHandle withHandle />
-            <ResizablePanel minSize={10} defaultSize={30}>
+            <ResizablePanel minSize={20} defaultSize={30}>
               <div className="flex flex-col h-full">
                 <div className="flex flex-col flex-1 bg-muted border border-border rounded-lg mx-1 my-1">
                   <div className="pt-2 px-4 space-x-2">
@@ -486,7 +486,7 @@ export default function Home() {
                       <Wrench size={16} /> Tools
                     </Button>
                   </div>
-                  <div className="flex flex-col flex-1 justify-end px-4 pb-4 mt-2">
+                  <div className="flex-1 px-4 pb-4 mt-2">
                     <ChatInput
                       inputValue={inputValue}
                       setInputValue={setInputValue}
