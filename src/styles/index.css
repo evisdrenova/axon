@@ -9,25 +9,25 @@
 
 @layer base {
   :root {
-    --background: 0 0% 97%; /* Very light background */
-    --foreground: 0 0% 10%; /* Dark text for readability */
+    --background: 0 0% 97%; /* Lightest background */
+    --foreground: 0 0% 12%; /* Dark foreground text (contrast with bg) */
     --muted: 0 0% 93%; /* Light muted background */
-    --muted-foreground: 0 0% 30%; /* Muted text with medium contrast */
-    --popover: 0 0% 100%; /* White popover background */
-    --popover-foreground: 0 0% 12%; /* Dark text for popovers */
-    --border: 0 0% 87%; /* Light border for subtle separation */
+    --muted-foreground: 0 0% 30%; /* Muted text with contrast */
+    --popover: 0 0% 98%; /* Very light popover background */
+    --popover-foreground: 0 0% 12%; /* Dark popover text */
+    --border: 0 0% 80%; /* Subtle but visible border */
     --input: 0 0% 90%; /* Light input background */
-    --card: 0 0% 100%; /* White card background */
-    --card-foreground: 0 0% 15%; /* Dark text on cards */
-    --primary: 220 80% 40%; /* Complementary blue tone */
-    --primary-foreground: 0 0% 100%; /* White text for contrast */
-    --secondary: 0 0% 92%; /* Slightly darker than background */
-    --secondary-foreground: 0 0% 20%; /* Dark text */
-    --accent: 220 80% 40%; /* Matching primary */
+    --card: 180 2% 96%; /* Slightly cool light background */
+    --card-foreground: 0 0% 12%; /* Dark text on cards */
+    --primary: 0 0% 85%; /* Vibrant blue for primary actions */
+    --primary-foreground: 0 0% 14%; /* White text on primary */
+    --secondary: 0 0% 92%; /* Light secondary background */
+    --secondary-foreground: 0 0% 15%; /* Darker text for contrast */
+    --accent: 220 80% 50%; /* Similar to primary, slightly lighter */
     --accent-foreground: 0 0% 100%; /* White text */
-    --destructive: 0 80% 45%; /* Softer red for destructive actions */
+    --destructive: 0 72% 45%; /* More vibrant red than dark mode */
     --destructive-foreground: 0 0% 100%; /* White text */
-    --ring: 220 70% 50%; /* Slightly brighter blue for focus */
+    --ring: 220 60% 40%; /* Balanced focus ring */
     --radius: 0.5rem;
   }
 

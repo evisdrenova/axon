@@ -87,7 +87,7 @@ export default function TitleBar(props: Props) {
           <DialogTrigger>
             <Settings2
               size={16}
-              className="text-primary-foreground/60 hover:text-primary-foreground"
+              className="text-primary-foreground/70 hover:text-primary-foreground"
             />
           </DialogTrigger>
           <DialogContent>
