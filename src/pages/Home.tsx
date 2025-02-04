@@ -165,6 +165,7 @@ export default function Home() {
     }
   };
 
+  // TODO: upadte the form to handle passing in files as well
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -389,6 +390,7 @@ export default function Home() {
       toast.error("Error saving active conversation:", err);
     }
   };
+
   const handleDeleteConversation = async (conversationId: number) => {
     try {
       await window.electron.deleteConversation(conversationId);
@@ -476,35 +478,17 @@ export default function Home() {
             </ResizablePanel>
             <ResizableHandle withHandle />
             <ResizablePanel minSize={20} defaultSize={30}>
-              <div className="flex flex-col h-full">
-                <div className="flex flex-col flex-1 bg-muted border border-border rounded-lg mx-1 my-1">
-                  <div className="pt-2 px-4 space-x-2">
-                    <ModelSelect
-                      handleProviderSelect={handleProviderSelect}
-                      selectedProvider={selectedProvider}
-                      providers={providers}
-                    />
-
-                    <Button
-                      variant="ghost"
-                      className="text-xs"
-                      size="sm"
-                      onClick={() => setOpenTools(true)}
-                    >
-                      <Wrench size={16} /> Tools
-                    </Button>
-                  </div>
-                  <div className="flex-1 px-4 pb-4 mt-2">
-                    <ChatInput
-                      inputValue={inputValue}
-                      setInputValue={setInputValue}
-                      currentProvider={currentProvider}
-                      isLoading={isLoading}
-                      handleSubmit={handleSubmit}
-                    />
-                  </div>
-                </div>
-              </div>
+              <ChatInput
+                inputValue={inputValue}
+                setInputValue={setInputValue}
+                currentProvider={currentProvider}
+                isLoading={isLoading}
+                handleSubmit={handleSubmit}
+                handleProviderSelect={handleProviderSelect}
+                selectedProvider={selectedProvider}
+                providers={providers}
+                setOpenTools={setOpenTools}
+              />
             </ResizablePanel>
           </ResizablePanelGroup>
         </ResizablePanel>
