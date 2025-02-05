@@ -1,6 +1,7 @@
 import OpenAI from "openai";
 import Anthropic from "@anthropic-ai/sdk";
 import { SettingsValue } from "../../src/settings/Settings";
+import { UserContent } from "ai";
 
 // always returns a promise since the IPC communication is async even if the underlying implementation is synchronous
 export interface IElectronAPI {
@@ -86,7 +87,7 @@ export interface User {
 export interface Message {
   id?: number;
   role: "user" | "assistant";
-  content: string | Anthropic.ContentBlock[];
+  content: UserContent;
   createdAt?: string;
   conversationId?: number;
 }

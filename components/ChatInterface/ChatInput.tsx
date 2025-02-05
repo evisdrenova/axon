@@ -18,7 +18,7 @@ import { Dialog, DialogContent, DialogTrigger } from "../ui/dialog";
 import { cn } from "../../src/lib/utils";
 import { toast } from "sonner";
 
-interface FileAttachment {
+export interface FileAttachment {
   id: string;
   file: File;
   type: string;
@@ -103,7 +103,6 @@ export default function ChatInput(props: Props) {
 
       setAttachments((current) => [...current, ...newAttachments]);
     } catch (error) {
-      console.error("Error processing dropped files:", error);
       toast.error("Error processing dropped files:", error);
     } finally {
       setIsProcessing(false);
@@ -168,12 +167,6 @@ export default function ChatInput(props: Props) {
     setAttachments(newAttachments);
   };
 
-  const onSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    await handleSubmit(e, attachments);
-    setAttachments([]);
-  };
-
   const handlePaste = async (e: React.ClipboardEvent) => {
     const items = e.clipboardData.items;
     const newAttachments: FileAttachment[] = [];
@@ -197,6 +190,12 @@ export default function ChatInput(props: Props) {
     if (newAttachments.length > 0) {
       setAttachments((current) => [...current, ...newAttachments]);
     }
+  };
+
+  const onSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await handleSubmit(e, attachments);
+    setAttachments([]);
   };
 
   return (

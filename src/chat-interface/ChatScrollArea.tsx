@@ -184,15 +184,45 @@ interface MessageContentProps {
 export function RenderMessageContent(props: MessageContentProps) {
   const { message } = props;
 
+  // Function to render attached images
+  const renderImageAttachments = (content: any[]) => {
+    return content
+      .filter((block) => block.type === "image_url" || block.type === "image")
+      .map((block, index) => (
+        <div key={index} className="mt-2">
+          <img
+            src={block.image_url?.url || block.url}
+            alt="Attached image"
+            className="max-w-full h-auto rounded-md border border-border"
+            style={{ maxHeight: "200px" }} // Limit image height
+          />
+        </div>
+      ));
+  };
+
   if (typeof message.content === "string") {
-    return renderMarkdown(message.content, message.role);
+    return <div>{renderMarkdown(message.content, message.role)}</div>;
   } else if (Array.isArray(message.content)) {
-    return message.content.map((block) => {
-      if (block.type === "text") {
-        return renderMarkdown(block.text || "", message.role);
-      }
-      return null;
-    });
+    return (
+      <div>
+        {/* Render text content first */}
+        {message.content.map((block, index) => {
+          if (block.type === "text") {
+            return (
+              <div key={`text-${index}`}>
+                {renderMarkdown(block.text || "", message.role)}
+              </div>
+            );
+          }
+          return null;
+        })}
+
+        {/* Render image attachments below text */}
+        <div className="grid grid-cols-2 gap-2">
+          {renderImageAttachments(message.content)}
+        </div>
+      </div>
+    );
   }
   return null;
 }

@@ -1,22 +1,21 @@
 import { useEffect, useState } from "react";
 import { Conversation, Message, Provider, User } from "../types";
 import ChatScrollArea from "../chat-interface/ChatScrollArea";
-import ChatInput from "../../components/ChatInterface/ChatInput";
-import ModelSelect from "../../components/ChatInterface/ModelSelect";
+import ChatInput, {
+  FileAttachment,
+} from "../../components/ChatInterface/ChatInput";
 import {
   ResizableHandle,
   ResizablePanel,
   ResizablePanelGroup,
 } from "../../components/ui/resizable";
 import ConversationTree from "../../components/ConversationTree/ConversationTree";
-import ChatTitle from "../../components/ChatInterface/ChatTitle";
 import { Dialog, DialogContent, DialogTitle } from "../../components/ui/dialog";
 import Models from "./Models";
 import Tools from "./Tools";
-import { Button } from "../../components/ui/button";
-import { Wrench } from "lucide-react";
 import { toast } from "sonner";
 import TitleBar from "../../components/Titlebar/Titlebar";
+import { TextPart, ImagePart, FilePart } from "ai";
 
 const SETTINGS = {
   ACTIVE_CONVERSATION: "activeConversation",
@@ -165,7 +164,10 @@ export default function Home() {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (
+    e: React.FormEvent,
+    attachments?: FileAttachment[]
+  ) => {
     e.preventDefault();
 
     if (
@@ -182,34 +184,135 @@ export default function Home() {
     setIsLoading(true);
     setInputValue("");
 
-    // create optimistic user message
-    const tempId = generateTempId(messages);
-
-    const optimisticUserMessage: Message = {
-      id: Date.now(),
-      role: "user",
-      content: trimmedInput,
-      conversationId: activeConversationId,
-      createdAt: new Date().toISOString(),
+    const fileToBase64 = (file: File): Promise<string> => {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => {
+          const base64String = reader.result as string;
+          // Remove the data URL prefix to get just the base64 content
+          const base64Content = base64String.split(",")[1];
+          resolve(base64Content);
+        };
+        reader.onerror = (error) => reject(error);
+      });
     };
 
-    // optimistically update the chat window
-    setConversations((prevConversations) =>
-      prevConversations.map((conversation) => {
-        if (conversation.id === activeConversationId) {
-          return {
-            ...conversation,
-            messages: [...conversation.messages, optimisticUserMessage],
-          };
-        }
-        return conversation;
-      })
-    );
+    const createMessageContent = async (
+      text: string,
+      attachments?: FileAttachment[]
+    ) => {
+      const content: Array<TextPart | ImagePart | FilePart> = [];
 
+      // Add text part if present
+      if (text) {
+        content.push({
+          type: "text",
+          text: text,
+        });
+      }
+
+      // Process attachments if present
+      if (attachments?.length) {
+        for (const attachment of attachments) {
+          const base64Content = await fileToBase64(attachment.file);
+          // switch (attachment.type) {
+          //   case "image":
+          //     return {
+          //       type: "image_url",
+          //       image_url: {
+          //         url: `form:file${index}`,
+          //         detail: "auto",
+          //       },
+          //     };
+
+          // case "pdf":
+          //   // Extract text from PDF using your electron API
+          //   const pdfText = await window.electron.extractPDFText(attachment.file);
+          //   return {
+          //     type: "text",
+          //     text: `Content from PDF "${attachment.file.name}":\n${pdfText}`
+          //   };
+
+          // case "csv":
+          //   // Parse CSV using your electron API
+          //   const csvData = await window.electron.parseCSV(attachment.file);
+          //   return {
+          //     type: "text",
+          //     text: `Data from CSV "${attachment.file.name}":\n${JSON.stringify(csvData, null, 2)}`
+          //   };
+
+          // case "spreadsheet":
+          //   // Parse spreadsheet using your electron API
+          //   const sheetData = await window.electron.parseSpreadsheet(attachment.file);
+          //   return {
+          //     type: "text",
+          //     text: `Data from spreadsheet "${attachment.file.name}":\n${JSON.stringify(sheetData, null, 2)}`
+          //   };
+
+          // case "text":
+          //   // Read text file
+          //   const text = await attachment.file.text();
+          //   return {
+          //     type: "text",
+          //     text: `Content from "${attachment.file.name}":\n${text}`
+          //   };
+
+          //   default:
+          //     toast.error(
+          //       `Unsupported file type for ${attachment.file.name}`
+          //     );
+          //     return null;
+          // }
+          if (attachment.type === "image") {
+            content.push({
+              type: "image",
+              image: base64Content,
+              mimeType: attachment.file.type,
+            });
+          } else {
+            content.push({
+              type: "file",
+              data: base64Content,
+              mimeType: attachment.file.type,
+            });
+          }
+        }
+      }
+
+      return content;
+    };
+    const tempId = generateTempId(messages);
     try {
+      const optimisticContent = await createMessageContent(
+        trimmedInput,
+        attachments
+      );
+      // create optimistic user message
+      const optimisticUserMessage: Message = {
+        id: Date.now(),
+        role: "user",
+        content: optimisticContent,
+        conversationId: activeConversationId,
+        createdAt: new Date().toISOString(),
+      };
+
+      // optimistically update the chat window by adding these to the messages array
+      setConversations((prevConversations) =>
+        prevConversations.map((conversation) => {
+          if (conversation.id === activeConversationId) {
+            return {
+              ...conversation,
+              messages: [...conversation.messages, optimisticUserMessage],
+            };
+          }
+          return conversation;
+        })
+      );
+
       const userMessage: Message = {
         role: "user",
-        content: trimmedInput,
+        content: optimisticContent,
         conversationId: activeConversationId,
       };
 
@@ -217,21 +320,20 @@ export default function Home() {
       try {
         await window.electron.saveMessage(userMessage);
       } catch (err) {
-        toast.error("there was an error setting the provider", err);
+        toast.error("Error saving user message", err);
+        throw err;
       }
 
-      // Get chat response
       let response;
       try {
         response = await window.electron.chat([...messages, userMessage]);
       } catch (err) {
-        // If chat fails, we should delete the saved user message
         try {
           await window.electron.deleteMessage(userMessage.id!);
         } catch (cleanupErr) {
-          toast.error("Failed to cleanup user message:", cleanupErr);
+          toast.error("Failed to cleanup user message", cleanupErr);
         }
-        toast.error("Failed to cleanup user message:", err);
+        throw err;
       }
 
       const assistantMessage: Message = {
@@ -244,16 +346,15 @@ export default function Home() {
       try {
         await window.electron.saveMessage(assistantMessage);
       } catch (err) {
-        // If we can't save the assistant message, cleanup the user message
         try {
           await window.electron.deleteMessage(userMessage.id!);
         } catch (cleanupErr) {
           toast.error(
-            "Failed to cleanup after assistant message error:",
+            "Failed to cleanup after assistant message error",
             cleanupErr
           );
         }
-        toast.error("Failed to save assistant response");
+        throw err;
       }
 
       await loadConversations();

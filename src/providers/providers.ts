@@ -4,6 +4,9 @@ import OpenAI from "openai";
 import MCP from "src/mcp/mcp";
 import AnthropicHandler from "./anthropic_provider";
 
+// import { generateText } from 'ai';
+// import { openai } from '@ai-sdk/openai';
+
 export default class Providers {
   private providerInstances: Map<string, ProviderClient> = new Map();
   private currentProvider: Provider | null = null;
@@ -26,6 +29,11 @@ export default class Providers {
   private async initializeProvider(
     provider: Provider
   ): Promise<ProviderClient> {
+    // const { text, finishReason, usage } = await generateText({
+    //   model: openai('gpt-3.5-turbo'),
+    //   messages: question,
+    // });
+
     switch (provider.type) {
       case "openai":
         return {

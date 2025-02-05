@@ -613,6 +613,18 @@ ipcMain.handle("summarize-context", async (_, data: Message[]) => {
   return providers.summarizeContext(data);
 });
 
+// ipcMain.handle("extractPDFText", async (_, file) => {
+//   // Implement PDF text extraction
+// });
+
+// ipcMain.handle("parseCSV", async (_, file) => {
+//   // Implement CSV parsing
+// });
+
+// ipcMain.handle("parseSpreadsheet", async (_, file) => {
+//   // Implement spreadsheet parsing
+// });
+
 // called when Electron has initialized and is ready to create browser windows.
 app.on("ready", createWindow);
 
