@@ -1,5 +1,3 @@
-"use client";
-
 import {
   ArrowUp,
   Database,
@@ -16,6 +14,7 @@ import { Button } from "../ui/button";
 import { Provider } from "../../src/types";
 import ModelSelect from "./ModelSelect";
 import { useRef, useState } from "react";
+import { Dialog, DialogContent, DialogTrigger } from "../ui/dialog";
 
 interface FileAttachment {
   id: string;
@@ -211,23 +210,36 @@ interface AttachmentPreviewProps {
 }
 
 function AttachmentPreview({ attachment, onRemove }: AttachmentPreviewProps) {
+  const [showPreview, setShowPreview] = useState(false);
+
   return (
-    <div className="relative bg-background rounded-md p-1.5 flex items-center w-full">
+    <div className="relative bg-background rounded-md p-1 flex items-center w-full space-x-2 border border-gray-300 dark:border-border">
       <Button
         variant="ghost"
         size="sm"
         className="absolute -top-1.5 -right-1.5 h-4 w-4 rounded-full p-0"
         onClick={onRemove}
       >
-        <X className="h-3 w-3" />
+        <X className="h-3 w-3 text-gray-900 dark:text-gray-300  bg-gray-300 dark:bg-gray-700 rounded-full" />
       </Button>
 
       {attachment.preview ? (
-        <img
-          src={attachment.preview}
-          alt="preview"
-          className="h-6 w-6 object-cover rounded"
-        />
+        <Dialog open={showPreview} onOpenChange={setShowPreview}>
+          <DialogTrigger asChild>
+            <img
+              src={attachment.preview}
+              alt="preview"
+              className="h-6 w-6 object-cover rounded cursor-pointer hover:opacity-80 transition-opacity"
+            />
+          </DialogTrigger>
+          <DialogContent className="max-w-3xl p-0 overflow-hidden">
+            <img
+              src={attachment.preview}
+              alt="preview"
+              className="w-full h-full object-contain"
+            />
+          </DialogContent>
+        </Dialog>
       ) : (
         <div className="h-6 w-6 bg-muted rounded flex items-center justify-center flex-shrink-0">
           {attachment.type === "pdf" && <FileText className="h-4 w-4" />}
@@ -239,11 +251,9 @@ function AttachmentPreview({ attachment, onRemove }: AttachmentPreviewProps) {
           )}
         </div>
       )}
-      <div className="flex flex-col min-w-0">
+      <div className="flex flex-col min-w-0 text-primary-foreground">
         <p className="text-xs truncate font-medium">{attachment.file.name}</p>
-        <p className="text-xs text-muted-foreground">
-          {(attachment.file.size / 1024).toFixed(1)} KB
-        </p>
+        <p className="text-xs">{(attachment.file.size / 1024).toFixed(1)} KB</p>
       </div>
     </div>
   );
