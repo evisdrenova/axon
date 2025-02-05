@@ -15,6 +15,8 @@ import { Provider } from "../../src/types";
 import ModelSelect from "./ModelSelect";
 import { useRef, useState } from "react";
 import { Dialog, DialogContent, DialogTrigger } from "../ui/dialog";
+import { cn } from "../../src/lib/utils";
+import { toast } from "sonner";
 
 interface FileAttachment {
   id: string;
@@ -53,6 +55,60 @@ export default function ChatInput(props: Props) {
 
   const [attachments, setAttachments] = useState<FileAttachment[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [dragCounter, setDragCounter] = useState(0);
+
+  const handleDragEnter = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragCounter((prev) => prev + 1);
+    if (!isDragging) setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragCounter((prev) => prev - 1);
+    if (dragCounter === 1) {
+      setIsDragging(false);
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleDrop = async (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+    setIsProcessing(true);
+
+    const files = Array.from(e.dataTransfer.files);
+    const newAttachments: FileAttachment[] = [];
+
+    try {
+      for (const file of files) {
+        const type = await detectFileType(file);
+        const preview = await createFilePreview(file);
+        newAttachments.push({
+          id: crypto.randomUUID(),
+          file,
+          type,
+          preview,
+        });
+      }
+
+      setAttachments((current) => [...current, ...newAttachments]);
+    } catch (error) {
+      console.error("Error processing dropped files:", error);
+      toast.error("Error processing dropped files:", error);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
 
   const detectFileType = async (file: File): Promise<string> => {
     // Basic file type detection
@@ -155,7 +211,35 @@ export default function ChatInput(props: Props) {
         />
         <div className="p-2 flex flex-col flex-1">
           <form onSubmit={onSubmit} className="flex flex-col flex-1">
-            <div className="flex flex-row flex-1 gap-2">
+            <div
+              className={cn(
+                "relative flex flex-row flex-1 gap-2 transition-all duration-200",
+                isDragging && "ring-2 ring-primary rounded-lg"
+              )}
+              onDragEnter={handleDragEnter}
+              onDragLeave={handleDragLeave}
+              onDragOver={handleDragOver}
+              onDrop={(e) => {
+                handleDrop(e);
+                setDragCounter(0);
+                setIsDragging(false);
+              }}
+            >
+              {isDragging && (
+                <div className="absolute inset-0 bg-primary/10 rounded-lg flex items-center justify-center pointer-events-none">
+                  <div className="bg-background/90 px-4 py-2 rounded-md shadow-lg">
+                    Drop files here
+                  </div>
+                </div>
+              )}
+              {isProcessing && (
+                <div className="absolute inset-0 bg-background/50 rounded-lg flex items-center justify-center">
+                  <div className="bg-background px-4 py-2 rounded-md shadow-lg flex items-center gap-2">
+                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-primary border-t-transparent" />
+                    Processing files...
+                  </div>
+                </div>
+              )}
               <Textarea
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}

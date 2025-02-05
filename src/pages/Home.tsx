@@ -165,7 +165,6 @@ export default function Home() {
     }
   };
 
-  // TODO: upadte the form to handle passing in files as well
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
