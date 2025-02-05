@@ -154,21 +154,31 @@ export default function ChatInput(props: Props) {
           setOpenTools={setOpenTools}
           onAttachClick={handleFileSelect}
         />
-        <div className="p-2">
+        <div className="p-2 flex flex-col flex-1">
           <form onSubmit={onSubmit} className="flex flex-col flex-1">
-            <Textarea
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              onPaste={handlePaste}
-              placeholder="What are you working on?"
-              className="placeholder:text-primary-foreground/40 placeholder:text-xs text-primary-foreground flex-1 w-full resize-none p-3 text-xs border-0 focus:ring-0 focus-visible:ring-0 shadow-none"
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && !e.shiftKey) {
-                  e.preventDefault();
-                  onSubmit(e);
-                }
-              }}
-            />
+            <div className="flex flex-row flex-1 gap-2">
+              <Textarea
+                value={inputValue}
+                onChange={(e) => setInputValue(e.target.value)}
+                onPaste={handlePaste}
+                placeholder="What are you working on?"
+                className="placeholder:text-primary-foreground/40 placeholder:text-xs text-primary-foreground w-full resize-none p-3 !text-[12px] border-0 focus:ring-0 focus-visible:ring-0 shadow-none"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    onSubmit(e);
+                  }
+                }}
+              />
+              <Button
+                type="submit"
+                size="sm"
+                disabled={!inputValue || !currentProvider || isLoading}
+                className="rounded-lg p-2 h-fit"
+              >
+                <ArrowUp className="w-4 h-4" />
+              </Button>
+            </div>
             {attachments.length > 0 && (
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 mt-2">
                 {attachments.map((attachment) => (
@@ -181,16 +191,6 @@ export default function ChatInput(props: Props) {
                 ))}
               </div>
             )}
-            <div className="flex justify-end mt-2">
-              <Button
-                type="submit"
-                size="sm"
-                disabled={!inputValue || !currentProvider || isLoading}
-                className="rounded-lg p-2"
-              >
-                <ArrowUp className="w-4 h-4" />
-              </Button>
-            </div>
           </form>
           <input
             type="file"
