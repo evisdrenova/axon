@@ -18,6 +18,7 @@ import ModelSelect from "./ModelSelect";
 import { useRef, useState } from "react";
 
 interface FileAttachment {
+  id: string;
   file: File;
   type: string;
   preview?: string;
@@ -89,25 +90,58 @@ export default function ChatInput(props: Props) {
     for (const file of files) {
       const type = await detectFileType(file);
       const preview = await createFilePreview(file);
-      newAttachments.push({ file, type, preview });
+      newAttachments.push({
+        id: crypto.randomUUID(), // Add unique ID
+        file,
+        type,
+        preview,
+      });
     }
 
     setAttachments([...attachments, ...newAttachments]);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
   };
 
-  const removeAttachment = (index: number) => {
-    const updatedAttachments = [...attachments];
-    updatedAttachments.splice(index, 1);
-    setAttachments(updatedAttachments);
+  const removeAttachment = (id: string) => {
+    const attachmentIndex = attachments.findIndex((a) => a.id === id);
+    if (attachmentIndex === -1) return;
+
+    const newAttachments = [
+      ...attachments.slice(0, attachmentIndex),
+      ...attachments.slice(attachmentIndex + 1),
+    ];
+
+    setAttachments(newAttachments);
   };
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     await handleSubmit(e, attachments);
     setAttachments([]);
+  };
+
+  const handlePaste = async (e: React.ClipboardEvent) => {
+    const items = e.clipboardData.items;
+    const newAttachments: FileAttachment[] = [];
+
+    for (const item of Array.from(items)) {
+      if (item.type.startsWith("image/")) {
+        const file = item.getAsFile();
+        if (file) {
+          const type = await detectFileType(file);
+          const preview = await createFilePreview(file);
+          newAttachments.push({
+            id: crypto.randomUUID(),
+            file,
+            type,
+            preview,
+          });
+        }
+      }
+    }
+
+    if (newAttachments.length > 0) {
+      setAttachments((current) => [...current, ...newAttachments]);
+    }
   };
 
   return (
@@ -125,6 +159,7 @@ export default function ChatInput(props: Props) {
             <Textarea
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
+              onPaste={handlePaste}
               placeholder="What are you working on?"
               className="placeholder:text-primary-foreground/40 placeholder:text-xs text-primary-foreground flex-1 w-full resize-none p-3 text-xs border-0 focus:ring-0 focus-visible:ring-0 shadow-none"
               onKeyDown={(e) => {
@@ -136,12 +171,13 @@ export default function ChatInput(props: Props) {
             />
             {attachments.length > 0 && (
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 mt-2">
-                {attachments.map((attachment, index) => (
-                  <AttachmentPreview
-                    key={index}
-                    attachment={attachment}
-                    onRemove={() => removeAttachment(index)}
-                  />
+                {attachments.map((attachment) => (
+                  <div className="p-1" key={attachment.id}>
+                    <AttachmentPreview
+                      attachment={attachment}
+                      onRemove={() => removeAttachment(attachment.id)}
+                    />
+                  </div>
                 ))}
               </div>
             )}
@@ -176,11 +212,11 @@ interface AttachmentPreviewProps {
 
 function AttachmentPreview({ attachment, onRemove }: AttachmentPreviewProps) {
   return (
-    <div className="relative bg-background rounded-md p-2 flex items-center gap-2 max-w-[200px]">
+    <div className="relative bg-background rounded-md p-1.5 flex items-center w-full">
       <Button
         variant="ghost"
         size="sm"
-        className="absolute -top-2 -right-2 h-5 w-5 rounded-full p-0"
+        className="absolute -top-1.5 -right-1.5 h-4 w-4 rounded-full p-0"
         onClick={onRemove}
       >
         <X className="h-3 w-3" />
@@ -190,10 +226,10 @@ function AttachmentPreview({ attachment, onRemove }: AttachmentPreviewProps) {
         <img
           src={attachment.preview}
           alt="preview"
-          className="h-8 w-8 object-cover rounded"
+          className="h-6 w-6 object-cover rounded"
         />
       ) : (
-        <div className="h-8 w-8 bg-muted rounded flex items-center justify-center">
+        <div className="h-6 w-6 bg-muted rounded flex items-center justify-center flex-shrink-0">
           {attachment.type === "pdf" && <FileText className="h-4 w-4" />}
           {attachment.type === "csv" && <Database className="h-4 w-4" />}
           {attachment.type === "spreadsheet" && <Table className="h-4 w-4" />}
