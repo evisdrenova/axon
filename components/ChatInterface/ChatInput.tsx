@@ -11,19 +11,12 @@ import {
 } from "lucide-react";
 import { Textarea } from "../ui/textarea";
 import { Button } from "../ui/button";
-import { Provider } from "../../src/types";
+import { FileAttachment, Provider } from "../../src/types";
 import ModelSelect from "./ModelSelect";
 import { useRef, useState } from "react";
 import { Dialog, DialogContent, DialogTrigger } from "../ui/dialog";
 import { cn } from "../../src/lib/utils";
 import { toast } from "sonner";
-
-export interface FileAttachment {
-  id: string;
-  file: File;
-  type: string;
-  preview?: string;
-}
 
 interface Props {
   inputValue: string;

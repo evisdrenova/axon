@@ -1,6 +1,7 @@
 import { Message, Provider, ProviderClient } from "../types";
 import Anthropic from "@anthropic-ai/sdk";
 import MCP from "src/mcp/mcp";
+import { UserContent } from "ai";
 export default class AnthropicHandler {
   constructor(private readonly mcp: MCP) {}
 
@@ -42,7 +43,8 @@ export default class AnthropicHandler {
           }
           messages.push({
             role: "user",
-            content: result.content as Anthropic.ContentBlock[],
+            // content: result.content as Anthropic.ContentBlock[],
+            content: result.content as UserContent,
           });
 
           const followUpResponse = await this.callAnthropic(

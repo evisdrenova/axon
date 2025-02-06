@@ -92,6 +92,13 @@ export interface Message {
   conversationId?: number;
 }
 
+export interface FileAttachment {
+  id: string;
+  file: File;
+  type: string;
+  preview?: string;
+}
+
 export interface Conversation {
   id?: number;
   providerId: number;

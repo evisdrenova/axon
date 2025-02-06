@@ -1,9 +1,12 @@
 import { useEffect, useState } from "react";
-import { Conversation, Message, Provider, User } from "../types";
-import ChatScrollArea from "../chat-interface/ChatScrollArea";
-import ChatInput, {
+import {
+  Conversation,
   FileAttachment,
-} from "../../components/ChatInterface/ChatInput";
+  Message,
+  Provider,
+  User,
+} from "../types";
+import ChatScrollArea from "../chat-interface/ChatScrollArea";
 import {
   ResizableHandle,
   ResizablePanel,
@@ -15,7 +18,8 @@ import Models from "./Models";
 import Tools from "./Tools";
 import { toast } from "sonner";
 import TitleBar from "../../components/Titlebar/Titlebar";
-import { TextPart, ImagePart, FilePart } from "ai";
+import ChatInput from "../../components/ChatInterface/ChatInput";
+import { UserContent } from "ai";
 
 const SETTINGS = {
   ACTIVE_CONVERSATION: "activeConversation",
@@ -202,7 +206,7 @@ export default function Home() {
       text: string,
       attachments?: FileAttachment[]
     ) => {
-      const content: Array<TextPart | ImagePart | FilePart> = [];
+      const content: UserContent = [];
 
       // Add text part if present
       if (text) {
@@ -282,6 +286,7 @@ export default function Home() {
 
       return content;
     };
+
     const tempId = generateTempId(messages);
     try {
       const optimisticContent = await createMessageContent(
