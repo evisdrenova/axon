@@ -19,7 +19,13 @@ import Tools from "./Tools";
 import { toast } from "sonner";
 import TitleBar from "../../components/Titlebar/Titlebar";
 import ChatInput from "../../components/ChatInterface/ChatInput";
-import { UserContent } from "ai";
+import {
+  CoreAssistantMessage,
+  CoreMessage,
+  CoreSystemMessage,
+  CoreToolMessage,
+  CoreUserMessage,
+} from "ai";
 
 const SETTINGS = {
   ACTIVE_CONVERSATION: "activeConversation",
@@ -183,121 +189,23 @@ export default function Home() {
       return;
     }
 
-    const trimmedInput = inputValue.trim();
-
     setIsLoading(true);
     setInputValue("");
 
-    const fileToBase64 = (file: File): Promise<string> => {
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = () => {
-          const base64String = reader.result as string;
-          // Remove the data URL prefix to get just the base64 content
-          const base64Content = base64String.split(",")[1];
-          resolve(base64Content);
-        };
-        reader.onerror = (error) => reject(error);
-      });
-    };
-
-    const createMessageContent = async (
-      text: string,
-      attachments?: FileAttachment[]
-    ) => {
-      const content: UserContent = [];
-
-      // Add text part if present
-      if (text) {
-        content.push({
-          type: "text",
-          text: text,
-        });
-      }
-
-      // Process attachments if present
-      if (attachments?.length) {
-        for (const attachment of attachments) {
-          const base64Content = await fileToBase64(attachment.file);
-          // switch (attachment.type) {
-          //   case "image":
-          //     return {
-          //       type: "image_url",
-          //       image_url: {
-          //         url: `form:file${index}`,
-          //         detail: "auto",
-          //       },
-          //     };
-
-          // case "pdf":
-          //   // Extract text from PDF using your electron API
-          //   const pdfText = await window.electron.extractPDFText(attachment.file);
-          //   return {
-          //     type: "text",
-          //     text: `Content from PDF "${attachment.file.name}":\n${pdfText}`
-          //   };
-
-          // case "csv":
-          //   // Parse CSV using your electron API
-          //   const csvData = await window.electron.parseCSV(attachment.file);
-          //   return {
-          //     type: "text",
-          //     text: `Data from CSV "${attachment.file.name}":\n${JSON.stringify(csvData, null, 2)}`
-          //   };
-
-          // case "spreadsheet":
-          //   // Parse spreadsheet using your electron API
-          //   const sheetData = await window.electron.parseSpreadsheet(attachment.file);
-          //   return {
-          //     type: "text",
-          //     text: `Data from spreadsheet "${attachment.file.name}":\n${JSON.stringify(sheetData, null, 2)}`
-          //   };
-
-          // case "text":
-          //   // Read text file
-          //   const text = await attachment.file.text();
-          //   return {
-          //     type: "text",
-          //     text: `Content from "${attachment.file.name}":\n${text}`
-          //   };
-
-          //   default:
-          //     toast.error(
-          //       `Unsupported file type for ${attachment.file.name}`
-          //     );
-          //     return null;
-          // }
-          if (attachment.type === "image") {
-            content.push({
-              type: "image",
-              image: base64Content,
-              mimeType: attachment.file.type,
-            });
-          } else {
-            content.push({
-              type: "file",
-              data: base64Content,
-              mimeType: attachment.file.type,
-            });
-          }
-        }
-      }
-
-      return content;
-    };
-
     const tempId = generateTempId(messages);
+
     try {
-      const optimisticContent = await createMessageContent(
-        trimmedInput,
+      const optimisticMessage = await createCoreMessage(
+        inputValue.trim(),
+        "user",
         attachments
       );
+
       // create optimistic user message
       const optimisticUserMessage: Message = {
-        id: Date.now(),
+        id: tempId,
         role: "user",
-        content: optimisticContent,
+        content: optimisticMessage,
         conversationId: activeConversationId,
         createdAt: new Date().toISOString(),
       };
@@ -317,9 +225,11 @@ export default function Home() {
 
       const userMessage: Message = {
         role: "user",
-        content: optimisticContent,
+        content: optimisticMessage,
         conversationId: activeConversationId,
       };
+
+      console.log("userMessage", userMessage);
 
       // Save user message
       try {
@@ -330,6 +240,7 @@ export default function Home() {
       }
 
       let response;
+
       try {
         response = await window.electron.chat([...messages, userMessage]);
       } catch (err) {
@@ -341,9 +252,14 @@ export default function Home() {
         throw err;
       }
 
+      const assitantCoreMessage = await createCoreMessage(
+        response,
+        "assistant"
+      );
+
       const assistantMessage: Message = {
         role: "assistant",
-        content: response,
+        content: assitantCoreMessage,
         conversationId: activeConversationId,
       };
 
@@ -618,4 +534,105 @@ export default function Home() {
       </Dialog>
     </div>
   );
+}
+async function createCoreMessage(
+  text: string,
+  role: "user" | "assistant" | "system" | "tool",
+  attachments?: FileAttachment[]
+): Promise<CoreMessage> {
+  let coreMessage: CoreMessage;
+
+  let messageContent: any = [];
+
+  console.log("message text", text);
+
+  // First add text content if present
+  if (text) {
+    messageContent.push({
+      type: "text",
+      text: text,
+    });
+  }
+
+  console.log("message content", messageContent);
+
+  // Then process any attachments
+  if (attachments?.length) {
+    console.log("attachments", attachments);
+    for (const [index, attachment] of attachments.entries()) {
+      const base64Content = await fileToBase64(attachment.file);
+
+      switch (attachment.type) {
+        case "image":
+          messageContent.push({
+            type: "image",
+            image: attachment.preview,
+          });
+          break;
+        case "pdf":
+        case "csv":
+        case "spreadsheet":
+        case "text":
+          messageContent.push({
+            type: "file",
+            data: base64Content,
+            mimeType: attachment.file.type,
+          });
+          break;
+
+        default:
+          toast.error(`Unsupported file type for ${attachment.file.name}`);
+          continue;
+      }
+    }
+  }
+
+  // Create the appropriate message type based on role
+  switch (role) {
+    case "user":
+      coreMessage = {
+        role: "user",
+        content: messageContent,
+      } as CoreUserMessage;
+      break;
+
+    case "assistant":
+      coreMessage = {
+        role: "assistant",
+        content: messageContent,
+      } as CoreAssistantMessage;
+      break;
+
+    case "system":
+      coreMessage = {
+        role: "system",
+        content: messageContent,
+      } as CoreSystemMessage;
+      break;
+
+    case "tool":
+      coreMessage = {
+        role: "tool",
+        content: messageContent,
+      } as CoreToolMessage;
+      break;
+
+    default:
+      throw new Error(`Unsupported role: ${role}`);
+  }
+
+  return coreMessage;
+}
+function fileToBase64(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => {
+      const base64String = reader.result as string;
+      // Remove the data URL prefix to get just the base64 content
+      const base64Content = base64String.split(",")[1];
+      resolve(base64Content);
+    };
+    reader.onerror = (error) => reject(error);
+  });
 }

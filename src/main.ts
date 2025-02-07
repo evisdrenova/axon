@@ -498,7 +498,10 @@ ipcMain.handle("delete-conversation", (_, convoId: number) => {
 });
 
 ipcMain.handle("save-message", (_, message: Message) => {
+  console.log("message in main", message);
   try {
+    const content = message.content.content || message.content;
+
     const stmt = db.prepare(`
       INSERT INTO messages (
         conversationId,
@@ -510,7 +513,7 @@ ipcMain.handle("save-message", (_, message: Message) => {
     const result = stmt.run(
       message.conversationId,
       message.role,
-      message.content
+      JSON.stringify(content) // Store the actual content array
     );
 
     return result.lastInsertRowid;
