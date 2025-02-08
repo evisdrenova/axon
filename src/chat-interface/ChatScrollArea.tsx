@@ -11,6 +11,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import Spinner from "../../components/ui/Spinner";
 import { Highlight, themes } from "prism-react-renderer";
 import { toast } from "sonner";
+import { CoreMessage } from "ai";
 
 interface Props {
   messages: Message[];
@@ -41,9 +42,7 @@ export default function ChatScrollArea(props: Props) {
     }
   }, [messages]);
 
-  const copyToClipBoard = async (
-    content: string | Anthropic.ContentBlock[]
-  ) => {
+  const copyToClipBoard = async (content: string) => {
     if (typeof content === "string") {
       await navigator.clipboard.writeText(content);
       setCopied(true);
@@ -135,9 +134,7 @@ interface AssistantMessageActionsProps {
   copied: boolean;
   onBranchConversation: (conversationId: number, messageId: number) => void;
   activeConversationId: number;
-  copyToClipBoard: (
-    content: string | Anthropic.ContentBlock[]
-  ) => Promise<void>;
+  copyToClipBoard: (content: string) => Promise<void>;
   isBranchLoading: boolean;
 }
 
@@ -151,14 +148,42 @@ function AssistantMessageActions(props: AssistantMessageActionsProps) {
     isBranchLoading,
   } = props;
 
+  const extractTextContent = (content: any): string => {
+    // If content is a string in JSON format, parse it
+    const parsedContent =
+      typeof content === "string" ? JSON.parse(content) : content;
+
+    // If content is nested (has content property), use that
+    const actualContent = Array.isArray(parsedContent)
+      ? parsedContent
+      : Array.isArray(parsedContent?.content)
+      ? parsedContent.content
+      : parsedContent;
+
+    // Handle string content
+    if (typeof actualContent === "string") {
+      return FilterThinkingContent(actualContent);
+    }
+
+    // Handle array of content blocks
+    if (Array.isArray(actualContent)) {
+      return actualContent
+        .filter((block) => block.type === "text")
+        .map((block) => FilterThinkingContent(block.text))
+        .join("\n\n");
+    }
+
+    return "";
+  };
+
   return (
     <div>
-      {message.role == "assistant" && (
+      {message.role === "assistant" && (
         <div className="flex flex-col gap-2">
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => copyToClipBoard(message.content)}
+            onClick={() => copyToClipBoard(extractTextContent(message.content))}
           >
             {copied ? <Check className="text-green-500 w-2 h-2" /> : <Copy />}
           </Button>
