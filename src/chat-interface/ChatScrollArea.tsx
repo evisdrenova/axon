@@ -181,31 +181,82 @@ interface MessageContentProps {
   message: Message;
 }
 
-export function RenderMessageContent(props: MessageContentProps) {
+function RenderMessageContent(props: MessageContentProps) {
   const { message } = props;
 
-  if (typeof message.content === "string") {
-    return <div>{renderMarkdown(message.content, message.role)}</div>;
-  } else if (Array.isArray(message.content)) {
+  const content =
+    typeof message.content === "string"
+      ? JSON.parse(message.content)
+      : message.content;
+
+  const actualContent = Array.isArray(content)
+    ? content
+    : Array.isArray(content?.content)
+    ? content.content
+    : content;
+
+  console.log("message", message);
+  console.log("parsed content", actualContent);
+
+  if (typeof actualContent === "string") {
+    return <div>{renderMarkdown(actualContent, message.role)}</div>;
+  }
+
+  if (Array.isArray(actualContent)) {
     return (
-      <div className="flex flex-col">
-        {message.content.map((block, index) => {
-          if (block.type === "text") {
-            return (
-              <div key={`text-${index}`}>
-                {renderMarkdown(block.text || "", message.role)}
-              </div>
-            );
+      <div className="flex flex-col gap-4">
+        {actualContent.map((block, index) => {
+          switch (block.type) {
+            case "text":
+              return (
+                <div key={`text-${index}`}>
+                  {renderMarkdown(block.text || "", message.role)}
+                </div>
+              );
+            case "image":
+              return (
+                <div
+                  key={`image-${index}`}
+                  className="rounded-lg overflow-hidden"
+                >
+                  <img
+                    src={block.image}
+                    alt="Message attachment"
+                    className="max-w-full h-auto"
+                  />
+                </div>
+              );
+            case "image_url":
+              return (
+                <div
+                  key={`image-url-${index}`}
+                  className="rounded-lg overflow-hidden"
+                >
+                  <img
+                    src={block.image_url.url}
+                    alt="Message attachment"
+                    className="max-w-full h-auto"
+                  />
+                </div>
+              );
+            case "file":
+              return (
+                <div key={`file-${index}`} className="p-4 border rounded-lg">
+                  <div className="text-sm text-gray-500">
+                    File attachment ({block.mimeType})
+                  </div>
+                </div>
+              );
+            default:
+              return null;
           }
-          return null;
         })}
-        <div className="grid grid-cols-2 gap-2">
-          {renderImageAttachments(message.content)}
-        </div>
       </div>
     );
   }
-  return null;
+
+  // Fallback for unsupported content types
+  return <div className="text-red-500">Unsupported message content</div>;
 }
 
 function renderMarkdown(content: string, role: string) {
