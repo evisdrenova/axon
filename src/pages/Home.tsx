@@ -203,7 +203,7 @@ export default function Home() {
 
       // create optimistic user message
       const optimisticUserMessage: Message = {
-        id: tempId,
+        id: Date.now(),
         role: "user",
         content: optimisticMessage,
         conversationId: activeConversationId,

@@ -498,7 +498,6 @@ ipcMain.handle("delete-conversation", (_, convoId: number) => {
 });
 
 ipcMain.handle("save-message", (_, message: Message) => {
-  console.log("message in main", message);
   try {
     const content = message.content.content || message.content;
 

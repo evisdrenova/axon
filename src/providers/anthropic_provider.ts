@@ -15,6 +15,8 @@ export default class AnthropicHandler {
 
     const availableTools = await this.mcp.listTools();
 
+    // TODO: update the handling here to send the image and text separately
+
     // get initial tool plan from claude
     try {
       const response = await this.callAnthropic(

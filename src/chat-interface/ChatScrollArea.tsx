@@ -27,8 +27,6 @@ export default function ChatScrollArea(props: Props) {
   const {
     messages,
     isLoading,
-    provider,
-    user,
     onBranchConversation,
     activeConversationId,
     isBranchLoading,
@@ -49,8 +47,6 @@ export default function ChatScrollArea(props: Props) {
       setTimeout(() => setCopied(false), 2000);
     }
   };
-
-  // const summary = extractSummary(messages)
 
   console.log("messages", messages);
 
@@ -149,7 +145,6 @@ function AssistantMessageActions(props: AssistantMessageActionsProps) {
   } = props;
 
   const extractTextContent = (content: any): string => {
-    // If content is a string in JSON format, parse it
     const parsedContent =
       typeof content === "string" ? JSON.parse(content) : content;
 
@@ -165,7 +160,6 @@ function AssistantMessageActions(props: AssistantMessageActionsProps) {
       return FilterThinkingContent(actualContent);
     }
 
-    // Handle array of content blocks
     if (Array.isArray(actualContent)) {
       return actualContent
         .filter((block) => block.type === "text")
@@ -219,9 +213,6 @@ function RenderMessageContent(props: MessageContentProps) {
     : Array.isArray(content?.content)
     ? content.content
     : content;
-
-  console.log("message", message);
-  console.log("parsed content", actualContent);
 
   if (typeof actualContent === "string") {
     return <div>{renderMarkdown(actualContent, message.role)}</div>;
@@ -453,19 +444,4 @@ function formatDateTime(dateString?: string): string {
     toast.error("Error formatting date:", error);
     return dateString;
   }
-}
-
-function renderImageAttachments(content: any[]) {
-  return content
-    .filter((block) => block.type === "image_url" || block.type === "image")
-    .map((block, index) => (
-      <div key={index} className="mt-2">
-        <img
-          src={block.image_url?.url || block.url}
-          alt="Attached image"
-          className="max-w-full h-auto rounded-md border border-border"
-          style={{ maxHeight: "200px" }} // Limit image height
-        />
-      </div>
-    ));
 }
