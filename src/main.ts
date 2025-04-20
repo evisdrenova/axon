@@ -7,6 +7,10 @@ import log from "electron-log/main";
 import MCP from "./mcp/mcp";
 import Providers from "./providers/providers";
 import SettingsManager, { SettingsValue } from "./settings/Settings";
+import { StreamChat } from "stream-chat";
+
+import * as dotenv from "dotenv";
+dotenv.config();
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (started) {
@@ -92,6 +96,7 @@ const initializeDatabase = () => {
 
 const createWindow = async () => {
   initializeDatabase();
+
   mcp = new MCP(db);
   await mcp.init();
   providers = new Providers(mcp);
@@ -615,18 +620,43 @@ ipcMain.handle("summarize-context", async (_, data: Message[]) => {
   return providers.summarizeContext(data);
 });
 
-// ipcMain.handle("extractPDFText", async (_, file) => {
-//   // Implement PDF text extraction
-// });
+ipcMain.handle("login_start", async (_, data: { user: string }) => {
+  try {
+    console.log("Logging in user from main.ts:", data.user);
 
-// ipcMain.handle("parseCSV", async (_, file) => {
-//   // Implement CSV parsing
-// });
+    // Call your remote server to get the user token
+    const response = await fetch("http://localhost:3008/user-token", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ userId: data.user }),
+    });
 
-// ipcMain.handle("parseSpreadsheet", async (_, file) => {
-//   // Implement spreadsheet parsing
-// });
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error("Error response from server:", errorData);
+      throw new Error(`Server returned error: ${response.status}`);
+    }
 
+    // Parse the response from your server
+    const tokenData = await response.json();
+    console.log("Token received successfully", tokenData);
+
+    // Return the login response structure expected by the frontend
+    return {
+      user_id: data.user,
+      client_config: {
+        api_key: tokenData.apiKey,
+        user_token: tokenData.userToken,
+        channels: [], // You can populate this later if needed
+      },
+    };
+  } catch (error) {
+    console.error("Error logging in:", error);
+    throw error;
+  }
+});
 // called when Electron has initialized and is ready to create browser windows.
 app.on("ready", createWindow);
 

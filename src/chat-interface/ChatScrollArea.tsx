@@ -7,7 +7,6 @@ import remarkGfm from "remark-gfm";
 import { Check, Copy, Split } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { useState, useRef, useEffect } from "react";
-import Anthropic from "@anthropic-ai/sdk";
 import Spinner from "../../components/ui/Spinner";
 import { Highlight, themes } from "prism-react-renderer";
 import { toast } from "sonner";

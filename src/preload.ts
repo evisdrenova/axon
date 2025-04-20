@@ -101,6 +101,17 @@ contextBridge.exposeInMainWorld("electron", {
     return ipcRenderer.invoke("summarize-context", data);
   },
 
+  loginStart: (username: string) => {
+    return ipcRenderer.invoke("login_start", { user: username });
+  },
+
+  checkAuth: () => {
+    return ipcRenderer.invoke("check_auth");
+  },
+  logout: () => {
+    return ipcRenderer.invoke("logout");
+  },
+
   // window methods
   // send() is for one-way communication, invoke() returns a promise
   minimizeWindow: () => ipcRenderer.send("window-minimize"),

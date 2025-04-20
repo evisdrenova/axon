@@ -1,7 +1,7 @@
 import { Message, Provider, ProviderClient } from "../types";
 import Anthropic from "@anthropic-ai/sdk";
 import MCP from "src/mcp/mcp";
-import { UserContent } from "ai";
+import { CoreMessage, UserContent } from "ai";
 export default class AnthropicHandler {
   constructor(private readonly mcp: MCP) {}
 
@@ -15,8 +15,8 @@ export default class AnthropicHandler {
 
     const availableTools = await this.mcp.listTools();
 
-    // TODO: update the handling here to send the image and text separately
-
+    // TODO: update handling images in mesages
+    // update
     // get initial tool plan from claude
     try {
       const response = await this.callAnthropic(
@@ -40,13 +40,12 @@ export default class AnthropicHandler {
           if ("text" in content && content.text) {
             messages.push({
               role: "assistant",
-              content: content.text as string,
+              content: content.text as CoreMessage,
             });
           }
           messages.push({
             role: "user",
-            // content: result.content as Anthropic.ContentBlock[],
-            content: result.content as UserContent,
+            content: result.content as CoreMessage,
           });
 
           const followUpResponse = await this.callAnthropic(

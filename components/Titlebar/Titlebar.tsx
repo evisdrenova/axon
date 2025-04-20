@@ -23,9 +23,9 @@ import ChatTitle from "../../components/ChatInterface/ChatTitle";
 import { Conversation } from "../../src/types";
 
 interface Props {
-  activeConversation: Conversation;
-  onUpdateTitle: (convoId: number, newTitle: string) => void;
-  onDeleteConversation: (convoId: number) => void;
+  activeConversation?: Conversation;
+  onUpdateTitle?: (convoId: number, newTitle: string) => void;
+  onDeleteConversation?: (convoId: number) => void;
 }
 
 export default function TitleBar(props: Props) {
